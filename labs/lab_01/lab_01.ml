@@ -1,4 +1,4 @@
-(* Modified by: ... replace the text between the dots with your name ... *)
+(* Modified by: ... Wen Chuan Lee ... *)
 
 (* A function computer the Fibonacci sequence: 1, 1, 2, 3, 5, 8, ... *)
 
