@@ -1,6 +1,8 @@
 /* A sample file to read the contents of a file into a 
    character buffer.
 
+Modified to also count the number of lowercase s in the file 
+
 Author: Eric Van Wyk
 
 Modifications for Lab 01 by:   <add your name here>
@@ -56,8 +58,22 @@ int main(int argc, char** argv) {
     // assigns the last array slot with \0, to indicate the end of the buffer.
     buffer[index] = '\0' ;
 
-    // Prints out every character in the file, including the \0. 
+    // Prints out every character in the file, except the terminating line. 
     printf ("The contents of the file are:\n%s\n\n", buffer) ;
+
+    // Calculate the number of lowercase 's'
+    printf ("Calculating the number of lowercase s in the file... \n");
+    
+    //set up a counter to keep track of the number of 's'
+    int count = 0;
+    index = 0;
+    while (buffer[index] != '\0') {
+      if (buffer[index] == 's'){
+	count++;
+      }
+      index++;
+    }
+    printf("The number of lowercase 's' letters in the input file is: %d \n", count);
 
     return 0 ;
 }
