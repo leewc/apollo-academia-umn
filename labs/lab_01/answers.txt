@@ -1,0 +1,46 @@
+Q1: How many (if any) files are in your repository?
+Answer: 0 files
+
+Q2: Write down the names of two of the files or directories in the .git directory.
+Answer: HEAD, branches
+
+
+Q3: What does git display when you type this command? (git remote --verbose)
+Answer: The URL of the origin server. 
+origin	https://github.umn.edu/umn-csci-3081F14/repo-leex7095 (fetch)
+origin	https://github.umn.edu/umn-csci-3081F14/repo-leex7095 (push)
+
+Q4:Run git status again. What is the output? What does it mean? Ask your TA - he will help you with this.
+Answer:This is the output: 
+On branch master
+Your branch is up-to-date with 'origin/master'.
+nothing to commit, working directory clean
+-> This means that there are no files in the directory and git has nothing to track, which at the same time we have nothing to commit
+
+
+Q5:What is the output of git status this time? What does it mean? Ask your TA - he will help you with this.
+Answer: This is the output:
+On branch master
+Your branch is up-to-date with 'origin/master'.
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+	new file:   readInput.cpp
+-> This means that there is a new file added to the local repository and the changes are yet to be committed. 
+
+
+Q6:What is the output of git status this time? What does it mean? Ask your TA - he will help you with this.. 
+Answer: This is the output:
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+nothing to commit, working directory clean
+-> This means that my local Git repository had changes that the origin server does not, by exactly one commit. 
+
+
+
+Q7:What Git commands do you need to type to add this file to your local repository and to push it up to the central repository? Edit that file so that it has all 7 answers.
+The following code are used to push answers.txt to the central repository:
+ git add answers.txt
+ git commit -m 'Added answers.txt'
+ git push 
