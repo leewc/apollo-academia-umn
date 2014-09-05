@@ -28,8 +28,10 @@ Here are a list of *Git* commands that are most frequently used:
 > *git clone* will make an identical copy of a repository (usually from a remote server) to the computer the command is executed on. This is only used when beginning to work on a project for the first time and needed source code. Or only when another backup of the repository is to be made.
 
 ### remote
-> This reads the files in .git, which are hidden and will output the name of the remote repository. This is useful when trying to remember which server the files are remotely stored in. Adding a '--verbose' argument to the command will provide the full URL of the server. One can also add more remote repositories to upload to with this command. This command is one of the least used commands compared to the others.
+> This reads the files in .git, which are hidden and will output the name of the remote repository. This is useful when trying to remember which server the files are remotely stored in. Adding a '--verbose' argument to the command will provide the full URL of the server. One can also add more remote repositories to upload to with this command. This command is one of the least used commands compared to the others, and are only used when information about the remote server is needed.
 
 ### config
-> 
+> Used whenever a user wants to configure Git. For example, setting global parameters like username or email. Often used with the '--config' argument. This is only used when git settings require changes, which is infrequent. 
+
+
 
