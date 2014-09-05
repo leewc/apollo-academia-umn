@@ -40,7 +40,7 @@ nothing to commit, working directory clean
 
 
 Q7:What Git commands do you need to type to add this file to your local repository and to push it up to the central repository? Edit that file so that it has all 7 answers.
-The following code are used to push answers.txt to the central repository:
+The following commands are used to push answers.txt to the central repository:
  git add answers.txt
  git commit -m 'Added answers.txt'
  git push 
