@@ -20,8 +20,8 @@ Here are a list of *Git* commands that are most frequently used:
 ### pull
 
 > *git pull* will fetch most recent files from the origin server and ensure that the local repository files are updated to match the server. The practice of pulling everytime a session is started is recommended as this will ensure that the files worked on are the most recent. This is only used when there is a need to check if there are updated files, which only occur before beginning to code.
-### status
 
+### status
 > *git status* prints out the status of the local Git repository such as if there are any uncommited changes, or any unstaged files. It also checks if the local repository is in sync with the origin server, and advises the need to do a push or not. This is frequently used as it allows for checking if the remote server is updated with the changes as well.  
 
 ### clone
