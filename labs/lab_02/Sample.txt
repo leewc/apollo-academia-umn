@@ -1,0 +1,13 @@
+some words 1
+
+// single line comments
+
+more words 2 3
+/* some words and numbers in a comment that are not counted.
+   4 
+*/  
+gotta love counting these 9 words
+
+
+
+

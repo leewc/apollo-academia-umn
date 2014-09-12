@@ -1,0 +1,30 @@
+I love counting words and numbers - I always see something interesting. 
+Some words pique my interest, others are less exciting.
+
+/* We also consider numbers! */
+Counting numbers is fun too - 1 2 3 4 5 6
+Some are short and some, like 31557600000, are longer.  This is
+roughly the number of seconds in 1000 years.
+
+We also like floating point numbers: 3.14159 is a favorite.  But others
+like 2.71828 or 0.57722 are also important. 5.89034811003 is an arbitrary float.
+
+The notion of keywords is interesting since they also match are
+regular expression for works.  So "Boot" should be matched as a
+keyword.  We also want to match "Booty" as a word, since we look for
+the longest match.
+
+// A single line comment though not in ANSI-C is helpful for this assignment. 1 2.1 Boot BootPaul 
+Boot
+
+Boot boot Boot
+ 
+// Single line comments may not start from the beginning of the line, but they do for this assignment and so as block comments.
+
+/* We also like to hide things in comments so that they don't get
+counted.  The numbers 1, 2, 3, 4.5 and keywords Boot here should not be
+counted in our final tally. */
+
+
+
+
