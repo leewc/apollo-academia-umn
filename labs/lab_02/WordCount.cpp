@@ -45,13 +45,21 @@ int main(int argc, char **argv) {
     makeRegex (&word, "^([a-zA-Z]+)") ;
 
     regex_t integerConst ;
-    makeRegex (&integerConst, "^[0-9]+") ;
+    //makeRegex (&integerConst, "^[0-9]+") ;    
+    // modified to include the count of floating point numbers
+    // somehow using / instead of [] complains, ^ is needed to show front
+    makeRegex (&integerConst, "^[0-9]*[.]*[0-9]+");
+    
+    //Add: Boot Regex
+    regex_t boot ;
+    makeRegex (&boot, "^(Boot)") ;
+
 
 
     /* This enumerated type is used to keep track of what kind of
        construct was matched. 
      */
-    enum MatchType { numMatch, wordMatch, noMatch } matchType ;
+    enum MatchType { numMatch, wordMatch, bootMatch, noMatch } matchType ;
 
     int numMatchedChars = 0 ;
 
@@ -68,6 +76,7 @@ int main(int argc, char **argv) {
 
     int maxNumMatchedChars = 0 ;
     int numWords = 0, numNumericConsts = 0 ;
+    int numBoot = 0;
 
     while ( text[0] != '\0' ) {
         maxNumMatchedChars = 0 ; matchType = noMatch ;
@@ -89,6 +98,15 @@ int main(int argc, char **argv) {
            is strictly greater than.  Not greater than or  equal to.
         */
 
+		// Add: BootMatch, which has to be above the normal wordMatch
+		// this is more important than word as it has to take precedence over the word regex
+		numMatchedChars = matchRegex (&boot, text) ;
+        if (numMatchedChars > maxNumMatchedChars) {
+            maxNumMatchedChars = numMatchedChars ;
+            matchType = bootMatch ;
+		}
+		
+
         // Try to match a word
         numMatchedChars = matchRegex (&word, text) ;
         if (numMatchedChars > maxNumMatchedChars) {
@@ -102,9 +120,10 @@ int main(int argc, char **argv) {
             maxNumMatchedChars = numMatchedChars ;
             matchType = numMatch ;
         }
-
+		
         switch (matchType) 
         {
+		case bootMatch: ++numBoot; break; 
         case wordMatch: ++numWords; break;
         case numMatch: ++numNumericConsts; break;
         case noMatch: ;
@@ -132,6 +151,7 @@ int main(int argc, char **argv) {
        we would need to accumulate the list of tokens. */
     printf ("%d\n", numWords) ;
     printf ("%d\n", numNumericConsts) ;
+    printf ("%d\n", numBoot) ;
 
     /* You will add another printf statement to print the number of
        "John" keywords.  All of these numbers should be on separate

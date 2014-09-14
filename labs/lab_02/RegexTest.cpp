@@ -11,6 +11,9 @@ int main() {
     // Some strings for regular expressions.
     const char* word_re = "^[a-zA-Z]+" ;
     const char* whiteSpace_re = "^([\n\t\r ])+" ;
+    const char* num_re = "^[0-9]*";
+    const char* float_re = "[0-9]*.\[0-9]+";
+    const char* l_parens_re = "\\{";   //first \ is to escape the \{, where the \ in \{ is to escape c-stirng, alternative -> [{]
 
     /* The match function lets you experiment with regular expressions.
        The first argument is the text to match against.
@@ -18,8 +21,8 @@ int main() {
        To match only against the beginning of the text the regular
        expression must begin with the ^ character.
      */
-    match ( "programming   \n   1234234 some text to match against",
-            word_re) ;
+    match ( "{\ left parens",
+            l_parens_re) ;
 }
 
 /* An function to experiment with the regex.h library. */
