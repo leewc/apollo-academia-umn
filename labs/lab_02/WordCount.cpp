@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     // somehow using / instead of [] complains, ^ is needed to show front
     makeRegex (&integerConst, "^[0-9]*[.]*[0-9]+");
     
-    //Add: Boot Regex
+    //Add: Boot Regex is not ^[Boot]+ as that matches nonwords
     regex_t boot ;
     makeRegex (&boot, "^(Boot)") ;
 
