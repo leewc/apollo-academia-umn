@@ -33,6 +33,8 @@ let approx_squareroot acc n =
      else sq_hlpr (guess, up)
   in sq_hlpr (lower, upper) ;;
 
+let square_approx acc n = approx_squareroot acc n;; 
+
 (* max_list function will not work with an empty list *)
 let max_list aList =
   let rec max a =
@@ -52,18 +54,13 @@ let drop d lst =
       | x::xs -> drop_help (d-1) xs
   in drop_help d lst  ;;
 
-let rev lst=
-  let rec count aList n =
-  match aList with
-  | [] -> n
-  | _::t -> count t (n+1)
-  in
-  let c = (count lst 0) in
-   let rec reverse i out c=
-     match out with
-     | [] -> i
-     | hd::tl -> if c>0 then reverse ([hd]@i) tl (c-1) else i
-   in reverse [] lst c  ;;
+let rev lst = 
+   let rec reverse alist = 
+   match alist with 
+   | [] -> []
+   | [x] -> [x]
+   | hd::tl -> (reverse tl)@[hd]
+  in reverse lst
 
 (* lol stands for list of lists *)
 let is_matrix lol =
@@ -132,3 +129,18 @@ let matrix_multiply lol=
    if n = 0 then true
    else if n = 1 then false
    else even (n-2)  *)
+
+(*
+let rev lst=
+  let rec count aList n =
+  match aList with
+  | [] -> n
+  | _::t -> count t (n+1)
+  in
+  let c = (count lst 0) in
+   let rec reverse i out c=
+     match out with
+     | [] -> i
+     | hd::tl -> if c>0 then reverse ([hd]@i) tl (c-1) else i
+   in reverse [] lst c  ;;
+ *)
