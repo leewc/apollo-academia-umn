@@ -36,7 +36,7 @@ let approx_squareroot acc n =
 let square_approx acc n = approx_squareroot acc n;; 
 
 (* max_list function will not work with an empty list *)
-let max_list aList =
+let max_list aList:int =    (*declare aList as int type *)
   let rec max a =
     match a with
     | [x] -> x
@@ -44,7 +44,7 @@ let max_list aList =
     | x::y::xs -> if x > y then max (x::xs) else max (y::xs)
   in max aList  ;;
 
-let drop d lst =
+let drop d lst:int list =
   let rec drop_help d aList =
     if d = 0 then aList
     else
@@ -63,7 +63,7 @@ let rev lst =
   in reverse lst
 
 (* lol stands for list of lists *)
-let is_matrix lol =
+let is_matrix lol=
   let rec count aList n =
     match aList with
     | [] -> n
