@@ -63,7 +63,7 @@ let rev lst =
   in reverse lst
 
 (* lol stands for list of lists *)
-let is_matrix lol=
+let is_matrix lol =
   let rec count aList n =
     match aList with
     | [] -> n
