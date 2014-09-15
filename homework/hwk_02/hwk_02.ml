@@ -44,7 +44,7 @@ let max_list aList:int =    (*declare aList as int type *)
     | x::y::xs -> if x > y then max (x::xs) else max (y::xs)
   in max aList  ;;
 
-let drop d lst:int list =
+let drop d lst =
   let rec drop_help d aList =
     if d = 0 then aList
     else
