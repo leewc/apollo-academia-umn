@@ -17,6 +17,9 @@ let to_float n =
   | Float n -> Some n 
   | _ -> None ;;
 
+(* match cases have to be in tuples to prevent match failures *)
+
+
 let add_number a b = 
   match (a,b) with
   | (Int a, Int b) -> Int (a+b) 
@@ -45,3 +48,16 @@ let div_number a b =
  | (Int a, Float b) -> Float (float_of_int a /. b)
  | (Float a, Int b) -> Float (a /. float_of_int b)
  | (Float a, Float b) -> Float (a /. b) 
+
+(* another way to do sub_number, parentheses for nested matched cases  *)
+
+(*
+let sub_number a b = 
+  match a with 
+  | Int a -> (match b with
+	     | Int b -> Int (a - b)
+	     | Float b -> Float(float_of_int a -. b)   )
+  | Float a -> (match b with 
+	       | Int b -> Float (float_of_int  a -. b)
+	       | Float b -> Float ( a -. b) )
+ *)
