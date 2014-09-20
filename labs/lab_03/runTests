@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# First make the test code for WordCount - WordCount.cpp
+cxxtest/bin/cxxtestgen \
+   --error-printer --abort-on-fail --have-eh \
+   -o WordCount_tests.cpp WordCount_tests.h
+# (Note that we can split a single command over several lines by 
+#  putting a back slash as the final character -  with no spaces 
+#  or tabs after it either.)
+
+# Second, compile the code to be tested
+g++ -c regex.cpp
+g++ -c WordCount.cpp
+
+# Third, compile and run the test code and code to be tested.
+g++ -Wall -Icxxtest -o WordCount_tests WordCount_tests.cpp WordCount.o regex.o 
+
+# Fourth, run the tests
+./WordCount_tests
