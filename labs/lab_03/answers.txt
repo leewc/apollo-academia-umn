@@ -1,0 +1,13 @@
+1. The new version of the function makeRegex was written so that it would be easier to test than the original one used in lab 2. 
+Explain in a few sentences why the new version is in fact easier to test. 
+Be as precise as possible.
+
+Answer: By modularizing the functions into separate files, the functions can be seperately tested by calling the functions individually. Also, this allows us easily distinguish which functions do not carry out what they are made to do as the wrong values returned can be seen as opposed to tracing through lines of code to find out where the bug is that has caused the failure of the program.
+
+
+2. Why should we write tests for makeRegex, matchRegex, and consumeWhiteSpaceAndComments at all? 
+One might say "If we instead just write tests for wordCount and they pass, 
+then we know that our code works. So writing tests for these other functions 
+is a waste of time." Why is this not true?
+
+Answer: This is not true because there may still be bugs that may exist in the code that does not handle edge cases, and that having only tests for wordCount would make it very much harder to debug. By having small modular tests for each function, it would allow more extensive testing for the smaller blocks of code that make up the entire, larger program. Hence, having smaller tests that ensure basic functions work before testing the larger functions will give programmers solid confidence that their code actually works; and that we can pinpoint the bug with relatively short time.  
