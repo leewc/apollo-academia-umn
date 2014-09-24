@@ -32,3 +32,30 @@ let max_number_list l:number option=
     | x::y::[] -> Some (max_number x y)
     | x::y::xs -> if (max_number x y) = x then max(x::xs) else max(y::xs)
   in max l
+
+let add_number a b = 
+  match (a,b) with
+  | (Int a, Int b) -> Int (a+b) 
+  | (Float a, Int b) -> Float (a +. float_of_int b)
+  | (Int a, Float b) -> Float (float_of_int a +. b)
+  | (Float a, Float b) -> Float ( a +. b)
+
+let sub_number a b = 
+  match (a,b) with 
+  | (Int a, Int b) -> Int (a-b)
+  | (Int a, Float b) -> Float (float_of_int a -. b)
+  | (Float a, Int b) -> Float (a -. float_of_int b)
+  | (Float a, Float b) -> Float (a -. b)
+
+
+let sum_diffs l=
+  match l with 
+  | [] -> None
+  | [x] -> None
+  | x::y::rest -> Some (let rec sdiff alist= 
+			  match alist with
+			  | a::(b::[]) -> sub_number a b
+			  | c::d::erest -> add_number  (sub_number c d) (sdiff (d::erest))
+			  | _ -> Int 0 (*case never falls here*)
+			in sdiff (x::y::rest))
+
