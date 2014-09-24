@@ -33,7 +33,7 @@ let add_number (a:number) (b:number) :number =
   | (Int a, Float b) -> Float (float_of_int a +. b)
   | (Float a, Float b) -> Float ( a +. b)
 
-(* number * number -> number *)
+(* number -> number -> number *)
 (* subtracts 2 numbers based on which type it is and returns the correct 
    type. Any Float types in the numbers will return a Float type, converts an int to float *)
 let sub_number (a:number) (b:number) :number =
@@ -44,7 +44,7 @@ let sub_number (a:number) (b:number) :number =
   | (Float a, Float b) -> Float (a -. b)
 
 
-(* number * number -> number *)
+(* number -> number -> number *)
 (* multiplies 2 numbers based on which type it is and returns the correct
    type. Any Float types in the numbers will return a Float type, converts
    an int to float *)
@@ -56,7 +56,7 @@ let mul_number (a:number) (b:number): number =
   | (Float a, Float b) -> Float (a *. b)
 
 
-(* number * number -> number *)
+(* number -> number -> number *)
 (* divides 2 numbers based on which type it is and returns the correct
    type. If any numbers contain a float, a float type is returned where the int type is also converted to a float. Also, if 2 Int types are passed in, the function returns a dividend of Int type if both numbers are completely divisible, oe else a function type returns when the numbers have flaoting point values when returned. *)
 let div_number (a:number) (b:number): number =

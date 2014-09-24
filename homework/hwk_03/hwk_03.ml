@@ -59,3 +59,17 @@ let sum_diffs l=
 			  | _ -> Int 0 (*case never falls here*)
 			in sdiff (x::y::rest))
 
+(* prettier impementation !!! *)
+(* 
+let sum_diffsbetter l=
+  let rec sdiff alist= 
+  match alist with
+  | a::(b::[]) -> sub_number a b
+  | c::d::erest -> add_number  (sub_number c d) (sdiff (d::erest))
+  | _ -> Int 0 (*case never falls here*)
+  in
+  match l with 
+  | [] -> None
+  | [x] -> None
+  | x::y::rest -> Some ( sdiff l)
+*)
