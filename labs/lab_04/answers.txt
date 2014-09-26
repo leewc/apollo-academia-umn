@@ -1,0 +1,44 @@
+Q1: What commands do you need to execute to update your local repository for the public class repository with this new file for this lab?
+
+Answer: change directories into the local class repository and then execute 'git pull'
+
+Q2: What does the output of these two commands indicate?
+
+Answer: git status indicates that templates.cpp has been modified
+        git diff templates.cpp indicates the difference between the current files and the most recent commit
+
+Q3: What does the output of this command indicate?
+
+Answer: git log templates.cpp indcates the time, author, and commit message of each commit of the templates.cpp file
+
+Q4: What do you think will happen if P1 pushes his/her changes and then P2 tries to push his/her changes?
+
+Answer: Git won't allow P2 to push his changes as there are modifications to templates.cpp made by p1 that do not exist in p2's local repo.
+
+Q5: What does the Git response to this command tell you that you should do?
+
+Answer: It says: hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+This means that P1 has to integrate the changes that P2 has made to the repository before P1 can push again. 
+
+Q6: What occured during the pull that P1 did that allowed Git to successfully push afterwards?
+
+Answer: An automatic merge happened.
+
+Q7: What happened? What did Git tell you about this attempted pull operation?
+
+Answer: An automatic merge failed to happen. Git said:Auto-merging project/src/templates.cpp
+CONFLICT (content): Merge conflict in project/src/templates.cpp
+Automatic merge failed; fix conflicts and then commit the result.
+
+Q8: How can you identify which change was yours and which change was from your partner?
+
+Answer: git shows the local changes first right below '<<<<HEAD' and my partner's changes (that are in the central repository) after the ====== separator. Git also indicates which commit the conflict is from.
+
+Q9:How does this case of conflict resolution differ from the previous case that used merging?
+
+Answer: The previous case automatically merged the differences because there were no conflicts (the changes were comments on different lines). In this case, we had to go in manually to resolve the conflicts.
