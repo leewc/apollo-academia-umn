@@ -2,6 +2,8 @@
    in comments.
 
    Author(s): Eric Van Wyk
+
+   Modified by: Wen Chuan Lee (leex7095) and Sophia Stembridge (stemb007)
 */
 
 #include <stdio.h>

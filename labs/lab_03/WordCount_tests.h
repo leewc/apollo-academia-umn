@@ -3,6 +3,9 @@
 #include "WordCount.h"
 #include "regex.h"
 
+// Modified by: Wen Chuan Lee (leex7095) and Sophia Stembridge (stemb007)
+
+
 using namespace std ;
 
 class WordCountTestSuite : public CxxTest::TestSuite 
@@ -46,18 +49,17 @@ public:
        should be similar to [test_makeRegex_fail_illformed_brackets]. 
      */
 
+    void test_makeRegex_fail_illformed_braces (void) {
+        regex_t *re = makeRegex ("{cow{") ;
+        TS_ASSERT (re == NULL) ;
+    }
+
     // Tests for matchRegex
     // --------------------------------------------------
     /* These tests are like those above, they help us understand how
        to use the functions.  */
 
     // Add: T1 test that intentionally fails
-    void test_makeRegex_fail_illformed_backets() {
-      regex_t *re = makeRegex ("(while)");
-      TS_ASSERT (re) ; 
-      int numMatchedChars = matchRegex (re, "while wah");
-      TS_ASSERT_EQUALS (numMatchedChars, 5);
-    }
 
     void test_matchRegex_abc_anywhere () {
         regex_t *re = makeRegex ("abc") ;
@@ -95,6 +97,15 @@ public:
        [test_matchRegex_fail_abc_at_beginning]. 
      */
 
+    //Add: Pattern not present in the text, hence fails to match with 0 chars
+    void test_match_makeRegex_pattern_not_present () {
+      regex_t *re = makeRegex("[0-9]*");
+      TS_ASSERT (re);
+      int numMatchedChars = matchRegex(re, "a1234");
+      TS_ASSERT_EQUALS (numMatchedChars, 0);
+    }
+
+
     // Tests of makeRegex and matchRegex for WordCount
     // --------------------------------------------------
     /* Here we want to write tests that ensure the we have written the
@@ -104,14 +115,6 @@ public:
        These create the regex_t and then try to match it.  These only
        need match at the beginning of the text. */
 
-
-    //Add: Pattern not present in the text, hence fails to match with 0 chars
-    void test_match_makeRegex_pattern_not_present () {
-      regex_t *re = makeRegex("[0-9]*");
-      TS_ASSERT (re);
-      int numMatchedChars = matchRegex(re, "a1234");
-      TS_ASSERT_EQUALS (numMatchedChars, 0);
-    }
 
 
     void test_make_matchRegex_word () {
