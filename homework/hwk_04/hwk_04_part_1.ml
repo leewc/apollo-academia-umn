@@ -39,8 +39,6 @@ let show_pretty_expr (exp:expr): string =
 
        maybe have a type whichchild = LeftChild | RightChild
 
-145 ===> 160
-200+ for furniture
      *)
 
 (* a:input expression r:bool if on right side and p:previous expr*)
@@ -62,11 +60,11 @@ let show_pretty_expr (exp:expr):string  =
     | (Div (l,r), false) -> (pexp l false)^"/"^(pexp r true)
     | (Var a ,_ )-> a
     | (Let (s,l,r), r2) -> (match ((s,l,r),r2,exp) with 
-			| ((s,l,r), false, Let _) -> "c1 let "^s^"="^(pexp l false)^" in "^(pexp r false)
-			| ((s,l,r), false, _) -> "(c2 let "^s^"="^(pexp l false)^" in "^(pexp r true) ^")"
-			| ((s,l,r4), true, Add _) -> if(isLast exp r4) then "c4a let "^s^"="^(pexp l false)^" in "^(pexp r false)
-						    else "(c4 let "^s^"="^(pexp l false)^" in "^(pexp r false)^")"
-			| ((s,l,r), true, _) -> "c3 let "^s^"="^(pexp l false)^" in "^(pexp r true)
+			| ((s,l,r), false, Let _) -> "let "^s^"="^(pexp l false)^" in "^(pexp r false)
+			| ((s,l,r), false, _) -> "(let "^s^"="^(pexp l false)^" in "^(pexp r true) ^")"
+			| ((s,l,r4), true, Add _) -> if(isLast exp r4) then "let "^s^"="^(pexp l false)^" in "^(pexp r false)
+						    else "(let "^s^"="^(pexp l false)^" in "^(pexp r false)^")"
+			| ((s,l,r), true, _) -> "let "^s^"="^(pexp l false)^" in "^(pexp r true)
 		    )  
     
   in pexp exp false 
