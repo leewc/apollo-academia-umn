@@ -72,9 +72,7 @@ let eval (e:expr) : value =
             | BoolVal b -> if b=true then (eval_h l env) else (eval_h r env)
             | _ -> raise (Failure "If then else requires one Boolean value and 2 integer/boolean values."))
     | Let (var, def, ex) -> eval_h ex ( (var, eval_h def env)::env)
-
-(* given: | Let (a,b,c) -> (a,(eval_h b env))::env  ~then we do~ eval_h c ((a,(eval_h n env))::env)
- *)
+     (* given: | Let (a,b,c) -> (a,(eval_h b env))::env  ~then we do~ eval_h c ((a,(eval_h n env))::env)       *)
     | Var x -> lookup x env
     | IntConst v -> IntVal v
     | BoolConst b -> BoolVal b
@@ -82,50 +80,28 @@ let eval (e:expr) : value =
 
   in eval_h e []
 
-let freevars (a:expr):string list =
-(*
-  let rec inList (a:string) (b:string list) = 
-    match b with 
-    | x::rest -> if x = a then true else inList a rest
-    | [] -> false
+let freevars (e:expr) : string list =
+  let rec present s env = match env with
+                          | [] -> false
+                          | x::xs -> x=s || (present s xs)
+                          (*right side is not evaluated if left is true*)
   in 
-
-  let rec clean (a:string list) (refa:string list) (out:string list):string list = 
-    match a with 
-    | x::rest -> if not (inList x refa) then clean rest refa out@[x] else clean rest refa out
-    | [] -> out
-  in 
- *)
-  let rec make_str (a:expr) (validate:string list):string list =
-    match a with
-
-(*    | Var x -> if not (inList x validate) then [x] else [] *)
-    | Var x -> [x] 
-    | Let (var,def,ex) -> (match def with
-			   | IntConst _
-(*
-			   | BoolConst _ -> (if (inList var validate) then make_str ex validate@[var] 
-					     else make_str ex validate)
- *)
-			   | BoolConst _-> []
-			   | _ -> [var])
-    | Mul (x,y)
-    | Div (x,y)
+  let rec freevars_h e env:string list = 
+    match e with
+    | IntConst _ -> []
+    | BoolConst _ -> []
+    | Var x -> if present x env then [] else [x] (*need a recursive helper function to check if it's been def*)
     | Sub (x,y)
     | Add (x,y) 
+    | Mul (x,y)
+    | Div (x,y) 
     | LT (x,y)
     | EQ (x,y)
-    | And (x,y)
-      -> make_str x validate @ make_str y validate
-    | Not x -> make_str x validate
-    | IfThenElse (x,y,z) -> make_str x validate @ make_str y validate @ make_str z validate
-    | _ -> []
-   in  
-   let rec lookup n env out validate = 
-    match env with 
-    | [] -> out@make_str n validate
-    | (name,value)::rest -> if n = name then value else lookup n rest out (validate)
-   in (lookup a [] [] [])
+    | And (x,y) -> (freevars_h x env) @ (freevars_h y env)
+    | Not x -> freevars_h x env
+    | IfThenElse (x,y,z) -> (freevars_h x env) @ (freevars_h y env) @ (freevars_h z env)
+    | Let (x,y,z) -> (freevars_h y env) @ (freevars_h z (x::env))
+  in freevars_h e []
 
 type int_expr =
   | Add_int of int_expr * int_expr
@@ -154,46 +130,106 @@ type int_or_bool_expr
   | BoolExpr of bool_expr 
 
 (* Place functions eval_int_bool and translate here. *)
+type vartype = IntType | BoolType | ErrorType
 
-let translate (d:expr):option int_or_bool_expr = 
-  let rec t (c:expr):int_or_bool_expr=
-  match c with 
-  | IntConst a -> Some IntExpr (IntConst_int a)
-  | Add_int (IntConst a, IntConst b) -> lslslsls
-  | Add_int (a ,b ) -> Add_int (t a ,t b)
-  in t d
-
-
-
-
-(*
-
-let eval_int_bool (w:int_or_bool_expr): value =
-  let rec toVal x: value = 
-    match x with
-    | IntExpr (int_expr a) -> IntVal a
-    | BoolExpr (bool_expr a) -> BoolVal a
+let translate (e:expr) : int_or_bool_expr option = 
+  let rec lookup n env = match env with 
+    | [ ] -> None
+    | (name, value)::rest -> if n=name then Some value else lookup n rest 
   in 
-  let rec i x hold: int_or_bool_expr =
-    match x with 
-    | Add_int (IntConst_int a , IntConst_int b) -> i (IntConst_int (a + b) )
-    | Add_int (a, b) -> (eval_int_bool a)::(eval_int_bool b)
-   (* | Mul_int (a,b) -> (i a) * (i b)
-    | Sub_int (a,b) -> (i a) - (i b)
-    | Div_int (a,b) -> (i a) / (i b) *)
-    | IntConst_int a -> toVal a
+  let rec translate_h e env = match e with 
+    | IntConst x -> Some (IntExpr (IntConst_int x))
+    | BoolConst x -> Some (BoolExpr (BoolConst_bool x))
+    | Var x -> (match lookup x env with 
+		| Some IntType -> Some (IntExpr (Var_int x))
+		| Some BoolType -> Some (BoolExpr (Var_bool x))
+		| Some ErrorType -> None
+		| None -> None )
+    | Add (x,y) -> (match translate_h x env, translate_h y env with 
+		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Add_int (a,b)))
+		    | _,_ -> None)
+    | Sub (x,y) -> (match translate_h x env, translate_h y env with 
+		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Sub_int (a,b)))
+		    | _,_ -> None)
+    | Div (x,y) -> (match translate_h x env, translate_h y env with 
+		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Div_int (a,b)))
+		    | _,_ -> None)
+    | Mul (x,y) -> (match translate_h x env, translate_h y env with 
+		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Mul_int (a,b)))
+		    | _,_ -> None)
+    | LT (x,y) -> (match translate_h x env, translate_h y env with 
+		    | Some (IntExpr a), Some (IntExpr b) -> Some (BoolExpr (LT_bool (a,b)))
+		    | _,_ -> None)
+    | EQ (x,y) -> (match translate_h x env, translate_h y env with 
+		    | Some (IntExpr a), Some (IntExpr b) -> Some (BoolExpr (EQ_int_bool (a,b)))
+		    | Some (BoolExpr a), Some (BoolExpr b) -> Some (BoolExpr (EQ_bool_bool (a,b)))
+		    | _,_ -> None)
+    | And (x,y) -> (match translate_h x env, translate_h y env with 
+		    | Some (BoolExpr a), Some (BoolExpr b) -> Some (BoolExpr (And_bool (a,b)))
+		    | _,_ -> None)
+    | Not (x) -> (match translate_h x env with
+		  | Some (BoolExpr x) -> Some (BoolExpr (Not_bool x))
+		  | _ -> None )
+    | IfThenElse (x,y,z) -> (match translate_h x env with 
+			     | Some (BoolExpr a) -> (match translate_h y env with 
+						     | Some (IntExpr b) -> (match translate_h z env with
+									    | Some (IntExpr c) -> Some (IntExpr (IfThenElse_int (a,b,c)))
+									    | _ -> None)
+						     | Some (BoolExpr b) -> (match translate_h z env with 
+									     | Some (BoolExpr c) -> Some (BoolExpr (IfThenElse_bool(a,b,c)))
+									     | _ -> None)
+						     | _ -> None) 
+			     | _ -> None)
+    | Let (x,y,z) -> (match translate_h y env with 
+		      | Some (IntExpr a) -> (match translate_h z ((x,IntType)::env) with 
+					     | Some (IntExpr b) -> Some (IntExpr (Let_int_int (x,a,b)))
+					     | Some (BoolExpr b) -> Some (BoolExpr (Let_int_bool (x,a,b)))
+					     | None -> None )
+		      | Some (BoolExpr a) -> (match translate_h z ((x,BoolType)::env) with 
+					      | Some (IntExpr b) -> Some (IntExpr (Let_bool_int (x,a,b)))
+					      | Some (BoolExpr b) -> Some (BoolExpr (Let_bool_bool (x,a,b)))
+					      | None -> None)
+		      | _-> (match translate_h z ((x,ErrorType)::env) with
+			     | _ -> None)
+		     )
+  in translate_h e []
 
-  and b y hold: int_or_bool_expr= 
+
+let eval_int_bool (w:int_or_bool_expr):value = 
+ 
+  let rec lookup n env=
+    match env with
+    | [ ] -> raise (Failure ("Identifier \"" ^ n ^ "\" not declared."))
+    | (name,value)::rest -> if n = name then value else lookup n rest
+  in 
+
+  let rec i (x) (envI) (envB)= 
+    match x with
+    | IntConst_int d -> d
+    | Add_int (a,b) -> (i a envI envB) + (i b envI envB)
+    | Sub_int (a,b) -> (i a envI envB) - (i b envI envB)
+    | Mul_int (a,b) -> (i a envI envB) * (i b envI envB)
+    | Div_int (a,b) -> (i a envI envB) / (i b envI envB)
+    | IfThenElse_int (a,c,d) -> if (b a envI envB) then (i c envI envB) else (i d envI envB)
+    | Let_int_int (var,def,ex) -> (i ex ((var, (i def envI envB)):: envI) envB)
+    | Let_bool_int (var,def,ex) -> (i ex envI ((var, (b def envI envB)):: envB))
+    | Var_int a -> (lookup a envI)
+  and b (y) (envI) (envB) =
     match y with 
-    | Not_bool (BoolConst_bool a) -> b (BoolConst_bool (not a))
-    | BoolConst_bool a -> BoolVal a
-  in
-  match w with
-  | IntExpr a -> toVal (i a)
-  | BoolExpr c -> toVal (b c)  
-
- *)
-
+    | BoolConst_bool d -> d
+   | LT_bool (d,e) -> (i d envI envB) < (i e envI envB)
+    | EQ_int_bool (d,e) -> (i d envI envB) = (i e envI envB)
+    | EQ_bool_bool (d,e) -> (b d envI envB) = (b e envI envB)
+    | And_bool (d,e) -> (b d envI envB) && (b e envI envB)
+    | Not_bool d -> not (b d envI envB)
+    | Let_bool_bool (var,def,ex) -> (b ex envI ((var, (b def envI envB))::envB))
+    | Let_int_bool (var,def,ex) -> (b ex ((var,(i def envI envB)):: envI) envB)
+    | Var_bool d -> (lookup d envB)
+    | IfThenElse_bool (c,d,e) -> if (b c envI envB) then (b d envI envB) else (b e envI envB)
+  in 
+  match w with 
+  | IntExpr x -> IntVal (i x [] [])
+  | BoolExpr x -> BoolVal (b x [] [])
 
 (*fail at: eval_int_bool (IntExpr (Add_int (IntConst_int 4, (Add_int (IntConst_int 1, IntConst_int 2)))));;
 eval_int_bool (IntExpr (Add_int (IntConst_int 4, (Add_int (IntConst_int 1, IntConst_int 2)))));;
