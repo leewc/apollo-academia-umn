@@ -72,6 +72,9 @@ let eval (e:expr) : value =
             | BoolVal b -> if b=true then (eval_h l env) else (eval_h r env)
             | _ -> raise (Failure "If then else requires one Boolean value and 2 integer/boolean values."))
     | Let (var, def, ex) -> eval_h ex ( (var, eval_h def env)::env)
+
+(* given: | Let (a,b,c) -> (a,(eval_h b env))::env  ~then we do~ eval_h c ((a,(eval_h n env))::env)
+ *)
     | Var x -> lookup x env
     | IntConst v -> IntVal v
     | BoolConst b -> BoolVal b
@@ -124,8 +127,6 @@ let freevars (a:expr):string list =
     | (name,value)::rest -> if n = name then value else lookup n rest out (validate)
    in (lookup a [] [] [])
 
-
-
 type int_expr =
   | Add_int of int_expr * int_expr
   | Mul_int of int_expr * int_expr
@@ -153,3 +154,48 @@ type int_or_bool_expr
   | BoolExpr of bool_expr 
 
 (* Place functions eval_int_bool and translate here. *)
+
+let translate (d:expr):option int_or_bool_expr = 
+  let rec t (c:expr):int_or_bool_expr=
+  match c with 
+  | IntConst a -> Some IntExpr (IntConst_int a)
+  | Add_int (IntConst a, IntConst b) -> lslslsls
+  | Add_int (a ,b ) -> Add_int (t a ,t b)
+  in t d
+
+
+
+
+(*
+
+let eval_int_bool (w:int_or_bool_expr): value =
+  let rec toVal x: value = 
+    match x with
+    | IntExpr (int_expr a) -> IntVal a
+    | BoolExpr (bool_expr a) -> BoolVal a
+  in 
+  let rec i x hold: int_or_bool_expr =
+    match x with 
+    | Add_int (IntConst_int a , IntConst_int b) -> i (IntConst_int (a + b) )
+    | Add_int (a, b) -> (eval_int_bool a)::(eval_int_bool b)
+   (* | Mul_int (a,b) -> (i a) * (i b)
+    | Sub_int (a,b) -> (i a) - (i b)
+    | Div_int (a,b) -> (i a) / (i b) *)
+    | IntConst_int a -> toVal a
+
+  and b y hold: int_or_bool_expr= 
+    match y with 
+    | Not_bool (BoolConst_bool a) -> b (BoolConst_bool (not a))
+    | BoolConst_bool a -> BoolVal a
+  in
+  match w with
+  | IntExpr a -> toVal (i a)
+  | BoolExpr c -> toVal (b c)  
+
+ *)
+
+
+(*fail at: eval_int_bool (IntExpr (Add_int (IntConst_int 4, (Add_int (IntConst_int 1, IntConst_int 2)))));;
+eval_int_bool (IntExpr (Add_int (IntConst_int 4, (Add_int (IntConst_int 1, IntConst_int 2)))));;
+*)
+

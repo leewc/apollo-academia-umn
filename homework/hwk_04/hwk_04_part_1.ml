@@ -7,6 +7,13 @@ type expr
   | Let of string * expr * expr
   | Var of string
 
+(*
+const 0 var 0 - but don't care
+add, sub 1
+mul, div 2
+let has highest
+wrapper function to wrap it. 
+ *)
 
 (* Place functions show_expr and show_pretty_expr in this file. *)
 
