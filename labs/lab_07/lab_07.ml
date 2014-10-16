@@ -16,7 +16,7 @@ type expr
 
 type value = IntVal of int | BoolVal of bool
 
-
+(*expr -> value*)
 let eval (e:expr) : value =
   let rec lookup n env = 
     match env with 
@@ -80,6 +80,7 @@ let eval (e:expr) : value =
 
   in eval_h e []
 
+(*expr -> string list*)
 let freevars (e:expr) : string list =
   let rec present s env = match env with
                           | [] -> false
@@ -132,6 +133,7 @@ type int_or_bool_expr
 (* Place functions eval_int_bool and translate here. *)
 type vartype = IntType | BoolType | ErrorType
 
+(*expr -> int_or_bool_expr option*)
 let translate (e:expr) : int_or_bool_expr option = 
   let rec lookup n env = match env with 
     | [ ] -> None
@@ -195,117 +197,7 @@ let translate (e:expr) : int_or_bool_expr option =
   in translate_h e []
 
 
-
-(*note: helper function i handles integers and helper function b handles booleans*)
-let eval_int_bool (w:int_or_bool_expr):value = 
- 
-  let rec lookup n env=
-    match env with
-    | [ ] -> raise (Failure ("Identifier \"" ^ n ^ "\" not declared."))
-    | (name,value)::rest -> if n = name then value else lookup n rest
-  in 
-
-  let rec i (x) (envI) (envB)= 
-    match x with
-    | IntConst_int d -> d
-    | Add_int (a,b) -> (i a envI envB) + (i b envI envB)
-    | Sub_int (a,b) -> (i a envI envB) - (i b envI envB)
-    | Mul_int (a,b) -> (i a envI envB) * (i b envI envB)
-    | Div_int (a,b) -> (i a envI envB) / (i b envI envB)
-    | IfThenElse_int (a,c,d) -> if (b a envI envB) then (i c envI envB) else (i d envI envB)
-    | Let_int_int (var,def,ex) -> (i ex ((var, (i def envI envB)):: envI) envB)
-    | Let_bool_int (var,def,ex) -> (i ex envI ((var, (b def envI envB)):: envB))
-    | Var_int a -> (lookup a envI)
-  and b (y) (envI) (envB) =
-    match y with 
-    | BoolConst_bool d -> d
-   | LT_bool (d,e) -> (i d envI envB) < (i e envI envB)
-    | EQ_int_bool (d,e) -> (i d envI envB) = (i e envI envB)
-    | EQ_bool_bool (d,e) -> (b d envI envB) = (b e envI envB)
-    | And_bool (d,e) -> (b d envI envB) && (b e envI envB)
-    | Not_bool d -> not (b d envI envB)
-    | Let_bool_bool (var,def,ex) -> (b ex envI ((var, (b def envI envB))::envB))
-    | Let_int_bool (var,def,ex) -> (b ex ((var,(i def envI envB)):: envI) envB)
-    | Var_bool d -> (lookup d envB)
-    | IfThenElse_bool (c,d,e) -> if (b c envI envB) then (b d envI envB) else (b e envI envB)
-  in 
-  match w with 
-  | IntExpr x -> IntVal (i x [] [])
-  | BoolExpr x -> BoolVal (b x [] [])
-
-(*fail at: eval_int_bool (IntExpr (Add_int (IntConst_int 4, (Add_int (IntConst_int 1, IntConst_int 2)))));;
-eval_int_bool (IntExpr (Add_int (IntConst_int 4, (Add_int (IntConst_int 1, IntConst_int 2)))));;
-*)
-
-
-
-(* Place functions eval_int_bool and translate here. *)
-type vartype = IntType | BoolType | ErrorType
-
-let translate (e:expr) : int_or_bool_expr option = 
-  let rec lookup n env = match env with 
-    | [ ] -> None
-    | (name, value)::rest -> if n=name then Some value else lookup n rest 
-  in 
-  let rec translate_h e env = match e with 
-    | IntConst x -> Some (IntExpr (IntConst_int x))
-    | BoolConst x -> Some (BoolExpr (BoolConst_bool x))
-    | Var x -> (match lookup x env with 
-		| Some IntType -> Some (IntExpr (Var_int x))
-		| Some BoolType -> Some (BoolExpr (Var_bool x))
-		| Some ErrorType -> None
-		| None -> None )
-    | Add (x,y) -> (match translate_h x env, translate_h y env with 
-		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Add_int (a,b)))
-		    | _,_ -> None)
-    | Sub (x,y) -> (match translate_h x env, translate_h y env with 
-		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Sub_int (a,b)))
-		    | _,_ -> None)
-    | Div (x,y) -> (match translate_h x env, translate_h y env with 
-		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Div_int (a,b)))
-		    | _,_ -> None)
-    | Mul (x,y) -> (match translate_h x env, translate_h y env with 
-		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Mul_int (a,b)))
-		    | _,_ -> None)
-    | LT (x,y) -> (match translate_h x env, translate_h y env with 
-		    | Some (IntExpr a), Some (IntExpr b) -> Some (BoolExpr (LT_bool (a,b)))
-		    | _,_ -> None)
-    | EQ (x,y) -> (match translate_h x env, translate_h y env with 
-		    | Some (IntExpr a), Some (IntExpr b) -> Some (BoolExpr (EQ_int_bool (a,b)))
-		    | Some (BoolExpr a), Some (BoolExpr b) -> Some (BoolExpr (EQ_bool_bool (a,b)))
-		    | _,_ -> None)
-    | And (x,y) -> (match translate_h x env, translate_h y env with 
-		    | Some (BoolExpr a), Some (BoolExpr b) -> Some (BoolExpr (And_bool (a,b)))
-		    | _,_ -> None)
-    | Not (x) -> (match translate_h x env with
-		  | Some (BoolExpr x) -> Some (BoolExpr (Not_bool x))
-		  | _ -> None )
-    | IfThenElse (x,y,z) -> (match translate_h x env with 
-			     | Some (BoolExpr a) -> (match translate_h y env with 
-						     | Some (IntExpr b) -> (match translate_h z env with
-									    | Some (IntExpr c) -> Some (IntExpr (IfThenElse_int (a,b,c)))
-									    | _ -> None)
-						     | Some (BoolExpr b) -> (match translate_h z env with 
-									     | Some (BoolExpr c) -> Some (BoolExpr (IfThenElse_bool(a,b,c)))
-									     | _ -> None)
-						     | _ -> None) 
-			     | _ -> None)
-    | Let (x,y,z) -> (match translate_h y env with 
-		      | Some (IntExpr a) -> (match translate_h z ((x,IntType)::env) with 
-					     | Some (IntExpr b) -> Some (IntExpr (Let_int_int (x,a,b)))
-					     | Some (BoolExpr b) -> Some (BoolExpr (Let_int_bool (x,a,b)))
-					     | None -> None )
-		      | Some (BoolExpr a) -> (match translate_h z ((x,BoolType)::env) with 
-					      | Some (IntExpr b) -> Some (IntExpr (Let_bool_int (x,a,b)))
-					      | Some (BoolExpr b) -> Some (BoolExpr (Let_bool_bool (x,a,b)))
-					      | None -> None)
-		      | _-> (match translate_h z ((x,ErrorType)::env) with
-			     | _ -> None)
-		     )
-  in translate_h e []
-
-
-
+(*int_or_bool_expr -> value*)
 (*note: helper function i handles integers and helper function b handles booleans*)
 let eval_int_bool (w:int_or_bool_expr):value = 
  
@@ -357,65 +249,65 @@ type int_or_bool_or_error
 
 let translate_report_errors (e:expr) : int_or_bool_or_error option = 
   let rec lookup n env = match env with 
-    | [ ] -> None
+    | [ ] -> Some ErrorType
     | (name, value)::rest -> if n=name then Some value else lookup n rest 
   in 
   
-  let rec translate_h e env = match e with 
+  let rec translate_h e env out = match e with 
     | IntConst x -> Some (IntExpr (IntConst_int x))
     | BoolConst x -> Some (BoolExpr (BoolConst_bool x))
     | Var x -> (match lookup x env with 
-		| Some IntType -> Some (IntExpr (Var_int x))
+		| Some IntType  -> Some (IntExpr (Var_int x))
 		| Some BoolType -> Some (BoolExpr (Var_bool x))
-		| _ -> Some (ErrorExpr (["Error at: Var X"])))
-    | Add (x,y) -> (match translate_h x env, translate_h y env with 
+		| _ -> Some (ErrorExpr (out@["Error at: Var X"])))
+    | Add (x,y) -> (match translate_h x env out, translate_h y env out with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Add_int (a,b)))
-		    | _,_ -> Some(ErrorExpr(["Error at: Add"])))
-    | Sub (x,y) -> (match translate_h x env, translate_h y env with 
+		    | _,_ -> Some(ErrorExpr(out@["Error at: Add"])))
+    | Sub (x,y) -> (match translate_h x env out, translate_h y env out with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Sub_int (a,b)))
-		    | _,_ -> Some(ErrorExpr(["Error at: Sub"])))
-    | Div (x,y) -> (match translate_h x env, translate_h y env with 
+		    | _,_ -> Some(ErrorExpr(out@["Error at: Sub"])))
+    | Div (x,y) -> (match translate_h x env out, translate_h y env out with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Div_int (a,b)))
-		    | _,_ -> Some(ErrorExpr(["Error at: Div"])))
-    | Mul (x,y) -> (match translate_h x env, translate_h y env with 
+		    | _,_ -> Some(ErrorExpr(out@["Error at: Div"])))
+    | Mul (x,y) -> (match translate_h x env out, translate_h y env out with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Mul_int (a,b)))
-		    | _,_ -> Some(ErrorExpr(["Error at: Mul"])))
-    | LT (x,y) -> (match translate_h x env, translate_h y env with 
+		    | _,_ -> Some(ErrorExpr(out@["Error at: Mul"])))
+    | LT (x,y) -> (match translate_h x env out, translate_h y env out with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (BoolExpr (LT_bool (a,b)))
-		    | _,_ -> Some(ErrorExpr(["Error at: LT"])))
-    | EQ (x,y) -> (match translate_h x env, translate_h y env with 
+		    | _,_ -> Some(ErrorExpr(out@["Error at: LT"])))
+    | EQ (x,y) -> (match translate_h x env out, translate_h y env out with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (BoolExpr (EQ_int_bool (a,b)))
 		    | Some (BoolExpr a), Some (BoolExpr b) -> Some (BoolExpr (EQ_bool_bool (a,b)))
-		    | _,_ -> Some(ErrorExpr(["Error at: EQ"])))
-    | And (x,y) -> (match translate_h x env, translate_h y env with 
+		    | _,_ -> Some(ErrorExpr(out@["Error at: EQ"])))
+    | And (x,y) -> (match translate_h x env out, translate_h y env out with 
 		    | Some (BoolExpr a), Some (BoolExpr b) -> Some (BoolExpr (And_bool (a,b)))
-		    | _,_ -> Some(ErrorExpr(["Error at: And"])))
-    | Not (x) -> (match translate_h x env with
+		    | _,_ -> Some(ErrorExpr(out@["Error at: And"])))
+    | Not (x) -> (match translate_h x env out with
 		  | Some (BoolExpr x) -> Some (BoolExpr (Not_bool x))
-		  | _ -> Some(ErrorExpr(["Error at: Not"]))) 
-    | IfThenElse (x,y,z) -> (match translate_h x env with 
-			     | Some (BoolExpr a) -> (match translate_h y env with 
-						     | Some (IntExpr b) -> (match translate_h z env with
+		  | _ -> Some(ErrorExpr(out@["Error at: Not"]))) 
+    | IfThenElse (x,y,z) -> (match translate_h x env out with 
+			     | Some (BoolExpr a) -> (match translate_h y env out with 
+						     | Some (IntExpr b) -> (match translate_h z env out with
 									    | Some (IntExpr c) -> Some (IntExpr (IfThenElse_int (a,b,c)))
-									    | _ -> Some(ErrorExpr(["Error at: IfThenInt"])))
-						     | Some (BoolExpr b) -> (match translate_h z env with 
+									    | _ -> Some(ErrorExpr(out@["Error at: IfThenInt"])))
+						     | Some (BoolExpr b) -> (match translate_h z env out with 
 									     | Some (BoolExpr c) -> Some (BoolExpr (IfThenElse_bool(a,b,c)))
-									     | _ -> Some(ErrorExpr(["Error at: IfThenBool"])))
-						     | _ -> Some(ErrorExpr(["Error at: IfThenBool"])))
-			     | _ -> Some(ErrorExpr(["Error at: IfThenElse"])))
-    | Let (x,y,z) -> (match translate_h y env with 
-		      | Some (IntExpr a) -> (match translate_h z ((x,IntType)::env) with 
+									     | _ -> Some(ErrorExpr(out@["Error at: IfThenBool"])))
+						     | _ -> Some(ErrorExpr(out@["Error at: IfThenBool"])))
+			     | _ -> Some(ErrorExpr(out@["Error at: IfThenElse"])))
+    | Let (x,y,z) -> (match translate_h y env out with 
+		      | Some (IntExpr a) -> (match translate_h z ((x,IntType)::env) out with 
 					     | Some (IntExpr b) -> Some (IntExpr (Let_int_int (x,a,b)))
 					     | Some (BoolExpr b) -> Some (BoolExpr (Let_int_bool (x,a,b)))
-					     | _ -> Some(ErrorExpr(["Error at: LET"]))) 
-		      | Some (BoolExpr a) -> (match translate_h z ((x,BoolType)::env) with 
+					     | _ -> Some(ErrorExpr(out@["Error at: LET"]))) 
+		      | Some (BoolExpr a) -> (match translate_h z ((x,BoolType)::env)out with 
 					      | Some (IntExpr b) -> Some (IntExpr (Let_bool_int (x,a,b)))
 					      | Some (BoolExpr b) -> Some (BoolExpr (Let_bool_bool (x,a,b)))
-					      | _ -> Some(ErrorExpr(["Error at: LET"])))
-		      | _-> (match translate_h z ((x,ErrorType)::env) with
-			     | _ -> Some(ErrorExpr(["Error at: LET"])))
+					      | _ -> Some(ErrorExpr(out@["Error at: LET"])))
+		      | _-> (match translate_h z ((x,ErrorType)::env) out with
+			     | _ -> Some(ErrorExpr(out@["Error at: LET"])))
 		     )
-  in translate_h e [];;
+  in translate_h e [] [];;
 
 (*some examples of translate report errors as directed by lab*)
 
