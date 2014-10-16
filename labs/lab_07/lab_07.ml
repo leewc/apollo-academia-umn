@@ -249,68 +249,88 @@ type int_or_bool_or_error
 
 let translate_report_errors (e:expr) : int_or_bool_or_error option = 
   let rec lookup n env = match env with 
-    | [ ] -> Some ErrorType
+    | [ ] -> None
     | (name, value)::rest -> if n=name then Some value else lookup n rest 
   in 
   
-  let rec translate_h e env out = match e with 
+  let rec translate_h e env = match e with 
     | IntConst x -> Some (IntExpr (IntConst_int x))
     | BoolConst x -> Some (BoolExpr (BoolConst_bool x))
     | Var x -> (match lookup x env with 
 		| Some IntType  -> Some (IntExpr (Var_int x))
 		| Some BoolType -> Some (BoolExpr (Var_bool x))
-		| _ -> Some (ErrorExpr (out@["Error at: Var X"])))
-    | Add (x,y) -> (match translate_h x env out, translate_h y env out with 
+		| _ -> Some (ErrorExpr (["Error at: Var X"])))
+
+    | Add (x,y) -> (match translate_h x env, translate_h y env with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Add_int (a,b)))
-		    | _,_ -> Some(ErrorExpr(out@["Error at: Add"])))
-    | Sub (x,y) -> (match translate_h x env out, translate_h y env out with 
+		    | Some (ErrorExpr a), Some (ErrorExpr b) -> Some(ErrorExpr(["Error at: Add"]@a@b))
+		    | _,_ -> Some (ErrorExpr(["Major Error at Add"])))
+
+    | Sub (x,y) -> (match translate_h x env, translate_h y env with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Sub_int (a,b)))
-		    | _,_ -> Some(ErrorExpr(out@["Error at: Sub"])))
-    | Div (x,y) -> (match translate_h x env out, translate_h y env out with 
+		    | Some (ErrorExpr a), Some (ErrorExpr b) -> Some(ErrorExpr(["Error at: Sub"]@a@b))
+		    | _,_ -> Some (ErrorExpr(["Major Error at Sub"])))
+
+    | Div (x,y) -> (match translate_h x env, translate_h y env with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Div_int (a,b)))
-		    | _,_ -> Some(ErrorExpr(out@["Error at: Div"])))
-    | Mul (x,y) -> (match translate_h x env out, translate_h y env out with 
+		    | Some (ErrorExpr a), Some (ErrorExpr b) -> Some(ErrorExpr(["Error at: Div"]@a@b))
+		    | _,_ -> Some(ErrorExpr(["Major Error at: Div"])))
+
+    | Mul (x,y) -> (match translate_h x env, translate_h y env with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (IntExpr (Mul_int (a,b)))
-		    | _,_ -> Some(ErrorExpr(out@["Error at: Mul"])))
-    | LT (x,y) -> (match translate_h x env out, translate_h y env out with 
+		    | Some (ErrorExpr a), Some (ErrorExpr b) -> Some(ErrorExpr(["Error at: Mul"]@a@b))
+		    | _,_ -> Some(ErrorExpr(["Major Error at: Mul"])))
+    | LT (x,y) -> (match translate_h x env, translate_h y env with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (BoolExpr (LT_bool (a,b)))
-		    | _,_ -> Some(ErrorExpr(out@["Error at: LT"])))
-    | EQ (x,y) -> (match translate_h x env out, translate_h y env out with 
+		    | Some (ErrorExpr a), Some (ErrorExpr b) -> Some(ErrorExpr(["Error at: LT"]@a@b))
+		    | _,_ -> Some (ErrorExpr(["Major Error at LT"])))
+    | EQ (x,y) -> (match translate_h x env, translate_h y env with 
 		    | Some (IntExpr a), Some (IntExpr b) -> Some (BoolExpr (EQ_int_bool (a,b)))
 		    | Some (BoolExpr a), Some (BoolExpr b) -> Some (BoolExpr (EQ_bool_bool (a,b)))
-		    | _,_ -> Some(ErrorExpr(out@["Error at: EQ"])))
-    | And (x,y) -> (match translate_h x env out, translate_h y env out with 
+		    | Some (ErrorExpr a), Some (ErrorExpr b) -> Some(ErrorExpr(["Error at: EQ"]@a@b))
+		    | _,_ -> Some(ErrorExpr(["Major Error at: EQ"])))
+    | And (x,y) -> (match translate_h x env , translate_h y env  with 
 		    | Some (BoolExpr a), Some (BoolExpr b) -> Some (BoolExpr (And_bool (a,b)))
-		    | _,_ -> Some(ErrorExpr(out@["Error at: And"])))
-    | Not (x) -> (match translate_h x env out with
+		    | Some (ErrorExpr a), Some (ErrorExpr b) -> Some(ErrorExpr(["Error at: And"]@a@b))
+		    | _,_ -> Some(ErrorExpr(["Major Error at: And"])))
+    | Not (x) -> (match translate_h x env with
 		  | Some (BoolExpr x) -> Some (BoolExpr (Not_bool x))
-		  | _ -> Some(ErrorExpr(out@["Error at: Not"]))) 
-    | IfThenElse (x,y,z) -> (match translate_h x env out with 
-			     | Some (BoolExpr a) -> (match translate_h y env out with 
-						     | Some (IntExpr b) -> (match translate_h z env out with
+		  | Some (ErrorExpr x) -> Some(ErrorExpr(["Error at: Not"]@x))
+		  | _ -> Some(ErrorExpr(["Major Error at: Not"]))) 
+    | IfThenElse (x,y,z) -> (match translate_h x env with 
+			     | Some (BoolExpr a) -> (match translate_h y env with 
+						     | Some (IntExpr b) -> (match translate_h z env with
 									    | Some (IntExpr c) -> Some (IntExpr (IfThenElse_int (a,b,c)))
-									    | _ -> Some(ErrorExpr(out@["Error at: IfThenInt"])))
-						     | Some (BoolExpr b) -> (match translate_h z env out with 
+									    | _ -> Some(ErrorExpr(["Error at: IfThenInt"])))
+						     | Some (BoolExpr b) -> (match translate_h z env with 
 									     | Some (BoolExpr c) -> Some (BoolExpr (IfThenElse_bool(a,b,c)))
-									     | _ -> Some(ErrorExpr(out@["Error at: IfThenBool"])))
-						     | _ -> Some(ErrorExpr(out@["Error at: IfThenBool"])))
-			     | _ -> Some(ErrorExpr(out@["Error at: IfThenElse"])))
-    | Let (x,y,z) -> (match translate_h y env out with 
-		      | Some (IntExpr a) -> (match translate_h z ((x,IntType)::env) out with 
+									     | _ -> Some(ErrorExpr(["Error at: IfThenBool"])))
+						     | Some (ErrorExpr b) -> Some(ErrorExpr(["Error at: IfThenBool"]@b))
+						     | _ -> Some(ErrorExpr(["Error at: IfThenBool"])))
+			     | Some (ErrorExpr a) -> Some(ErrorExpr(["Error at: IfThenElse"]@a))
+			     | _ -> Some(ErrorExpr(["Major Error at: IfThenElse"])))
+    | Let (x,y,z) -> (match translate_h y env with 
+		      | Some (IntExpr a) -> (match translate_h z ((x,IntType)::env) with 
 					     | Some (IntExpr b) -> Some (IntExpr (Let_int_int (x,a,b)))
 					     | Some (BoolExpr b) -> Some (BoolExpr (Let_int_bool (x,a,b)))
-					     | _ -> Some(ErrorExpr(out@["Error at: LET"]))) 
-		      | Some (BoolExpr a) -> (match translate_h z ((x,BoolType)::env)out with 
+					     | Some (ErrorExpr x) -> Some(ErrorExpr(["Error at: InnerMostLet"]@x))
+					     | _ -> Some(ErrorExpr(["Error at: InnerLET"]))) 
+		      | Some (BoolExpr a) -> (match translate_h z ((x,BoolType)::env) with 
 					      | Some (IntExpr b) -> Some (IntExpr (Let_bool_int (x,a,b)))
 					      | Some (BoolExpr b) -> Some (BoolExpr (Let_bool_bool (x,a,b)))
-					      | _ -> Some(ErrorExpr(out@["Error at: LET"])))
-		      | _-> (match translate_h z ((x,ErrorType)::env) out with
-			     | _ -> Some(ErrorExpr(out@["Error at: LET"])))
+					      | Some (ErrorExpr x) -> Some(ErrorExpr(["Error at: InnerLet"]@x))
+					      | _ -> Some(ErrorExpr(["Error at: InnetLET"])))
+		      | _-> (match translate_h z ((x,ErrorType)::env) with
+			     | _ -> Some(ErrorExpr(["Major Error at: LET"])))
 		     )
-  in translate_h e [] [];;
+  in translate_h e [];;
 
-(*some examples of translate report errors as directed by lab*)
+(*some examples of translate report errors as directed by lab, test cases adapted from the previous homework and modified to be errorneous*)
 
 translate_report_errors(IfThenElse (BoolConst true, BoolConst true, IntConst 1));;
 translate_report_errors(IfThenElse (BoolConst true, IntConst 1, BoolConst true));;
-translate_report_errors (LT (Add (IntConst 1, BoolConst false), Add (BoolConst true, IntConst 4)));;
+translate_report_errors(LT (Add (BoolConst false, BoolConst false), Add (IntConst 5, BoolConst true)));;
+translate_report_errors(Let ("x", BoolConst true, IfThenElse (BoolConst true, BoolConst true, IntConst 1) ));;
+
+(*these cases should not toss an error*)
+translate_report_errors(Div (IntConst 1, IntConst 0));;
