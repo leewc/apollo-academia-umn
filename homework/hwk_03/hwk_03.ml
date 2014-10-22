@@ -48,7 +48,7 @@ let sub_number a b =
   | (Float a, Float b) -> Float (a -. b)
 
 
-let sum_diffs l=
+let sum_number_diffs l=
   match l with 
   | [] -> None
   | [x] -> None
