@@ -40,15 +40,15 @@
 
     Test passed.
 
-+ 0 / 5: ``sum_number_diffs [ n4 ]`` evaluates to ``None``
++ 5 / 5: ``sum_number_diffs [ n4 ]`` evaluates to ``None``
 
-    Test failed: the expression ``sum_number_diffs [ n4 ]=None`` could not be evaluated. A syntax or type error occurred.
+    Test passed.
 
-+ 0 / 5: ``sum_number_diffs [ n1; n2; n4; n5; n3_1415]`` evaluates to a ``Some`` value containing the ``number`` representation for -2.1415.
++ 5 / 5: ``sum_number_diffs [ n1; n2; n4; n5; n3_1415]`` evaluates to a ``Some`` value containing the ``number`` representation for -2.1415.
 
-    Test failed: the expression ``(match (match (sum_number_diffs [ n1; n2; n4; n5; n3_1415]) with | Some y -> to_float y | _ -> None) with | Some x -> x<(-2.1315000000000004) && x>(-2.1515) | None -> false)`` could not be evaluated. A syntax or type error occurred.
+    Test passed.
 
 ### Total score
 
-+ 30 / 40: total score for this assignment
++ 40 / 40: total score for this assignment
 
