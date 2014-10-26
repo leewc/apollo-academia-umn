@@ -129,7 +129,107 @@ file and experimenting with them to see what went wrong.
 
     Test passed.
 
++ 8 / 8: ``translate (LT (BoolConst true, BoolConst false))`` should evaluate to ``None``
+
+    Test passed.
+
++ 8 / 8: ``translate (LT (Add (IntConst 1, IntConst 3), Add (IntConst 2, IntConst 4)))`` should evaluate to ``Some (BoolExpr (LT_bool (Add_int (IntConst_int 1, IntConst_int 3),Add_int (IntConst_int 2, IntConst_int 4))))``
+
+    Test passed.
+
++ 8 / 8: ``translate (EQ (IntConst 1, IntConst 2))`` should evaluate to ``Some (BoolExpr (EQ_int_bool (IntConst_int 1, IntConst_int 2)))``
+
+    Test passed.
+
++ 8 / 8: ``translate (EQ (BoolConst true, BoolConst false))`` should evaluate to ``Some (BoolExpr (EQ_bool_bool (BoolConst_bool true, BoolConst_bool false)))``
+
+    Test passed.
+
++ 8 / 8: ``translate (EQ (IntConst 1, BoolConst true))`` should evaluate to ``None``
+
+    Test passed.
+
++ 8 / 8: ``translate (EQ (BoolConst true, IntConst 1))`` should evaluate to ``None``
+
+    Test passed.
+
++ 8 / 8: ``translate (Let ("x", BoolConst true, BoolConst false))`` should evaluate to ``Some (BoolExpr (Let_bool_bool ("x", BoolConst_bool true, BoolConst_bool false)))``
+
+    Test passed.
+
++ 8 / 8: ``translate (Let ("x", BoolConst true, IntConst 1))`` should evaluate to ``Some (IntExpr (Let_bool_int ("x", BoolConst_bool true, IntConst_int 1)))``
+
+    Test passed.
+
++ 8 / 8: ``translate (Let ("x", IntConst 1, BoolConst true))`` should evaluate to ``Some (BoolExpr (Let_int_bool ("x", IntConst_int 1, BoolConst_bool true)))``
+
+    Test passed.
+
++ 8 / 8: ``translate (Let ("x", IntConst 1, IntConst 2))`` should evaluate to ``Some (IntExpr (Let_int_int ("x", IntConst_int 1, IntConst_int 2)))``
+
+    Test passed.
+
++ 8 / 8: ``translate (IfThenElse (BoolConst true, BoolConst true, BoolConst false))`` should evaluate to ``Some (BoolExpr (IfThenElse_bool (BoolConst_bool true, BoolConst_bool true, BoolConst_bool false)))``
+
+    Test passed.
+
++ 8 / 8: ``translate (IfThenElse (BoolConst true, IntConst 1, IntConst 2))`` should evaluate to ``Some (IntExpr (IfThenElse_int (BoolConst_bool true, IntConst_int 1, IntConst_int 2)))``
+
+    Test passed.
+
++ 8 / 8: ``translate (IfThenElse (BoolConst true, BoolConst true, IntConst 1))`` should evaluate to ``None``
+
+    Test passed.
+
++ 8 / 8: ``translate (IfThenElse (BoolConst true, IntConst 1, BoolConst true))`` should evaluate to ``None``
+
+    Test passed.
+
++ 8 / 8: ``translate (Div (IntConst 1, IntConst 0))`` should evaluate to ``Some (IntExpr (Div_int (IntConst_int 1, IntConst_int 0)))``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (BoolExpr (LT_bool (Add_int (IntConst_int 1, IntConst_int 3),Add_int (IntConst_int 2, IntConst_int 4))))`` should evaluate to ``BoolVal true``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (BoolExpr (EQ_int_bool (IntConst_int 1, IntConst_int 2)))`` should evaluate to ``BoolVal false``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (BoolExpr (EQ_bool_bool (BoolConst_bool true, BoolConst_bool false)))`` should evaluate to ``BoolVal false``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (BoolExpr (Let_bool_bool ("x", BoolConst_bool true, BoolConst_bool false)))`` should evaluate to ``BoolVal false``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (IntExpr (Let_bool_int ("x", BoolConst_bool true, IntConst_int 1)))`` should evaluate to ``IntVal 1``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (BoolExpr (Let_int_bool ("x", IntConst_int 1, BoolConst_bool true)))`` should evaluate to ``BoolVal true``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (IntExpr (Let_int_int ("x", IntConst_int 1, IntConst_int 2)))`` should evaluate to ``IntVal 2``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (BoolExpr (IfThenElse_bool (BoolConst_bool true, BoolConst_bool true, BoolConst_bool false)))`` should evaluate to ``BoolVal true``
+
+    Test passed.
+
++ 7 / 7: ``eval_int_bool (IntExpr (Div_int (IntConst_int 1, IntConst_int 0)))``should raise an exception
+
+    Test passed.
+
++ 0 / 7: ``eval_int_bool (IntExpr (IfThenElse_int (BoolConst_bool true, IntConst_int 1, IntConst_int 2)))`` should evaluate to ``IntVal 1``
+
+    Test failed: the expression ``eval_int_bool (IntExpr (IfThenElse_int (BoolConst_bool true, IntConst_int 1, IntConst_int 2))) = IntVal 1`` did not evalaute to as required.
+
 ### Total score
 
-+ 115 / 115: total score for this assignment
++ 298 / 305: total score for this assignment
 
