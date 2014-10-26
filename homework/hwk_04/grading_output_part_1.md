@@ -1,8 +1,4 @@
-Below are the results of the initial grading for homework 4, part 1.
-
-The TAs will shortly double check the cases in which a very low score was reported. Thus, if your score is very low and you feel you at least nearly completed the work, please wait for this manual check to be completed.
-
-After this manual process has finished, these lines will be removed and the word "initial" from the first line will be removed. If at that point, there is a grading concern that needs addressing please email **csci2041@cs.umn.edu** with your question or request.
+Below are the results of the grading for homework 4, part 1.
 
 ## Scores from homework hwk_04_part_1.ml.
 
