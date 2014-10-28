@@ -51,7 +51,7 @@ let split_by (z:'a -> 'a -> bool) (input: 'a list) (kill: 'a list) =
 
 let length (lst: 'a list):int =
   match lst with 
-  | [] -> 0
+  | [] -> 0 (*prevent not echaustiveness*)
   | _ -> let count a lst= a+1 in foldl count 0 lst
 
 type word = char list
