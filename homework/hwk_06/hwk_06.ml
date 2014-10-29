@@ -38,7 +38,13 @@ let is_elem (a:'a) (lst: 'a list):bool =
   | [] -> false
   | _ -> true
 
+let split_by (z:'a -> 'a -> bool) (input: 'a list) (kill: 'a list) = 
+  let is = (fun x -> is_elem x kill)
+  in 
+  map is input
 
+
+(*
 let split_by (z:'a -> 'a -> bool) (input: 'a list) (kill: 'a list) =
   let is = (fun x -> is_elem x kill) (*takes input list outputs true/false if elem is in kill list, to swap with loaded func*)
   in 
@@ -48,6 +54,7 @@ let split_by (z:'a -> 'a -> bool) (input: 'a list) (kill: 'a list) =
   in let cur = (fun x -> compose(is x) x)
   in map cur input 
   (*map curry input*)
+ *)
 
 let length (lst: 'a list):int =
   match lst with 
