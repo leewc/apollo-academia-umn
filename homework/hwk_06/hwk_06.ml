@@ -76,7 +76,7 @@ let convert_to_non_blank_lines_of_words (poem:string):line list =
 
 let get_text (fn:string) : string option =
   try
-      Some (In_channel.read_all fn)
+    Some (In_channel.read_all fn)
   with 
   | _ -> None
 
