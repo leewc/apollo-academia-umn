@@ -32,36 +32,35 @@ let rec drop (n:int) (lst:'a list): 'a list =
   | [] -> []
   | x::xs -> if n=0 then x::xs else drop (n-1) xs
 (*-------End: Helper Functions---------------------*)
+(*####################### TO REMOVE ########################*)
+let show_list f l =
+  let rec sl f l =
+    match l with 
+    | [] -> ""
+    | [x] -> f x
+    | x::xs -> f x ^ "; " ^ sl f xs
+  in "[ " ^ sl f l ^ " ]"
 
+let show_pair f (x,y) = "(" ^ f x ^ ", " ^ f y ^ ")"
+
+let rec show_result = function
+  | OK  -> "OK"
+  | FileNotFound filename -> "FileNotFound " ^ filename
+  | IncorrectNumLines n -> "IncorrectNumLines " ^ Int.to_string n
+  | IncorrectLines xs -> "IncorrectLines " ^
+               show_list (show_pair Int.to_string) xs
+  | IncorrectLastStanza -> "IncorrectLastStanza"
+(*############################################################*)
 let is_elem (a:'a) (lst: 'a list):bool = 
-  match (filter (fun b -> if b=a then true else false) lst) with
-  | [] -> false
-  | _ -> true
+  (filter (fun b -> b=a) lst) <> [] 
 
-(*split_by evaluates elements from ls with the kill list using the equality function, where aux is a helper function that does thi, and wrapper contructs the output list*)
 let split_by (eq:'a -> 'a -> bool) (ls: 'a list) (kill: 'a list) =
-  let aux (a:'a) (lst: 'a list):bool =
-  match (filter (fun b -> if (eq b a) then true else false) lst) with
-  | [] -> false
-  | _ -> true
-  in
   let wrap ((lista: 'a list list), (listb: 'a list)) (e:'a) =
-    match (aux e kill) with
-    | true -> (lista@[listb], [])
-    | false -> (lista, listb@[e])
+    if (filter (fun b -> (eq b e)) kill <> []) then (lista@[listb], []) else (lista, listb@[e])
   in let(l1,l2) = foldl wrap ([],[]) ls 
-     in match l2 with 
-	| [] -> filter (fun x -> not (x = [])) l1
-	| _ ->  filter (fun x -> not (x = [])) l1@[l2]
-(*the last l1@[l2] appends any leftover items in the list*)
-(*filter required to remove [] generated when there is , and space*)
+     in  filter (fun x -> x <> []) (l1@[l2]) (*parens needed or else filter only works on l1*)
 
-
-let length (lst: 'a list):int =
-  match lst with 
-  | [] -> 0 (*prevent not exhaustiveness*)
-  | _ -> let count a lst= a+1 in foldl count 0 lst
-
+let length (lst: 'a list):int = foldl (fun x _ -> x+1) 0 lst
 
 type word = char list
 type line = word list
@@ -71,8 +70,7 @@ let convert_to_non_blank_lines_of_words (poem:string):line list =
   in
   let curr = fun x -> split_by (=) x [' ';'.';'!';'?';',';';';':';'-';',']
   in 
-  filter (fun x -> not (x = [])) (map curr line)
-(*filter was to get rid of double newlines*)
+  filter (fun x -> x <> []) (map curr line)
 
 let get_text (fn:string) : string option =
   try
@@ -81,24 +79,13 @@ let get_text (fn:string) : string option =
   | _ -> None
 
 
+type result = OK 
+            | FileNotFound of string
+            | IncorrectNumLines of int 
+            | IncorrectLines of (int * int) list
+            | IncorrectLastStanza
 
-assert (is_elem 4 [1;2;3;4;5;6])
-assert (not (is_elem 7 [1;2;3;4;5;6;8;9;10] ) )
-assert (is_elem "Hello" ["Why"; "not";  "say"; "Hello"])
-assert (not (is_elem 3.5 [ ]) )
-
-
-assert ( split_by (=) [1;2;3;4;5;6;7;8;9;10;11] [3;7] =
-         [ [1;2]; [4;5;6]; [8;9;10;11] ] )
-assert ( split_by (=) ["A"; "B"; "C"; "D"] [] =
-         [["A"; "B"; "C"; "D"]] )
-
-
-assert ( length [] = 0 )
-assert ( length [1;2;3;4] = 4 )
-assert ( length ["Hello"] = 1 )
-
-
+ 
 assert ( let text = In_channel.read_all "paradelle_susan_1.txt"
          in length (convert_to_non_blank_lines_of_words text) = 24 )
 
@@ -124,30 +111,32 @@ assert ( let text = In_channel.read_all "not_a_paradelle_wrong_line_count.txt"
          in length (convert_to_non_blank_lines_of_words text) = 9 )
 
 assert ( let text = In_channel.read_all "paradelle_susan_1.txt"
-     in  match convert_to_non_blank_lines_of_words text with
-         | line1::rest -> length line1 = 9
-         | _ -> false ) 
- 
+	 in  match convert_to_non_blank_lines_of_words text with
+             | line1::rest -> length line1 = 9
+             | _ -> false )
 
 
 
-(*fails --ignore*)
+
+
 (*
-let split_by (z:'a -> 'a -> bool) (input: 'a list) (kill: 'a list) =
-  let is = (fun x -> is_elem x kill) (*takes input list outputs true/false if elem is in kill list, to swap with loaded func*)
-  in 
-  let compose z y = (match z with (*if z is false then put corresponding y in there, where z,y are elements*)
-    | true -> y
-    | false -> y)
-  in let cur = (fun x -> compose(is x) x)
-  in map cur input 
-  (*map curry input*)
+##wrong is_elem method
+let is_elemWrong (a:'a) (lst: 'a list) = (foldl (fun x -> x = a)false lst)
+##Long is_elem but works! 
+let is_elem (a:'a) (lst: 'a list):bool = 
+  match (filter (fun b -> b=a) lst) with
+  | [] -> false
+  | _ -> true
 
+##Log split_by
 
-let convert_to_non_blank_lines_of_words (poem:string):line list = 
-  let chrls = String.to_list poem
+let split_by (eq:'a -> 'a -> bool) (ls: 'a list) (kill: 'a list) =
+  let aux (a:'a) (lst: 'a list):bool = (filter (fun b -> (eq b a)) lst) <> []
   in
-  let lines:word list = split_by (=) chrls [' ';',';'.';'!'] 
-  (*splits into words*)
-  in split_by (=) (lines) [['\n']]
+  let wrap ((lista: 'a list list), (listb: 'a list)) (e:'a) =
+    if (aux e kill) then (lista@[listb], []) else (lista, listb@[e])
+  in let(l1,l2) = foldl wrap ([],[]) ls 
+     in  filter (fun x -> x <> []) l1@[l2]
  *)
+
+(*map (( fun x -> map (fun x -> x+1) x )) [[1;2;3];[4;5;6];[8;9;10]] *)
