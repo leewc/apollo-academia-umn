@@ -64,25 +64,25 @@ type result = OK
             | IncorrectLastStanza
 
 let paradelle (fileName:string):result = 
+  let cmp = fun x y-> if x>y then 1 else if x=y then 0 else -1 in
   let validateLastStanza lastStanza first3 = 
-    if List.dedup (List.concat lastStanza) <> List.dedup (List.concat first3) then IncorrectLastStanza else OK
+    if List.sort cmp (List.dedup (List.concat lastStanza)) <> List.sort cmp (List.dedup (List.concat first3)) then IncorrectLastStanza else OK
   in 
   let stanzaCheck text (seed:int) = 
     match text with
       | a1::a2::a3::a4::a5::a6::[] ->
-	 if a1 <> a2 then (seed,seed+1)
-	 else if a3 <> a4 then (seed+2,seed+3)
-	 else
-	   let cmp = fun x y-> if x>y then 1 else if x=y then 0 else -1 in 
-	   if List.sort (cmp) (a5@a6) <> List.sort (cmp) (a1@a3) then (seed+4,seed+5) else (888,888)
-      | _ -> (1000,1000)
+	 if a1 <> a2 then (if a3 <> a4 then [(seed,seed+1);(seed+2,seed+3)] else [(seed,seed+1)]) 
+	 else if a3 <> a4 then [(seed+2,seed+3)]
+	 else 
+	   if List.sort (cmp) (a5@a6) <> List.sort (cmp) (a1@a3) then [(seed+4,seed+5)] else [(888,888)]
+      | _ -> [(1000,1000)] (*should never get here*)
   in 
   let mainChecker (text:line list) =
     if length(text) <> 24 then IncorrectNumLines (length text)
     else 
-      let first3 = filter (fun x -> x <> (888,888))     [(stanzaCheck (take 6 text) 1); 
-							 (stanzaCheck (drop 6 (take 12 text)) 7);  
-							 (stanzaCheck (drop 12 (take 18 text)) 13)] in
+      let first3 = (filter (fun x -> x <> (888,888)))   (  (stanzaCheck (take 6 text) 1)@ 
+							 (stanzaCheck (drop 6 (take 12 text)) 7)@  
+							 (stanzaCheck (drop 12 (take 18 text)) 13)) in
       match first3 with 
       | [] -> validateLastStanza (drop 18 text) (take 18 text)
       | _ -> IncorrectLines first3
