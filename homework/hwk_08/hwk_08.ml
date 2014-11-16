@@ -24,6 +24,7 @@ let rec map (f: 'a -> 'b) (s: 'a stream) : 'b stream =
   | Cons (v, tl) -> Cons (f v, fun () -> map f (tl ()))
 
 
+
 let rec from n = Cons ( n, fun () -> from (n+1) )
 let nats = from 1
 (*check if we can use nats and from1 on squares again!, and also ask about tl () and () tl*)
@@ -37,11 +38,11 @@ let sqrt_approximations (n:float): float stream =
   in sqhlpr 1.0 n
 
 
+(*might be able to use take drop instead*)
 let rec epsilon_diff (ep:float) (s: float stream): float = 
   match s with
   | Cons (v, tl) -> match (tl ()) with 
 		    | Cons (v2, _) -> if ep > Float.abs (v -. v2) then v2 else epsilon_diff ep (tl ()) 
-
 
 let rough_guess = epsilon_diff 1.0 (sqrt_approximations 50.0) 
 let precise_calculation = epsilon_diff 0.00001 (sqrt_approximations 50.0) 
@@ -52,15 +53,27 @@ let head (s: 'a stream) : 'a = match s with
 let tail (s: 'a stream) : 'a stream = match s with
   | Cons (_, tl) -> tl ()
 
-(*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! YOU STILL NEED TO LEAVE A COMMENT AS TO WHY THIS IS, COMPARING BY ITSELF BY GOING BACK TO SQ IS BETTER THAN COMPARE ONE OF THE OTHER IN BABYLONIAN*)
+
+(*  Explanation for why sqrt_threshold is more accurate than using epsilon_diff
+    epsilon_diff takes successive approximation values from the stream of approximations, 
+    it then computes the difference between them to see if it is within 'epsilon' accuracy.
+    Whereas sqrt_threshold only takes one approximation, reducing the number of 'approximated
+    values' and then squares that square root, and takes the difference compared to the original 
+    number to see if it is within the threshold (margin of difference), making it more accurate as
+    it tests for correctness. 
+*)
+
 let sqrt_threshold (v:float) (t:float): float = 
   let rec helper (sqrt:float stream) =
   match (map (fun s -> Float.abs ((s *. s) -.v) < t) sqrt) with
-  | Cons (true, tl) -> (head sqrt)  
-  | Cons (false, tl) -> helper (tail sqrt)
+  | Cons (true, _) -> (head sqrt)  
+  | Cons (false, _) -> helper (tail sqrt)
   in helper (sqrt_approximations v)
 
-(* ##### GIVEN AND Self Made HLPR FNCTINS ##### *)
+
+
+
+(* ######## Extra Helper functions ####### *)
 let rec diminishing n= Cons (n, fun () -> diminishing (n/.2.0))
 
 let rec take (n:int) (s : 'a stream) : ('a list) =
@@ -77,4 +90,4 @@ let rec filter (f: 'a -> bool) (s: 'a stream) : 'a stream =
      in
      if f hd then Cons (hd, rest) else rest ()
 
-(*#### END OF helper functions #######*)
+(*#### End of Extra helper functions #####*)
