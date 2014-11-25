@@ -29,7 +29,7 @@ let rec foldr f v l = match l with
 let is_elem v l =
   foldr (fun x in_rest -> if x = v then true else in_rest) false l
 
-(*####################################################################### *)
+(*########################  Written Code  ################################ *)
 
 (*formula -> subst -> bool*)
 let rec eval (f:formula) (s:subst) : bool =
@@ -39,11 +39,9 @@ let rec eval (f:formula) (s:subst) : bool =
     | _ -> raise (Failure("Prop not found"))
   in 
   match f with 
-  | Or (Prop x,Prop y) -> (in_subst x s) || (in_subst y s)
   | Or (x,y) -> (eval x s) || (eval y s) 
-  | And (Prop x,Prop y) -> (in_subst x s) && (in_subst y s) 
-  | And (x,y) -> (eval x s) || (eval y s)
-  | Not (Prop x) -> not (in_subst x s)
+  | And (x,y) -> (eval x s) && (eval y s)
+ (* | Not (Prop x) -> not (in_subst x s)  this is redundant*)
   | Not x -> not (eval x s)
   | Prop p -> in_subst p s 
   | True -> true
@@ -52,16 +50,21 @@ let rec eval (f:formula) (s:subst) : bool =
 
 let freevars (f:formula):string list =
   let rec helper f l = 
-    if l = [] then (
     match f with 
     | Or (x,y)
     | And (x,y) -> (helper x l) @ (helper y l) 
     | Not x -> helper x l
-    | Prop p -> if is_elem p l then [] else l@[p]  
+    | Prop p -> l@[p]  
     | True
-    | False -> l)
-  in helper f []
+    | False -> l
+  in List.dedup (helper f [])
+
+let is_tautology (f:formula) (funSubst: subst -> subst option): subst option= 
+
+
 
 
 assert (eval (And ( Prop "P", Prop "Q")) [("P",true); ("Q",false)] = false )
 assert (eval (And ( Prop "P", Prop "Q")) [("P",true); ("Q",true)] = true )
+assert ( (freevars (And ( Prop "P", Prop "Q")) = ["P"; "Q"]) || (freevars (And ( Prop "P", Prop "Q")) = ["Q"; "P"]) )
+assert ( List.length (freevars (And ( Prop "P", Or (Prop "Q", Prop "P")))) = 2)
