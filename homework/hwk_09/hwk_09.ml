@@ -65,8 +65,9 @@ let freevars (f:formula):string list =
   in List.dedup (helper f [])
 
 (*
-  Function takes in a list of strings (from freevars) and returns all possible subst combinations, 
-this is split from is_tautology as a design choice in an attempt to simplify code.
+  Function takes in a list of strings (from freevars) and returns all possible 
+  subst combinations, this is split from is_tautology as a design choice in an 
+  attempt to simplify code.
          string list -> subst list
 *)
 let subst_gen vars : subst list =
@@ -86,14 +87,17 @@ let subst_gen vars : subst list =
   in wrap (t (List.length vars))
 
 
-(*
+
 let is_tautology (f:formula) (funSubst: subst -> subst option): subst option= 
-  let vars = freevars f in   (*generates list of vars. 'string list*)
-  let rec gen_subst (sub:subst) (varList:'subst list): subst =
-    match varList with
-    | [] -> subst
-    | x::xs -> if (is_elem sub varList) then gen_subst 
- *)
+  let vars = subst_gen (freevars f) in   (*generates list of true/false subst list.*)
+  let rec helper vars = 
+    match vars with 
+    | [] -> None
+    | x::xs -> if not (eval f x) then (try (funSubst x) with
+				       | KeepLooking -> helper xs)
+	       else helper xs
+  in helper vars  
+
 
 
 
@@ -104,6 +108,15 @@ assert (eval (And ( Prop "P", Prop "Q")) [("P",true); ("Q",false)] = false )
 assert (eval (And ( Prop "P", Prop "Q")) [("P",true); ("Q",true)] = true )
 assert ( (freevars (And ( Prop "P", Prop "Q")) = ["P"; "Q"]) || (freevars (And ( Prop "P", Prop "Q")) = ["Q"; "P"]) )
 assert ( List.length (freevars (And ( Prop "P", Or (Prop "Q", Prop "P")))) = 2)
+
+(* Testing *)
+let is_tautology_first f = is_tautology f (fun s -> Some s)
+
+let is_tautology_print_all f =
+  is_tautology 
+    f
+    (fun s -> print_endline (show_subst s); 
+          raise KeepLooking)
 
 
 
