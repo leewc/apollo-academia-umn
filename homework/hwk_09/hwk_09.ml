@@ -35,6 +35,17 @@ let rec map (f:'a -> 'b) (l:'a list) : 'b list =
   | [] -> []
   | x::xs -> f x :: map f xs
 
+let rec filter (f:'a -> bool) (l:'a list) : 'a list =
+  match l with
+  | [] -> []
+  | x::xs -> let rest = filter f xs
+	     in if f x then x :: rest else rest
+
+let rec is_not_elem set v =
+  match set with
+  | [] -> true
+  | s::ss -> if s = v then false else is_not_elem ss v
+
 (*########################  Written Code  ################################ *)
 
 (*formula -> subst -> bool*)
@@ -86,8 +97,6 @@ let subst_gen vars : subst list =
     | x::xs -> (zip vars x) :: wrap xs
   in wrap (t (List.length vars))
 
-
-
 let is_tautology (f:formula) (funSubst: subst -> subst option): subst option= 
   let vars = subst_gen (freevars f) in   (*generates list of true/false subst list.*)
   let rec helper vars = 
@@ -98,8 +107,53 @@ let is_tautology (f:formula) (funSubst: subst -> subst option): subst option=
 	       else helper xs
   in helper vars  
 
+(* Helper function that maps all possible moves. 
+   Taken out of the maze function to evaluate it and reduce 
+   length of code in Maze () since this serves as a mapping only
+*)
+let maze_moves xy = 
+  match xy with 
+  | (1,1) -> [(2,1)]
+  | (2,1) -> [(3,1);(1,1)]
+  | (3,1) -> [(3,2);(2,1)]
+  | (4,1) -> [(4,2)]
+  | (5,1) -> [(5,2)]
+  | (1,2) -> [(2,2);(1,3)]
+  | (2,2) -> [(3,2);(1,2)]  
+  | (3,2) -> [(2,2);(4,2)]
+  | (4,2) -> [(3,2);(4,1)]
+  | (5,2) -> [(5,1);(5,3)]
+  | (1,3) -> [(1,4);(1,2);(2,3)]
+  | (2,3) -> [(1,3)]
+  | (3,3) -> [(3,2);(4,3);(3,4)]
+  | (4,3) -> [(3,3);(5,3)]
+  | (5,3) -> [(5,2);(5,4)]
+  | (1,4) -> [(1,3);(1,5)]
+  | (2,4) -> [(2,5);(3,4)]
+  | (3,4) -> [(3,3);(2,4);(4,4)]
+  | (4,4) -> [(3,4);(4,5)]
+  | (5,4) -> [(5,3)]
+  | (1,5) -> [(1,4);(2,5)]
+  | (2,5) -> [(2,4);(1,5)]
+  | (3,5) -> [(4,5)]
+  | (4,5) -> [(3,5);(5,5)]
+  | (5,5) -> [(4,5)]
 
-
+let maze () = 
+  let rec go_from state path = 
+    if state = (5,1) || state = (3,5) then path    (*Found goal, G, return the path found*)
+    else 
+      match filter (is_not_elem path) (maze_moves state) with 
+      | [] -> raise KeepLooking
+      | [a] -> go_from a (path@[a])
+      | [a;b] -> (try go_from a (path@[a]) with 
+		  | KeepLooking -> go_from b (path@[b]) )
+      | [a;b;c] -> (try go_from a (path@[a]) with 
+		    | KeepLooking -> try go_from b (path@[b]) with 
+				     | KeepLooking -> go_from c (path@[c]) )
+      | _ -> raise (Failure ("This shouldn't happen!"))
+  in go_from (2,3) [(2,3)]
+(*argument passed into go_from is the starting point, S*)
 
 
 
@@ -121,7 +175,7 @@ let is_tautology_print_all f =
 
 
 
-(*Code Fails*)
+(*Code Fails -- I left my ugly code here for reference, clean and lean code vs bad messy code*)
 
 (*
     else [(true :: (tf (n-1)))] @ (false :: (tf (n-1)))]
@@ -131,3 +185,33 @@ let is_tautology_print_all f =
 (*let left = [table_make xs (out@[(x,true)]) ] in 
 	       left @ [(table_make xs (out@[(x,false)]))] 
   in table_make vars [] *)
+
+(*
+
+let maze_moves (x,y: int*int) : ((int * int) list)  = 
+  let walls = [((1,1),(1,2));((2,1),(2,2));((2,2),(2,3));((2,3),(3,3));
+	       ((2,3),(2,4));((2,4),(1,4));((2,5),(3,5));((3,5),(3,4));
+	       ((3,1),(4,1));((4,2),(4,3));((4,3),(4,4));((4,1),(5,1));
+	       ((4,2),(5,2));((4,4),(5,4));((5,4),(5,5));
+	       (*maze borders below*)
+	       ((1,1),(0,1));((1,1),(1,0));((1,2),(0,2));((1,3),(0,3));
+	       ((1,4),(0,4));((1,5),(0,5));((1,5),(1,6));((2,5),(2,6));
+	       ((3,5),(3,6));((4,5),(4,6));((5,5),(5,6));((5,5),(6,5));
+	       ((5,4),(6,4));((5,3),(6,3));((5,2),(6,2));((5,1),(6,1));
+	       ((5,1),(5,0));((4,1),(4,0));((3,1),(3,0));((2,1),(2,0));((2,1),(1,0));
+	       (*deadends below*)
+	       ((3,1),(3,2)); ((5,3),(5,4));((4,5),(5,5))]
+  in 
+  let move_allow (x1,y1) (x2,y2) = not (((is_elem ((x1,y1),(x2,y2)) walls) || (is_elem ((x2,y2),(x1,y1)) walls)))
+  in 
+  let rec m_list (x,y) prevxy path = 
+    if (x,y) = (5,1) || (x,y) = (3,5) then (path@[(x,y)])    (*if we reach G*)
+    else if (move_allow (x,y) (x-1,y) && not ((x-1,y) =prevxy)) then m_list (x-1,y) (x,y) (path@[(x,y)]) (*up*)
+    else if (move_allow (x,y) (x,y+1) && not ((x,y+1) =prevxy)) then m_list (x,y+1) (x,y) (path@[(x,y)]) (*right*)
+    else if (move_allow (x,y) (x+1,y) && not ((x+1,y) =prevxy)) then m_list (x+1,y) (x,y) (path@[(x,y)]) (*down*)
+    else if (move_allow (x,y) (x,y-1) && not ((x,y-1) =prevxy)) then m_list (x,y-1) (x,y) (path@[(x,y)]) (*left*)
+    else path@[(99,99)]
+  in m_list (x,y) (100,100) [] (*100 as sentinel val, whole thing doesn't work since it's always up right down left*)
+
+
+*)
