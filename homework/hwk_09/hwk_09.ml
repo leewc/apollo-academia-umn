@@ -138,10 +138,11 @@ let maze_moves xy =
   | (3,5) -> [(4,5)]
   | (4,5) -> [(3,5);(5,5)]
   | (5,5) -> [(4,5)]
+  | _ -> [(0,0)]
 
-let maze () = 
+let maze (): (int*int) list option = 
   let rec go_from state path = 
-    if state = (5,1) || state = (3,5) then path    (*Found goal, G, return the path found*)
+    if state = (5,1) || state = (3,5) then Some path    (*Found goal, G, return the path found*)
     else 
       match filter (is_not_elem path) (maze_moves state) with 
       | [] -> raise KeepLooking
@@ -151,7 +152,7 @@ let maze () =
       | [a;b;c] -> (try go_from a (path@[a]) with 
 		    | KeepLooking -> try go_from b (path@[b]) with 
 				     | KeepLooking -> go_from c (path@[c]) )
-      | _ -> raise (Failure ("This shouldn't happen!"))
+      | _ -> None
   in go_from (2,3) [(2,3)]
 (*argument passed into go_from is the starting point, S*)
 
