@@ -34,6 +34,7 @@ let rec is_not_elem set v =
 
 (* ###################################################### *)
 
+(* int * int -> (int * int ) list*)
 let maze_moves xy = 
   match xy with 
   | (1,1) -> [(2,1)]
@@ -63,7 +64,7 @@ let maze_moves xy =
   | (5,5) -> [(4,5)]
   | _ -> [(0,0)]
 
-
+(* (int * int) -> string*)
 let show_int_int_pair (x,y) = "(" ^ (Int.to_string x) ^ "," ^ (Int.to_string y) ^ ")" 
 
 let maze_v2 (func:((int * int) list -> 'a option)): 'a option = 

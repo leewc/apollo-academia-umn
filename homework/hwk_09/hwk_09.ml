@@ -81,6 +81,8 @@ let freevars (f:formula):string list =
   attempt to simplify code.
          string list -> subst list
 *)
+
+(* string list -> subst list *)
 let subst_gen vars : subst list =
   let rec t n =  (*generates all true false combination, help from TA*)
     if n = 1 then [[true];[false]] 
@@ -111,6 +113,7 @@ let is_tautology (f:formula) (funSubst: subst -> subst option): subst option=
    Taken out of the maze function to evaluate it and reduce 
    length of code in Maze () since this serves as a mapping only
 *)
+(* int * int -> (int * int) list *)
 let maze_moves xy = 
   match xy with 
   | (1,1) -> [(2,1)]
@@ -140,6 +143,7 @@ let maze_moves xy =
   | (5,5) -> [(4,5)]
   | _ -> [(0,0)]
 
+(* unit -> (int * int ) list option *)
 let maze (): (int*int) list option = 
   let rec go_from state path = 
     if state = (5,1) || state = (3,5) then Some path    (*Found goal, G, return the path found*)
@@ -158,13 +162,13 @@ let maze (): (int*int) list option =
 
 
 
+(* Testing *)
 
 assert (eval (And ( Prop "P", Prop "Q")) [("P",true); ("Q",false)] = false )
 assert (eval (And ( Prop "P", Prop "Q")) [("P",true); ("Q",true)] = true )
 assert ( (freevars (And ( Prop "P", Prop "Q")) = ["P"; "Q"]) || (freevars (And ( Prop "P", Prop "Q")) = ["Q"; "P"]) )
 assert ( List.length (freevars (And ( Prop "P", Or (Prop "Q", Prop "P")))) = 2)
 
-(* Testing *)
 let is_tautology_first f = is_tautology f (fun s -> Some s)
 
 let is_tautology_print_all f =
