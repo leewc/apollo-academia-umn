@@ -64,8 +64,37 @@ let maze_moves xy =
   | (5,5) -> [(4,5)]
   | _ -> [(0,0)]
 
-(* (int * int) -> string*)
-let show_int_int_pair (x,y) = "(" ^ (Int.to_string x) ^ "," ^ (Int.to_string y) ^ ")" 
+(* unit -> (int * int ) list option *)
+let maze_generic (): (int*int) list option =
+  let start_point = (2,1) 
+  and goal_points = [(5,1);(3,5)]
+  and maze_moves xy = maze_moves_example xy in
+
+  (*have a function that does maze_moves and also a func that does interactive or not?*)
+  let rec go_from state path =
+    if is_elem state goal_points then Some path    (*Found goal, G, return the path found*)
+    else
+      match filter (is_not_elem path) (maze_moves state) with
+      | [] -> raise KeepLooking
+      | [a] -> go_from a (path@[a])
+      | x::xs -> let rec direction_taken x = (try go_from x (path@[x]) with
+					      | KeepLooking -> 
+      | [a;b] -> (try go_from a (path@[a]) with
+                  | KeepLooking -> go_from b (path@[b]) )
+      | [a;b;c] -> (try go_from a (path@[a]) with
+                    | KeepLooking -> try go_from b (path@[b]) with
+                                     | KeepLooking -> go_from c (path@[c]) )
+      | [a;b;c;d] -> (try go_from a (path@[a]) with
+                    | KeepLooking -> try go_from b (path@[b]) with
+                                     | KeepLooking -> try go_from c (path@[c]) with 
+						      | KeepLooking -> go_from d (path@[d]) )
+		     
+      | _ -> None
+  in try go_from start_point [start_point] with (*argument passed into go_from is the starting point, S*)
+     | KeepLooking -> (print_endline ("No other possible solutions. ")) ; None
+
+
+
 
 let maze_v2 (func:((int * int) list -> 'a option)): 'a option = 
   let rec go_from state path = 
@@ -79,13 +108,14 @@ let maze_v2 (func:((int * int) list -> 'a option)): 'a option =
       | [a;b;c] -> (try go_from a (path@[a]) with 
 		    | KeepLooking -> try go_from b (path@[b]) with 
 				     | KeepLooking -> go_from c (path@[c]) )
-      | [a;b;c;d] -> (try go_from a (path@[a]) with
-                      | KeepLooking -> try go_from b (path@[b]) with
-                                       | KeepLooking -> try go_from c (path@[c]) with
-							| KeepLooking -> go_from d (path@[d]) )
       | _ -> None
   in try go_from (2,3) [(2,3)] with (*argument passed into go_from is the starting point, S*)
      | KeepLooking -> (print_endline ("No other possible solutions. ")) ; None
+
+
+
+(* (int * int) -> string*)
+let show_int_int_pair (x,y) = "(" ^ (Int.to_string x) ^ "," ^ (Int.to_string y) ^ ")" 
 
 (* (int * int) list -> (int * int) list option *)
 let rec process_solution_maze maze = 
@@ -98,6 +128,8 @@ let rec process_solution_maze maze =
      if is_elem 'n' (String.to_list answer) 
      then raise KeepLooking
      else (print_endline "Here's your path! " ; Some maze)
+
+
 
 (* unit -> (int * int) list option *)
 let maze_interactive () = maze_v2 process_solution_maze

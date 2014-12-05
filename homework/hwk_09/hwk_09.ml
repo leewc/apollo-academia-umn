@@ -123,7 +123,7 @@ let maze_moves xy =
   | (5,1) -> [(5,2)]
   | (1,2) -> [(2,2);(1,3)]
   | (2,2) -> [(3,2);(1,2)]  
-  | (3,2) -> [(2,2);(4,2)]
+  | (3,2) -> [(2,2);(4,2);(3,1);(3,3)]
   | (4,2) -> [(3,2);(4,1)]
   | (5,2) -> [(5,1);(5,3)]
   | (1,3) -> [(1,4);(1,2);(2,3)]
@@ -156,6 +156,10 @@ let maze (): (int*int) list option =
       | [a;b;c] -> (try go_from a (path@[a]) with 
 		    | KeepLooking -> try go_from b (path@[b]) with 
 				     | KeepLooking -> go_from c (path@[c]) )
+      | [a;b;c;d] -> (try go_from a (path@[a]) with
+                      | KeepLooking -> try go_from b (path@[b]) with
+                                       | KeepLooking -> try go_from c (path@[c]) with
+							| KeepLooking -> go_from d (path@[d]) )
       | _ -> None
   in go_from (2,3) [(2,3)]
 (*argument passed into go_from is the starting point, S*)
