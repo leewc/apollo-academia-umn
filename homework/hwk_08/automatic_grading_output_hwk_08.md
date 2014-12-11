@@ -12,14 +12,6 @@
 
     Test passed.
 
-+ 10 / 10: ``take 2 ( drop 3 ( squares ))`` should evaluate to  ``[ 16; 25 ]``
-
-    Test passed.
-
-+ 10 / 10: ``head (drop_until (fun v -> v > 35) squares)`` should evaluate to  ``36``
-
-    Test passed.
-
 + 10 / 10: ``take 5 squares_again`` should evaluate to  ``[1; 4; 9; 16; 25]``
 
     Test passed.
@@ -58,5 +50,5 @@
 
 ### Total score
 
-+ 140 / 140: total score for this assignment
++ 120 / 120: total score for this assignment
 
