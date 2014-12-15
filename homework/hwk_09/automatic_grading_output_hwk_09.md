@@ -36,25 +36,23 @@
 
     Test passed.
 
-+ 7 / 7: ``is_tautology_first t1 = None`` should evaluate to ``true`
++ 7 / 7: ``is_tautology_first (Or (Prop "P", Not (Prop "P"))) = None`` should evaluate to ``true`
 
     Test passed.
 
-+ 7 / 7: ``is_tautology_first t2 = None`` should evaluate to ``true`
++ 7 / 7: ``is_tautology_first (Or (Or ( Not (Prop "P"), Prop "Q"), Or ( Not (Prop "Q"), Prop "P"))) = None`` should evaluate to ``true`
 
     Test passed.
 
-+ 7 / 7: ``is_tautology_first nt1 <> None`` should evaluate to ``true`
++ 7 / 7: ``is_tautology_first (Or (Prop "P", Prop "Q")) <> None`` should evaluate to ``true`
 
     Test passed.
 
-+ 0 / 7: ``is_tautology_first nt1 = Some [ ("Q", false); ("P", false) ] || is_tautology_first nt1 = Some [ ("Q", false); ("P", false) ]`` should evaluate to ``true``
++ 7 / 7: ``is_tautology_first (Or (Prop "P", Prop "Q")) = Some [ ("Q", false); ("P", false) ] || is_tautology_first (Or (Prop "P", Prop "Q")) = Some [ ("P", false); ("Q", false) ]`` should evaluate to ``true``
 
-    Test failed: the expression ``(is_tautology_first nt1 = Some [ ("Q", false); ("P", false) ] || is_tautology_first nt1 = Some [ ("Q", false); ("P", false) ])`` did not evalaute to the required value.
+    Test passed.
 
-    The expression evaluated to ``false``.
-
-+ 7 / 7: ``let _ = results := [] in let _ = is_tautology_save_all nt2 in List.length (!results) = 3`` should evaluate to ``true``
++ 7 / 7: ``let _ = results := [] in let _ = is_tautology_save_all (And (Prop "P", Prop "Q")) in List.length (!results) = 3`` should evaluate to ``true``
 
     Test passed.
 
@@ -68,5 +66,5 @@
 
 ### Total score
 
-+ 83 / 90: total score for this assignment
++ 90 / 90: total score for this assignment
 
