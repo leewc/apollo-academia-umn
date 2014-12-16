@@ -1,8 +1,8 @@
 # Grading for Extra Credit 2 on Homework 9
 
-+ ?? /  5: well written description of how you solved the problem
++ 0 /  5: well written description of how you solved the problem
 
-+ ?? / 10: successful execution of appropriately written function such as ``maze_generic ()`` 
++ 0 / 10: successful execution of appropriately written function such as ``maze_generic ()`` 
            
   The generic puzzle solving function needs to be passed
   arguments to determine the following:
