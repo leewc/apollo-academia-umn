@@ -1,21 +1,21 @@
 # Manual grading of Homework 10
 
 
-+ ?? / 5: reasonable attempt at an ``Arithmetic`` interface
++ 5 / 5: reasonable attempt at an ``Arithmetic`` interface
 
-+ ?? / 5: reasonable attempt at an ``Int_arithmetic`` module
++ 5 / 5: reasonable attempt at an ``Int_arithmetic`` module
 
-+ ?? / 5: reasonable attempt at an ``Complex_arithmetic`` module
++ 5 / 5: reasonable attempt at an ``Complex_arithmetic`` module
 
-+ ?? / 5: reasonable attempt at an ``Vector`` interface
++ 0 / 5: reasonable attempt at an ``Vector`` interface
 
-+ ?? / 5: reasonable attempt at an ``Make_vector`` functor
++ 5 / 5: reasonable attempt at an ``Make_vector`` functor
 
-+ ?? / 5: reasonable attempt at an ``Int_vector`` module
++ 5 / 5: reasonable attempt at an ``Int_vector`` module
 
-+ ?? / 5: reasonable attempt at an ``Complex_vector`` module
++ 5 / 5: reasonable attempt at an ``Complex_vector`` module
 
-+ ?? / 10: the type ``t`` in at least one vector module must not show the implemnetation type as a list.
++ 10 / 10: the type ``t`` in at least one vector module must not show the implemnetation type as a list.
 
   Something like the following is acceptable
    ```
