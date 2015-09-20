@@ -1,4 +1,6 @@
 import queue
+import copy
+import pdb
 """This is where the problem is defined. Initial state, goal state and other information that can be got from the problem"""
 
 
@@ -30,28 +32,52 @@ class Problem(object):
             # 0 represents an unknown number
             self.numberOfUnknowns += row.count(0)
 
-    def actions(self, state):
+    def actions(self, state, depth):
         """Return the actions that can be executed in the given
         state. The result would typically be a list, but if there are
         many actions, consider yielding them one at a time in an
         iterator, rather than building them all at once."""
         # if state == 0:  #First Node in tree with no child
-        return [x for x in range(1, self.dimension + 1)]
+        if depth != self.numberOfUnknowns:
+            return [x for x in range(1, self.dimension + 1)]
+        else:
+            return []
 
     def result(self, state, action):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        return action     #since we want a bunch of nodes
+        return action  # since we want a bunch of nodes, this doesn't do much, just return what needs to be returned.
 
-    def goal_test(self, collapsedState, depth):
+    def collapse(self, node):
+        """Return a list of states for a potential soln."""
+        x = list()
+        while node.parent is not None:
+            x.insert(0, node.state)
+            node = node.parent
+        return x
+
+    def make_soln(self, states):
+        board = copy.deepcopy(self.representation)
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] == 0:
+                    board[i][j] = states.pop()
+        return board
+
+    def goal_test(self, node):
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
         method if checking against a single self.goal is not enough.
         This must be written by students"""
-        if depth != self.numberOfUnknowns:
+        if node.depth != self.numberOfUnknowns:
             return False
             # print("not there yet")
+        else:
+            # print("Checking Collapsed State")
+            w = self.collapse(node)
+            print(self.make_soln(w))
+
         return False
 
 
@@ -83,20 +109,12 @@ class Node:
     def expand(self, problem):
         # List the nodes reachable in one step from this node.
         return [self.child_node(problem, action)
-                for action in problem.actions(self.state)]
+                for action in problem.actions(self.state, self.depth)]
 
     # Makes a child node
     def child_node(self, problem, action):
         next = problem.result(self.state, action)
         return Node(next, self, action)
-
-    def collapse(self):
-        if self.state is 0:
-            return
-        else:
-            x = self.state
-            self = self.parent
-            return [x].append(self.collapse())
 
     def __str__(self):
         return "Node %i - Depth %i" % (self.state, self.depth)
@@ -108,10 +126,11 @@ class Node:
 
 
 def breadth_first_search(problem):
+    printTree = False
     # Start from first node of the problem Tree
     node = Node(problem.initial)
     # Check if current node meets Goal_Test criteria
-    if problem.goal_test(node.state, node.depth):
+    if problem.goal_test(node):
         return node
     # Create a Queue to store all nodes of a particular level. Import
     # QueueClass()
@@ -120,17 +139,17 @@ def breadth_first_search(problem):
 
     # Loop until all nodes are explored(frontier queue is empty) or Goal_Test
     # criteria are met
-    while frontier:
+    while not frontier.empty():
         # Remove from frontier, for analysis
         node = frontier.get()
         # Loop over all children of the current node
         # Note: We consider the fact that a node can have multiple child nodes
         # here
-        print(node)
+        if printTree: print(node)
         for child in node.expand(problem):
-            print(" |--", child, "--", end="")
+            if printTree: print(" |--", child, "--", end="")
             # If child node meets Goal_Test criteria
-            if problem.goal_test(child.collapse(), child.depth):
+            if problem.goal_test(child):
                 return child
             # Add every new child to the frontier
             frontier.put(child)
@@ -140,6 +159,7 @@ def breadth_first_search(problem):
 
 
 def runApp():
+    """
     sudoku = [
         [1, 5, 0, 0, 4, 0],
         [2, 0, 0, 0, 5, 6],
@@ -147,6 +167,13 @@ def runApp():
         [0, 0, 0, 0, 0, 4],
         [6, 3, 0, 0, 2, 0],
         [0, 2, 0, 0, 3, 1],
+    ]
+    """
+    sudoku = [
+        [0, 1, 0, 4],
+        [4, 0, 0, 0],
+        [0, 9, 4, 3],
+        [3, 4, 2, 0],
     ]
     # problemStartNode = Node(sudoku) -- This is done by BFS
     breadth_first_search(Problem(sudoku))
