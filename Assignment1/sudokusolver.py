@@ -65,7 +65,7 @@ class Problem(object):
     def make_soln(self, states):
         """Swaps in potential solutions into the board"""
         for index in self.indexValues:
-            self.representation[index[0]][index[1]] = states.pop()
+            self.representation[index[0]][index[1]] = states.pop(0)
 
     def checkRow(self,row):
         for i in range(1, self.dimension + 1):
@@ -76,16 +76,31 @@ class Problem(object):
     def getColumn(self, index):
         return [row[index] for row in self.representation]
 
+    def checkSubGrid(self,row,col,step):
+        subGrid = list()
+        for i in range(row, row + step):
+            for j in range(col, col + step):
+                subGrid.append(self.representation[i][j])
+        # print(subGrid)
+        return self.checkRow(subGrid)
 
-
+    def checkSubSquares(self):
+        if self.dimension is 4:
+            for x in range(0,4,2):
+                for y in range(0,4,2):
+                    if not self.checkSubGrid(x,y,2):
+                        return False
+            return True
 
     def check_soln(self, board):
         # print(board)
-        # pdb.set_trace()
         for i in range(0, self.dimension):
-            if (self.checkRow(board[i])):
-                if(self.checkRow(self.getColumn(i))):
-                    return True
+            if not (self.checkRow(board[i])):
+                return False
+            if not (self.checkRow(self.getColumn(i))):
+                return False
+        if(self.checkSubSquares()):
+            return True
         return False
 
     def goal_test(self, node):
@@ -171,8 +186,8 @@ def breadth_first_search(problem):
             if printTree: print(" |--", child, "--", end="")
             # If child node meets Goal_Test criteria
             if problem.goal_test(child):
-                print("Solution")
-                # return child
+                # pdb.set_trace()
+                return child
             # Add every new child to the frontier
             frontier.put(child)
             if printTree: print("")
@@ -192,15 +207,28 @@ def runApp():
     ]
     """
     sudoku = [
-        [2, 1, 0, 4], 00 01
-        [4, 0, 1, 2], 10 11
-        [1, 0, 4, 0],
+        [0, 1, 0, 4],
+        [4, 0, 0, 0],
+        [0, 0, 0, 3],
         [3, 0, 2, 0],
     ]
+
+    expectedSoln = [
+        [2, 1, 3, 4],
+        [4, 3, 1, 2],
+        [1, 2, 4, 3],
+        [3, 4, 2, 1],
+    ]
+
+    print("Original Sudoku is: ", sudoku)
     # problemStartNode = Node(sudoku) -- This is done by BFS
     solutionNode = breadth_first_search(Problem(sudoku))
 
-    print(collapse(solutionNode))
+    print("From top to bottom", collapse(solutionNode))
+
+    assert(sudoku, expectedSoln)
+    print("Final Solved Sudoku is", sudoku)
+            
 
 
 if(__name__ == '__main__'):
