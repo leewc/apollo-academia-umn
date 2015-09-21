@@ -4,6 +4,14 @@ import pdb
 """This is where the problem is defined. Initial state, goal state and other information that can be got from the problem"""
 
 
+def collapse(node):
+    """Return a list of states for a potential soln."""
+    x = list()
+    while node.parent is not None:
+        x.insert(0, node.state)
+        node = node.parent
+    return x
+
 class Problem(object):
 
     """
@@ -27,10 +35,15 @@ class Problem(object):
         self.goal = goal
         self.numberOfUnknowns = 0
         self.dimension = len(representation)  # dimension of sudoku
+        self.indexValues = list()  # a tuple of indexes to avoid deepcopy
 
-        for row in self.representation:
+        for row in range(len(self.representation)):
             # 0 represents an unknown number
-            self.numberOfUnknowns += row.count(0)
+            self.numberOfUnknowns += self.representation[row].count(0)
+            for cell in range(len(self.representation[0])):
+                value = self.representation[row][cell]
+                if value is 0:
+                    self.indexValues.append((row, cell))   # append index tuple to list
 
     def actions(self, state, depth):
         """Return the actions that can be executed in the given
@@ -49,21 +62,31 @@ class Problem(object):
         self.actions(state)."""
         return action  # since we want a bunch of nodes, this doesn't do much, just return what needs to be returned.
 
-    def collapse(self, node):
-        """Return a list of states for a potential soln."""
-        x = list()
-        while node.parent is not None:
-            x.insert(0, node.state)
-            node = node.parent
-        return x
-
     def make_soln(self, states):
-        board = copy.deepcopy(self.representation)
-        for i in range(len(board)):
-            for j in range(len(board[0])):
-                if board[i][j] == 0:
-                    board[i][j] = states.pop()
-        return board
+        """Swaps in potential solutions into the board"""
+        for index in self.indexValues:
+            self.representation[index[0]][index[1]] = states.pop()
+
+    def checkRow(self,row):
+        for i in range(1, self.dimension + 1):
+            if row.count(i) > 1:
+                return False
+        return True
+
+    def getColumn(self, index):
+        return [row[index] for row in self.representation]
+
+
+
+
+    def check_soln(self, board):
+        # print(board)
+        # pdb.set_trace()
+        for i in range(0, self.dimension):
+            if (self.checkRow(board[i])):
+                if(self.checkRow(self.getColumn(i))):
+                    return True
+        return False
 
     def goal_test(self, node):
         """Return True if the state is a goal. The default method compares the
@@ -72,13 +95,11 @@ class Problem(object):
         This must be written by students"""
         if node.depth != self.numberOfUnknowns:
             return False
-            # print("not there yet")
         else:
-            # print("Checking Collapsed State")
-            w = self.collapse(node)
-            print(self.make_soln(w))
-
-        return False
+            w = collapse(node)
+            self.make_soln(w)
+            return self.check_soln(self.representation)
+            # print(self.representation)
 
 
 class Node:
@@ -131,7 +152,7 @@ def breadth_first_search(problem):
     node = Node(problem.initial)
     # Check if current node meets Goal_Test criteria
     if problem.goal_test(node):
-        return node
+        return nodes
     # Create a Queue to store all nodes of a particular level. Import
     # QueueClass()
     frontier = queue.Queue()
@@ -150,10 +171,11 @@ def breadth_first_search(problem):
             if printTree: print(" |--", child, "--", end="")
             # If child node meets Goal_Test criteria
             if problem.goal_test(child):
-                return child
+                print("Solution")
+                # return child
             # Add every new child to the frontier
             frontier.put(child)
-            print("")
+            if printTree: print("")
     # printTree(node)
     return None
 
@@ -170,13 +192,32 @@ def runApp():
     ]
     """
     sudoku = [
-        [0, 1, 0, 4],
-        [4, 0, 0, 0],
-        [0, 9, 4, 3],
-        [3, 4, 2, 0],
+        [2, 1, 0, 4], 00 01
+        [4, 0, 1, 2], 10 11
+        [1, 0, 4, 0],
+        [3, 0, 2, 0],
     ]
     # problemStartNode = Node(sudoku) -- This is done by BFS
-    breadth_first_search(Problem(sudoku))
+    solutionNode = breadth_first_search(Problem(sudoku))
+
+    print(collapse(solutionNode))
+
 
 if(__name__ == '__main__'):
     runApp()
+
+"""
+sudoku = [
+        [0, 1, 0, 4],
+        [4, 0, 0, 0],
+        [0, 0, 0, 3],
+        [3, 0, 2, 0],
+    ]
+
+soln = [
+    [2, 1, 3, 4],
+    [4, 3, 1, 2],
+    [1, 2, 4, 3],
+    [3, 4, 2, 1],
+]
+"""
