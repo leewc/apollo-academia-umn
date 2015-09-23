@@ -12,6 +12,7 @@ def collapse(node):
         node = node.parent
     return x
 
+
 class Problem(object):
 
     """
@@ -43,7 +44,8 @@ class Problem(object):
             for cell in range(len(self.representation[0])):
                 value = self.representation[row][cell]
                 if value is 0:
-                    self.indexValues.append((row, cell))   # append index tuple to list
+                    # append index tuple to List
+                    self.indexValues.append((row, cell))
 
     def actions(self, state, depth):
         """Return the actions that can be executed in the given
@@ -67,7 +69,7 @@ class Problem(object):
         for index in self.indexValues:
             self.representation[index[0]][index[1]] = states.pop(0)
 
-    def checkRow(self,row):
+    def checkRow(self, row):
         for i in range(1, self.dimension + 1):
             if row.count(i) > 1:
                 return False
@@ -76,21 +78,34 @@ class Problem(object):
     def getColumn(self, index):
         return [row[index] for row in self.representation]
 
-    def checkSubGrid(self,row,col,step):
+    def checkSubGrid(self, row, col, stepRow, stepCol):
+        """Different values for step are needed to accomodate rectangle subGrids, e.g: 6x6"""
         subGrid = list()
-        for i in range(row, row + step):
-            for j in range(col, col + step):
+        for i in range(row, row + stepCol):
+            for j in range(col, col + stepRow):
                 subGrid.append(self.representation[i][j])
         # print(subGrid)
         return self.checkRow(subGrid)
 
     def checkSubSquares(self):
+        # Hard coded boundaries based on dimension of sudoku, remember range is upperbounded.
+        # Individual grid checking may be implemented later when pruning
         if self.dimension is 4:
-            for x in range(0,4,2):
-                for y in range(0,4,2):
-                    if not self.checkSubGrid(x,y,2):
+            for x in range(0, 4, 2):
+                for y in range(0, 4, 2):
+                    if not self.checkSubGrid(x, y, 2, 2):
                         return False
-            return True
+        if self.dimension is 6:
+            for x in range(0, 6, 2):
+                for y in range(0, 6, 3):
+                    if not self.checkSubGrid(x, y, 3, 2):
+                        return False
+        if self.dimension is 9:
+            for x in range(0, 7, 3):
+                for y in range(0, 7, 3):
+                    if not self.checkSubGrid(x, y, 3, 3):
+                        return False
+        return True
 
     def check_soln(self, board):
         # print(board)
@@ -181,54 +196,124 @@ def breadth_first_search(problem):
         # Loop over all children of the current node
         # Note: We consider the fact that a node can have multiple child nodes
         # here
-        if printTree: print(node)
+        if printTree:
+            print(node)
         for child in node.expand(problem):
-            if printTree: print(" |--", child, "--", end="")
+            if printTree:
+                print(" |--", child, "--", end="")
             # If child node meets Goal_Test criteria
             if problem.goal_test(child):
                 # pdb.set_trace()
                 return child
             # Add every new child to the frontier
             frontier.put(child)
-            if printTree: print("")
+            if printTree:
+                print("")
     # printTree(node)
     return None
 
 
+def printNestedList(lol):
+    string = ""
+    for l in lol:
+        string += str(l) + "\n"
+    return string
+
+
+def sudoku_driver(sudoku, expectedSoln=None):
+
+    print("Original Sudoku:\n%s" % printNestedList(sudoku))
+
+    solutionNode = breadth_first_search(Problem(sudoku))
+
+    print("Final Solved Sudoku:\n%s" % printNestedList(sudoku))
+    if expectedSoln is not None:
+        assert(sudoku == expectedSoln)
+        print("Solution Matches Expected Solution")
+
+
 def runApp():
-    """
-    sudoku = [
-        [1, 5, 0, 0, 4, 0],
-        [2, 0, 0, 0, 5, 6],
-        [4, 0, 0, 0, 0, 3],
-        [0, 0, 0, 0, 0, 4],
-        [6, 3, 0, 0, 2, 0],
-        [0, 2, 0, 0, 3, 1],
+
+    # sixBySix = [
+    #     [1, 5, 0, 0, 4, 0],
+    #     [2, 0, 0, 0, 5, 6],
+    #     [4, 0, 0, 0, 0, 3],
+    #     [0, 0, 0, 0, 0, 4],
+    #     [6, 3, 0, 0, 2, 0],
+    #     [0, 2, 0, 0, 3, 1],
+    # ]
+
+    sixBySixEasy = [
+        [1, 5, 6, 3, 4, 0],
+        [2, 4, 3, 1, 5, 6],
+        [4, 0, 2, 5, 0, 3],
+        [3, 0, 5, 0, 1, 4],
+        [6, 3, 1, 4, 2, 0],
+        [5, 2, 4, 0, 3, 1],
     ]
-    """
-    sudoku = [
+
+    solnSixBySix = [
+        [1, 5, 6, 3, 4, 2],
+        [2, 4, 3, 1, 5, 6],
+        [4, 1, 2, 5, 6, 3],
+        [3, 6, 5, 2, 1, 4],
+        [6, 3, 1, 4, 2, 5],
+        [5, 2, 4, 6, 3, 1],
+    ]
+
+    fourByFour = [
         [0, 1, 0, 4],
         [4, 0, 0, 0],
         [0, 0, 0, 3],
         [3, 0, 2, 0],
     ]
 
-    expectedSoln = [
+    solnFourByFour = [
         [2, 1, 3, 4],
         [4, 3, 1, 2],
         [1, 2, 4, 3],
         [3, 4, 2, 1],
     ]
 
-    print("Original Sudoku is: ", sudoku)
-    # problemStartNode = Node(sudoku) -- This is done by BFS
-    solutionNode = breadth_first_search(Problem(sudoku))
+    # nineByNine = [
+    #     [0, 0, 0, 8, 4, 0, 6, 5, 0],
+    #     [0, 8, 0, 0, 0, 0, 0, 0, 9],
+    #     [0, 0, 0, 0, 0, 5, 2, 0, 1],
+    #     [0, 3, 4, 0, 7, 0, 5, 0, 6],
+    #     [0, 6, 0, 2, 5, 1, 0, 3, 0],
+    #     [5, 0, 9, 0, 6, 0, 7, 2, 0],
+    #     [1, 0, 8, 5, 0, 0, 0, 0, 0],
+    #     [6, 0, 0, 0, 0, 0, 0, 4, 0],
+    #     [0, 5, 2, 0, 8, 6, 0, 0, 0],
+    # ]
 
-    print("From top to bottom", collapse(solutionNode))
+    nineBynineEasy = [
+        [7, 2, 1, 8, 0, 9, 6, 0, 3],
+        [3, 8, 5, 0, 1, 2, 4, 7, 9],
+        [9, 4, 6, 7, 3, 5, 2, 8, 1],
+        [2, 3, 4, 9, 7, 8, 5, 1, 6],
+        [8, 6, 7, 0, 5, 1, 9, 3, 4],
+        [5, 1, 9, 4, 6, 3, 7, 2, 8],
+        [1, 7, 0, 5, 9, 4, 3, 6, 2],
+        [6, 9, 3, 1, 2, 7, 8, 4, 5],
+        [4, 5, 2, 3, 0, 6, 1, 9, 7],
+    ]
 
-    assert(sudoku, expectedSoln)
-    print("Final Solved Sudoku is", sudoku)
-            
+    nineBynineSoln = [
+        [7, 2, 1, 8, 4, 9, 6, 5, 3],
+        [3, 8, 5, 6, 1, 2, 4, 7, 9],
+        [9, 4, 6, 7, 3, 5, 2, 8, 1],
+        [2, 3, 4, 9, 7, 8, 5, 1, 6],
+        [8, 6, 7, 2, 5, 1, 9, 3, 4],
+        [5, 1, 9, 4, 6, 3, 7, 2, 8],
+        [1, 7, 8, 5, 9, 4, 3, 6, 2],
+        [6, 9, 3, 1, 2, 7, 8, 4, 5],
+        [4, 5, 2, 3, 8, 6, 1, 9, 7],
+    ]
+
+    # sudoku_driver(fourByFour, solnFourByFour)
+    sudoku_driver(sixBySixEasy, solnSixBySix)
+    sudoku_driver(nineBynineEasy, nineBynineSoln)
 
 
 if(__name__ == '__main__'):
