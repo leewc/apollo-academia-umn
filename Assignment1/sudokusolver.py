@@ -31,6 +31,7 @@ class Problem(object):
             Based on the set up initial is of type node. A Tree of Nodes.
             Goal is also a node tree.
         """
+        self.PRUNE = True
         self.representation = representation
         self.initial = 0
         self.goal = goal
@@ -58,20 +59,60 @@ class Problem(object):
         else:
             return []
 
-    def result(self, state, action):
+    def result(self, parentNode, action, depth):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        return action  # since we want a bunch of nodes, this doesn't do much, just return what needs to be returned.
+        if not self.PRUNE:
+            # since we want a bunch of nodes, this doesn't do much, just return
+            # what needs to be returned.
+            return action
+        else:
+            # get index based on depth, since each depth level is an unknown
+            # pdb.set_trace()
+            index = self.indexValues[depth]
+
+            # # update board with new values
+            self.representation[index[0]][index[1]] = action
+
+            # # load in whatever previous value we have
+            ptrNode = parentNode
+            while ptrNode.state is not 0:
+                idx = self.indexValues[depth]
+                self.representation[idx[0]][idx[1]] = ptrNode.state
+                ptrNode = ptrNode.parent
+            # # pdb.set_trace()
+
+            isPossibleValue = False
+            if self.representation[index[1]].count(action) == 1:
+                if self.getColumn(index[0]).count(action) == 1:
+                    isPossibleValue = True
+
+            # Clean up so we can try next soln set - BFS switches branches
+            for indexTuple in self.indexValues:
+                self.representation[indexTuple[0]][indexTuple[1]] = 0
+
+            if isPossibleValue:
+                return action
+            # todo check subgrids??
+
+            # if (self.checkRow(self.representation[index[0]])
+            #         and self.checkRow(self.getColumn(index[1]))):
+            #     return action
+            # else:
+
+            # if count of 'action' value is <=1 then
+            # if count of row value is <=1 then ok
 
     def make_soln(self, states):
         """Swaps in potential solutions into the board"""
         for index in self.indexValues:
             self.representation[index[0]][index[1]] = states.pop(0)
 
+    # #### Begin Board Checking Functions #### #
     def checkRow(self, row):
         for i in range(1, self.dimension + 1):
-            if row.count(i) > 1:
+            if row.count(i) != 1:
                 return False
         return True
 
@@ -118,6 +159,8 @@ class Problem(object):
             return True
         return False
 
+    # #### End Board Checking Functions #### #
+
     def goal_test(self, node):
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
@@ -159,13 +202,21 @@ class Node:
 
     def expand(self, problem):
         # List the nodes reachable in one step from this node.
-        return [self.child_node(problem, action)
-                for action in problem.actions(self.state, self.depth)]
+        # NoneType is returned when pruning occurs
+        return list(filter(None.__ne__,
+                           [self.child_node(problem, action)
+                            for action in problem.actions(self.state, self.depth)]))
 
-    # Makes a child node
+        # Alternative return without NoneType method
+        # return [self.child_node(problem, action)
+        #         for action in problem.actions(self.state, self.depth)
+        #         if self.child_node(problem, action) is not None]
+
     def child_node(self, problem, action):
-        next = problem.result(self.state, action)
-        return Node(next, self, action)
+        """Makes a child node"""
+        next = problem.result(self, action, self.depth)
+        if next is not None:
+            return Node(next, self, action)
 
     def __str__(self):
         return "Node %i - Depth %i" % (self.state, self.depth)
@@ -226,6 +277,9 @@ def sudoku_driver(sudoku, expectedSoln=None):
 
     solutionNode = breadth_first_search(Problem(sudoku))
 
+    if solutionNode is None:
+        raise(ValueError("No valid soln found."))
+
     print("Final Solved Sudoku:\n%s" % printNestedList(sudoku))
     if expectedSoln is not None:
         assert(sudoku == expectedSoln)
@@ -234,22 +288,22 @@ def sudoku_driver(sudoku, expectedSoln=None):
 
 def runApp():
 
-    # sixBySix = [
-    #     [1, 5, 0, 0, 4, 0],
-    #     [2, 0, 0, 0, 5, 6],
-    #     [4, 0, 0, 0, 0, 3],
-    #     [0, 0, 0, 0, 0, 4],
-    #     [6, 3, 0, 0, 2, 0],
-    #     [0, 2, 0, 0, 3, 1],
-    # ]
+    sixBySix = [
+        [1, 5, 0, 0, 4, 0],
+        [2, 0, 0, 0, 5, 6],
+        [4, 0, 0, 0, 0, 3],
+        [0, 0, 0, 0, 0, 4],
+        [6, 3, 0, 0, 2, 0],
+        [0, 2, 0, 0, 3, 1],
+    ]
 
     sixBySixEasy = [
         [1, 5, 6, 3, 4, 0],
         [2, 4, 3, 1, 5, 6],
-        [4, 0, 2, 5, 0, 3],
-        [3, 0, 5, 0, 1, 4],
-        [6, 3, 1, 4, 2, 0],
-        [5, 2, 4, 0, 3, 1],
+        [4, 0, 2, 0, 0, 3],
+        [3, 6, 5, 0, 0, 4],
+        [6, 3, 0, 0, 2, 0],
+        [5, 2, 0, 0, 3, 1],
     ]
 
     solnSixBySix = [
@@ -313,7 +367,7 @@ def runApp():
 
     # sudoku_driver(fourByFour, solnFourByFour)
     sudoku_driver(sixBySixEasy, solnSixBySix)
-    sudoku_driver(nineBynineEasy, nineBynineSoln)
+    # sudoku_driver(nineBynineEasy, nineBynineSoln)
 
 
 if(__name__ == '__main__'):
