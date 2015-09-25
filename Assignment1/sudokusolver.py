@@ -59,7 +59,7 @@ class Problem(object):
         else:
             return []
 
-    def result(self, parentNode, action, depth):
+    def result(self, parentNode, action):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
@@ -70,22 +70,22 @@ class Problem(object):
         else:
             # get index based on depth, since each depth level is an unknown
             # pdb.set_trace()
-            index = self.indexValues[depth]
+            index = self.indexValues[parentNode.depth]
 
             # # update board with new values
             self.representation[index[0]][index[1]] = action
 
             # # load in whatever previous value we have
             ptrNode = parentNode
-            while ptrNode.state is not 0:
-                idx = self.indexValues[depth]
+            while ptrNode.depth is not 0:
+                idx = self.indexValues[ptrNode.depth - 1] # -1 because if not offset it is overwritten -> this took so long
                 self.representation[idx[0]][idx[1]] = ptrNode.state
                 ptrNode = ptrNode.parent
-            # # pdb.set_trace()
+            
 
             isPossibleValue = False
-            if self.representation[index[1]].count(action) == 1:
-                if self.getColumn(index[0]).count(action) == 1:
+            if self.representation[index[0]].count(action) == 1:
+                if self.getColumn(index[1]).count(action) == 1:
                     isPossibleValue = True
 
             # Clean up so we can try next soln set - BFS switches branches
@@ -214,7 +214,7 @@ class Node:
 
     def child_node(self, problem, action):
         """Makes a child node"""
-        next = problem.result(self, action, self.depth)
+        next = problem.result(self, action)
         if next is not None:
             return Node(next, self, action)
 
@@ -329,17 +329,17 @@ def runApp():
         [3, 4, 2, 1],
     ]
 
-    # nineByNine = [
-    #     [0, 0, 0, 8, 4, 0, 6, 5, 0],
-    #     [0, 8, 0, 0, 0, 0, 0, 0, 9],
-    #     [0, 0, 0, 0, 0, 5, 2, 0, 1],
-    #     [0, 3, 4, 0, 7, 0, 5, 0, 6],
-    #     [0, 6, 0, 2, 5, 1, 0, 3, 0],
-    #     [5, 0, 9, 0, 6, 0, 7, 2, 0],
-    #     [1, 0, 8, 5, 0, 0, 0, 0, 0],
-    #     [6, 0, 0, 0, 0, 0, 0, 4, 0],
-    #     [0, 5, 2, 0, 8, 6, 0, 0, 0],
-    # ]
+    nineByNine = [
+        [0, 0, 0, 8, 4, 0, 6, 5, 0],
+        [0, 8, 0, 0, 0, 0, 0, 0, 9],
+        [0, 0, 0, 0, 0, 5, 2, 0, 1],
+        [0, 3, 4, 0, 7, 0, 5, 0, 6],
+        [0, 6, 0, 2, 5, 1, 0, 3, 0],
+        [5, 0, 9, 0, 6, 0, 7, 2, 0],
+        [1, 0, 8, 5, 0, 0, 0, 0, 0],
+        [6, 0, 0, 0, 0, 0, 0, 4, 0],
+        [0, 5, 2, 0, 8, 6, 0, 0, 0],
+    ]
 
     nineBynineEasy = [
         [7, 2, 1, 8, 0, 9, 6, 0, 3],
@@ -365,9 +365,9 @@ def runApp():
         [4, 5, 2, 3, 8, 6, 1, 9, 7],
     ]
 
-    # sudoku_driver(fourByFour, solnFourByFour)
-    sudoku_driver(sixBySixEasy, solnSixBySix)
-    # sudoku_driver(nineBynineEasy, nineBynineSoln)
+    sudoku_driver(fourByFour, solnFourByFour)
+    sudoku_driver(sixBySix, solnSixBySix)
+    sudoku_driver(nineByNine, nineBynineSoln)
 
 
 if(__name__ == '__main__'):
