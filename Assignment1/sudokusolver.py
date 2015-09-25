@@ -1,5 +1,4 @@
 import queue
-import copy
 import pdb
 """This is where the problem is defined. Initial state, goal state and other information that can be got from the problem"""
 
@@ -16,44 +15,41 @@ def collapse(node):
 class Problem(object):
 
     """
-        My notes:
-        - each 0 in the list is an empty node that needs to be solved.
-        - need a build initial tree function of nodes that is called by init.
-        - since each level is based on numbers, create nodes with value 1 -> length
-        - goal test needs to check if the constraints are obeyed.
-        - perhaps add a separate flag to enable pruning? (later)
+    - Each 0 in the list is an empty node that needs to be solved.
+    - since each level is based on numbers, create nodes with value 1 -> length
+    - goal test needs to check if the constraints are obeyed.
     """
 
-    def __init__(self, representation, goal=None):
+    def __init__(self, representation, goal=None, prune=True):
         """This is the constructor for the Problem class. It specifies the initial state, and possibly a goal state, if there is a unique goal.  You can add other arguments if the need arises"""
 
         """
             Based on the set up initial is of type node. A Tree of Nodes.
             Goal is also a node tree.
         """
-        self.PRUNE = True
+        self.PRUNE = prune
         self.representation = representation
         self.initial = 0
         self.goal = goal
         self.numberOfUnknowns = 0
         self.dimension = len(representation)  # dimension of sudoku
-        self.indexValues = list()  # a tuple of indexes to avoid deepcopy
+        self.indexValues = list()  # tuples of indexes (of 0) to avoid deepcopy
 
         for row in range(len(self.representation)):
             # 0 represents an unknown number
-            self.numberOfUnknowns += self.representation[row].count(0)
             for cell in range(len(self.representation[0])):
                 value = self.representation[row][cell]
                 if value is 0:
                     # append index tuple to List
                     self.indexValues.append((row, cell))
+                    self.numberOfUnknowns += 1
 
     def actions(self, state, depth):
         """Return the actions that can be executed in the given
         state. The result would typically be a list, but if there are
         many actions, consider yielding them one at a time in an
         iterator, rather than building them all at once."""
-        # if state == 0:  #First Node in tree with no child
+
         if depth != self.numberOfUnknowns:
             return [x for x in range(1, self.dimension + 1)]
         else:
@@ -64,8 +60,8 @@ class Problem(object):
         action in the given state. The action must be one of
         self.actions(state)."""
         if not self.PRUNE:
-            # since we want a bunch of nodes, this doesn't do much, just return
-            # what needs to be returned.
+            # since we want a bunch of nodes, without pruning, just return
+            # the value of action to be made into a possible soln.
             return action
         else:
             # get index based on depth, since each depth level is an unknown
@@ -78,11 +74,12 @@ class Problem(object):
             # # load in whatever previous value we have
             ptrNode = parentNode
             while ptrNode.depth is not 0:
-                idx = self.indexValues[ptrNode.depth - 1] # -1 because if not offset it is overwritten -> this took so long
+                # -1 because if not offset it is overwritten -> took too long
+                idx = self.indexValues[ptrNode.depth - 1]
                 self.representation[idx[0]][idx[1]] = ptrNode.state
                 ptrNode = ptrNode.parent
-            
 
+            # count of 'action' value is must be =1 on row and col
             isPossibleValue = False
             if self.representation[index[0]].count(action) == 1:
                 if self.getColumn(index[1]).count(action) == 1:
@@ -94,15 +91,6 @@ class Problem(object):
 
             if isPossibleValue:
                 return action
-            # todo check subgrids??
-
-            # if (self.checkRow(self.representation[index[0]])
-            #         and self.checkRow(self.getColumn(index[1]))):
-            #     return action
-            # else:
-
-            # if count of 'action' value is <=1 then
-            # if count of row value is <=1 then ok
 
     def make_soln(self, states):
         """Swaps in potential solutions into the board"""
@@ -172,25 +160,24 @@ class Problem(object):
             w = collapse(node)
             self.make_soln(w)
             return self.check_soln(self.representation)
-            # print(self.representation)
 
 
 class Node:
 
-    """A node in a search tree. Contains:
+    """
+    A node in a search tree. Contains:
         - a pointer to the parent (the node that this is a successor of, up one level) 
         - a pointer to the actual state for this node. 
         - the action that got us to this state
 
     If a state is arrived at by two paths, then there are two nodes with
     the same state.
-
     """
 
     def __init__(self, state, parent=None, action=None):
         """Create a search tree Node, derived from a parent by an action.
         Update the node parameters based on constructor values"""
-        # update(self, state=state, parent=parent, action=action, depth=0)
+
         self.state = state
         self.parent = parent
         self.action = action
@@ -220,11 +207,6 @@ class Node:
 
     def __str__(self):
         return "Node %i - Depth %i" % (self.state, self.depth)
-
-# def printTree(parentNode):
-#     print(parentNode)
-#     print("|", end="")
-#     for parentNode.child
 
 
 def breadth_first_search(problem):
@@ -372,19 +354,3 @@ def runApp():
 
 if(__name__ == '__main__'):
     runApp()
-
-"""
-sudoku = [
-        [0, 1, 0, 4],
-        [4, 0, 0, 0],
-        [0, 0, 0, 3],
-        [3, 0, 2, 0],
-    ]
-
-soln = [
-    [2, 1, 3, 4],
-    [4, 3, 1, 2],
-    [1, 2, 4, 3],
-    [3, 4, 2, 1],
-]
-"""
