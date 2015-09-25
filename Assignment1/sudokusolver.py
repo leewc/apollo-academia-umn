@@ -1,31 +1,26 @@
 import queue
 import pdb
-"""This is where the problem is defined. Initial state, goal state and other information that can be got from the problem"""
-
-
-def collapse(node):
-    """Return a list of states for a potential soln."""
-    x = list()
-    while node.parent is not None:
-        x.insert(0, node.state)
-        node = node.parent
-    return x
+import time
 
 
 class Problem(object):
 
-    """
+    """This is where the problem is defined. Initial state, goal state and other information 
+    that can be got from the problem
+
     - Each 0 in the list is an empty node that needs to be solved.
     - since each level is based on numbers, create nodes with value 1 -> length
     - goal test needs to check if the constraints are obeyed.
     """
 
     def __init__(self, representation, goal=None, prune=True):
-        """This is the constructor for the Problem class. It specifies the initial state, and possibly a goal state, if there is a unique goal.  You can add other arguments if the need arises"""
+        """This is the constructor for the Problem class.
+        It specifies the initial state, and possibly a goal state,
+        if there is a unique goal.
+        You can add other arguments if the need arises
 
-        """
-            Based on the set up initial is of type node. A Tree of Nodes.
-            Goal is also a node tree.
+        Based on the set up initial is of type node. A Tree of Nodes.
+        Goal is also a node tree.
         """
         self.PRUNE = prune
         self.representation = representation
@@ -83,7 +78,9 @@ class Problem(object):
             isPossibleValue = False
             if self.representation[index[0]].count(action) == 1:
                 if self.getColumn(index[1]).count(action) == 1:
-                    isPossibleValue = True
+                    # check subGrid where unknown is located at
+                    if self.checkSubSquares(index[0], index[1]):
+                        isPossibleValue = True
 
             # Clean up so we can try next soln set - BFS switches branches
             for indexTuple in self.indexValues:
@@ -91,11 +88,6 @@ class Problem(object):
 
             if isPossibleValue:
                 return action
-
-    def make_soln(self, states):
-        """Swaps in potential solutions into the board"""
-        for index in self.indexValues:
-            self.representation[index[0]][index[1]] = states.pop(0)
 
     # #### Begin Board Checking Functions #### #
     def checkRow(self, row):
@@ -107,34 +99,80 @@ class Problem(object):
     def getColumn(self, index):
         return [row[index] for row in self.representation]
 
-    def checkSubGrid(self, row, col, stepRow, stepCol):
-        """Different values for step are needed to accomodate rectangle subGrids, e.g: 6x6"""
+    def checkSubGrid(self, row, col, stepRow, stepCol, zeroOK=False):
+        """Different step values needed for rectangle subGrids e.g: 6x6"""
         subGrid = list()
         for i in range(row, row + stepCol):
             for j in range(col, col + stepRow):
                 subGrid.append(self.representation[i][j])
-        # print(subGrid)
-        return self.checkRow(subGrid)
 
-    def checkSubSquares(self):
+        # short-circuit for pruning, no need to check if incomplete grid
+        if zeroOK and subGrid.count(0) > 0:
+            return True
+        else:
+            return self.checkRow(subGrid)
+
+    def checkSubSquares(self, row=None, col=None):
         # Hard coded boundaries based on dimension of sudoku, remember range is upperbounded.
-        # Individual grid checking may be implemented later when pruning
-        if self.dimension is 4:
-            for x in range(0, 4, 2):
-                for y in range(0, 4, 2):
-                    if not self.checkSubGrid(x, y, 2, 2):
-                        return False
-        if self.dimension is 6:
-            for x in range(0, 6, 2):
-                for y in range(0, 6, 3):
-                    if not self.checkSubGrid(x, y, 3, 2):
-                        return False
-        if self.dimension is 9:
-            for x in range(0, 7, 3):
-                for y in range(0, 7, 3):
-                    if not self.checkSubGrid(x, y, 3, 3):
-                        return False
-        return True
+        if row is None or col is None:
+            if self.dimension is 4:
+                for x in range(0, 4, 2):
+                    for y in range(0, 4, 2):
+                        if not self.checkSubGrid(x, y, 2, 2):
+                            return False
+            if self.dimension is 6:
+                for x in range(0, 6, 2):
+                    for y in range(0, 6, 3):
+                        if not self.checkSubGrid(x, y, 3, 2):
+                            return False
+            if self.dimension is 9:
+                for x in range(0, 7, 3):
+                    for y in range(0, 7, 3):
+                        if not self.checkSubGrid(x, y, 3, 3):
+                            return False
+            return True
+        else:
+            # Individual grid checking (for pruning)
+            if self.dimension is 6:
+                if col <= 2 and row <= 1:  # First subgrid
+                    return self.checkSubGrid(0, 0, 3, 2, True)
+                elif (3 <= col <= 5) and row <= 1:
+                    return self.checkSubGrid(0, 3, 3, 2, True)
+                elif col <= 2 and (2 <= row <= 3):
+                    return self.checkSubGrid(2, 0, 3, 2, True)
+                elif (3 <= col <= 5) and (2 <= row <= 3):
+                    return self.checkSubGrid(2, 3, 3, 2, True)
+                elif col <= 2 and (4 <= row <= 5):
+                    return self.checkSubGrid(4, 0, 3, 2, True)
+                else:
+                    return self.checkSubGrid(4, 3, 3, 2, True)
+
+            elif self.dimension is 9:
+                if col <= 3 and row <= 2:  # First subgrid
+                    return self.checkSubGrid(0, 0, 3, 3, True)
+                elif (4 <= col <= 6) and row <= 2:  # Second
+                    return self.checkSubGrid(0, 3, 3, 3, True)
+                elif (7 <= col <= 9) and row <= 2:  # Third
+                    return self.checkSubGrid(0, 6, 3, 3, True)
+
+                elif col <= 3 and (3 <= row <= 6):  # Fourth
+                    return self.checkSubGrid(3, 0, 3, 3, True)
+                elif (4 <= col <= 6) and (3 <= row <= 6):  # Fifth
+                    return self.checkSubGrid(3, 3, 3, 3, True)
+                elif (7 <= col <= 9) and (3 <= row <= 6):  # Sixth
+                    return self.checkSubGrid(3, 6, 3, 3, True)
+
+                elif col <= 3 and (7 <= row <= 9):  # Seventh
+                    return self.checkSubGrid(6, 0, 3, 3, True)
+                elif (4 <= col <= 6) and (7 <= row <= 9):  # Eighth
+                    return self.checkSubGrid(6, 3, 3, 3, True)
+                elif (7 <= col <= 9) and (7 <= row <= 9):  # Ninth
+                    return self.checkSubGrid(6, 6, 3, 3, True)
+            else:
+                return True
+                # Individual checking for 4x4 and other dimensions
+                # not implemented, return True to keep possible values
+                # board will still be checked later when board is complete.
 
     def check_soln(self, board):
         # print(board)
@@ -157,8 +195,12 @@ class Problem(object):
         if node.depth != self.numberOfUnknowns:
             return False
         else:
-            w = collapse(node)
-            self.make_soln(w)
+            ptrNode = node
+            while ptrNode.state is not 0:
+                idx = self.indexValues[ptrNode.depth-1]
+                self.representation[idx[0]][idx[1]] = ptrNode.state
+                ptrNode = ptrNode.parent
+
             return self.check_soln(self.representation)
 
 
@@ -166,8 +208,8 @@ class Node:
 
     """
     A node in a search tree. Contains:
-        - a pointer to the parent (the node that this is a successor of, up one level) 
-        - a pointer to the actual state for this node. 
+        - a pointer to the parent (successor node, up one level)
+        - a pointer to the actual state for this node.
         - the action that got us to this state
 
     If a state is arrived at by two paths, then there are two nodes with
@@ -254,6 +296,17 @@ def printNestedList(lol):
 
 
 def sudoku_driver(sudoku, expectedSoln=None):
+    """
+    Driver method that runs the solver, input: unsolved sudoku.
+    Optional: expectedSoln, a solution for correctness
+    Prints the Original, then the Solution, and Elapsed process_time.
+    Raises a ValueError if no solution can be found.
+    Note:
+        Add a False as an argument for Problem constructor if you
+        do not want pruning. e.g Problem(sudoku, False)
+    """
+
+    t = time.process_time()
 
     print("Original Sudoku:\n%s" % printNestedList(sudoku))
 
@@ -263,39 +316,19 @@ def sudoku_driver(sudoku, expectedSoln=None):
         raise(ValueError("No valid soln found."))
 
     print("Final Solved Sudoku:\n%s" % printNestedList(sudoku))
+    print("Elapsed time for soln: ", time.process_time() - t)
     if expectedSoln is not None:
         assert(sudoku == expectedSoln)
-        print("Solution Matches Expected Solution")
+        print("Solution Matches Expected Solution! \n")
 
 
 def runApp():
-
-    sixBySix = [
-        [1, 5, 0, 0, 4, 0],
-        [2, 0, 0, 0, 5, 6],
-        [4, 0, 0, 0, 0, 3],
-        [0, 0, 0, 0, 0, 4],
-        [6, 3, 0, 0, 2, 0],
-        [0, 2, 0, 0, 3, 1],
-    ]
-
-    sixBySixEasy = [
-        [1, 5, 6, 3, 4, 0],
-        [2, 4, 3, 1, 5, 6],
-        [4, 0, 2, 0, 0, 3],
-        [3, 6, 5, 0, 0, 4],
-        [6, 3, 0, 0, 2, 0],
-        [5, 2, 0, 0, 3, 1],
-    ]
-
-    solnSixBySix = [
-        [1, 5, 6, 3, 4, 2],
-        [2, 4, 3, 1, 5, 6],
-        [4, 1, 2, 5, 6, 3],
-        [3, 6, 5, 2, 1, 4],
-        [6, 3, 1, 4, 2, 5],
-        [5, 2, 4, 6, 3, 1],
-    ]
+    """
+    Put in any sudoku to be solved, represented as List of Lists.
+    I've included the test puzzles, as well as 'easier' versions that
+    have less unknowns to speed up my testing.
+    I've also included expected solutions for test puzzles
+    """
 
     fourByFour = [
         [0, 1, 0, 4],
@@ -309,6 +342,51 @@ def runApp():
         [4, 3, 1, 2],
         [1, 2, 4, 3],
         [3, 4, 2, 1],
+    ]
+
+    sixBySixFirst = [
+        [1, 5, 0, 0, 4, 0],
+        [2, 0, 0, 0, 5, 6],
+        [4, 0, 0, 0, 0, 3],
+        [0, 0, 0, 0, 0, 4],
+        [6, 3, 0, 0, 2, 0],
+        [0, 2, 0, 0, 3, 1],
+    ]
+
+    sixBySixFirstEasy = [
+        [1, 5, 6, 3, 4, 0],
+        [2, 4, 3, 1, 5, 6],
+        [4, 0, 2, 0, 0, 3],
+        [3, 6, 5, 0, 0, 4],
+        [6, 3, 0, 0, 2, 0],
+        [5, 2, 0, 0, 3, 1],
+    ]
+
+    solnSixBySixFirst = [
+        [1, 5, 6, 3, 4, 2],
+        [2, 4, 3, 1, 5, 6],
+        [4, 1, 2, 5, 6, 3],
+        [3, 6, 5, 2, 1, 4],
+        [6, 3, 1, 4, 2, 5],
+        [5, 2, 4, 6, 3, 1],
+    ]
+
+    sixBySixSecond = [
+        [0, 0, 0, 0, 4, 0],
+        [5, 6, 0, 0, 0, 0],
+        [3, 0, 2, 6, 5, 4],
+        [0, 4, 0, 2, 0, 3],
+        [4, 0, 0, 0, 6, 5],
+        [1, 5, 6, 0, 0, 0],
+    ]
+
+    solnSixBySixSecond = [
+        [2, 3, 1, 5, 4, 6],
+        [5, 6, 4, 3, 2, 1],
+        [3, 1, 2, 6, 5, 4],
+        [6, 4, 5, 2, 1, 3],
+        [4, 2, 3, 1, 6, 5],
+        [1, 5, 6, 4, 3, 2],
     ]
 
     nineByNine = [
@@ -348,7 +426,8 @@ def runApp():
     ]
 
     sudoku_driver(fourByFour, solnFourByFour)
-    sudoku_driver(sixBySix, solnSixBySix)
+    sudoku_driver(sixBySixFirst, solnSixBySixFirst)
+    sudoku_driver(sixBySixSecond, solnSixBySixSecond)
     sudoku_driver(nineByNine, nineBynineSoln)
 
 
