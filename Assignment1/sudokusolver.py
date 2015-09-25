@@ -257,7 +257,7 @@ def breadth_first_search(problem):
     node = Node(problem.initial)
     # Check if current node meets Goal_Test criteria
     if problem.goal_test(node):
-        return nodes
+        return node
     # Create a Queue to store all nodes of a particular level. Import
     # QueueClass()
     frontier = queue.Queue()
@@ -316,7 +316,14 @@ def sudoku_driver(sudoku, expectedSoln=None):
         raise(ValueError("No valid soln found."))
 
     print("Final Solved Sudoku:\n%s" % printNestedList(sudoku))
-    print("Elapsed time for soln: ", time.process_time() - t)
+
+    print("Solution Branch (upwards from child -> parent): ", end="")
+    ptrNode = solutionNode
+    while ptrNode.state is not 0:
+        print(ptrNode.state, " ", end="")
+        ptrNode = ptrNode.parent
+
+    print("\nElapsed time for soln: ", time.process_time() - t)
     if expectedSoln is not None:
         assert(sudoku == expectedSoln)
         print("Solution Matches Expected Solution! \n")
@@ -326,7 +333,7 @@ def runApp():
     """
     Put in any sudoku to be solved, represented as List of Lists.
     I've included the test puzzles, as well as 'easier' versions that
-    have less unknowns to speed up my testing.
+    have less unknown values to speed up my testing.
     I've also included expected solutions for test puzzles
     """
 
