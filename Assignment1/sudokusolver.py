@@ -23,10 +23,10 @@ class Problem(object):
         Goal is also a node tree.
         """
         self.PRUNE = prune
-        self.representation = representation
-        self.initial = 0
+        self.representation = representation  # instance of Sudoku board
+        self.initial = 0  # Highest node has 0 state
         self.goal = goal
-        self.numberOfUnknowns = 0
+        self.numberOfUnknowns = 0  # used to check if we are at possible goal state
         self.dimension = len(representation)  # dimension of sudoku
         self.indexValues = list()  # tuples of indexes (of 0) to avoid deepcopy
 
@@ -284,7 +284,7 @@ def breadth_first_search(problem):
             frontier.put(child)
             if printTree:
                 print("")
-    # printTree(node)
+
     return None
 
 
@@ -363,10 +363,10 @@ def runApp():
     sixBySixFirstEasy = [
         [1, 5, 6, 3, 4, 0],
         [2, 4, 3, 1, 5, 6],
-        [4, 0, 2, 0, 0, 3],
-        [3, 6, 5, 0, 0, 4],
-        [6, 3, 0, 0, 2, 0],
-        [5, 2, 0, 0, 3, 1],
+        [4, 1, 2, 0, 0, 3],
+        [3, 6, 5, 2, 0, 4],
+        [6, 3, 0, 4, 2, 0],
+        [0, 2, 4, 0, 3, 1],
     ]
 
     solnSixBySixFirst = [
@@ -436,7 +436,6 @@ def runApp():
     sudoku_driver(sixBySixFirst, solnSixBySixFirst)
     sudoku_driver(sixBySixSecond, solnSixBySixSecond)
     sudoku_driver(nineByNine, nineBynineSoln)
-
 
 if(__name__ == '__main__'):
     runApp()
