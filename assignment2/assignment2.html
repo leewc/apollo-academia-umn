@@ -4,7 +4,47 @@
 	<meta charset="utf-8"/>
 	<title>Campus Building Information</title>
 	<link rel="stylesheet" href="assignment2.css" />
+
+	<script src="campus_slideshow.js"></script>
+<!-- 
+	<script type="text/javascript">
+	</script>
+-->
+
 </head>
 <body>
+
+<nav>
+	<button name="start"> Start</button>
+	<button name="next"> Next</button>
+	<button name="previous"> Previous </button>
+
+	Select Information Type:
+		<select>
+			<option value="none">None</option>
+			<option value="architect">Architect</option>
+			<option value="year">Year</option>
+			<option value="description">Description</option>
+		</select>
+
+	<div id="thumbnails">
+	</div>
+</nav>
+
+<button name="slideshow_start">Start Slide Show</button>
+<button name="slideshow_stop">Stop Slide Show</button>
+<br/>
+Slow<input id="slideshow_speed" type="range" min="1" max="10"/>Fast
+
+<br />
+	<div class="slideshow">
+		<img id="theatre" src="" width="500" height="300"/>
+
+	<div id="infopanel">
+	<h1> Image Information: </h1>
+	</div>
+	</div>
+
+
 </body>
 </html>

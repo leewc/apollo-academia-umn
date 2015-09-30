@@ -1,0 +1,22 @@
+nav {
+	padding: 2em 0 2em 0;
+	border-top: 2px solid gray;
+	border-bottom: 2px solid gray;
+	border-spacing: 0.5em;
+	margin-bottom: 2em;
+}
+
+.slideshow {
+	display: block;
+}
+
+.slideshow img {
+	float: left;
+	padding: 0 2em 0 0;
+}
+
+.slideshow #infopanel {
+	font-family: arial;
+	position: relative;
+	border-spacing: 0.5em;
+}
