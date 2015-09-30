@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0100)http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Assignment2.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>CSci 4131 Internet Programming</title>
+
+<style>
+  h1, h2, h3  { text-align: center;} 
+.style1 {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+.style2 {
+	font-size: medium;
+}
+.style3 {
+	text-decoration: underline;
+}
+</style> 
+</head>
+
+<body>
+
+<h1 style="textg-align: center"> CSci 4131 Internet Programming <br> 
+Fall 2015<br>
+</h1>
+
+<h2>Assignment 2: Programming with JavaScript <br>
+Due Date: October 5, 2015 <br>
+This assignment must be done <u> individually</u> 
+</h2>
+
+<p class="MsoNormal" style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto; margin-top:0; margin-bottom:0">
+<b><span style="font-size:14.0pt">Goals:&nbsp; </span></b></p>
+<p class="MsoNormal" style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto; margin-top:0; margin-bottom:0">
+In this assignment you will learn about HTML, CSS, and JavaScript programming. 
+The primary focus of this assignment is on JavaScript. You will learn how 
+JavaScript is used for dynamic content generation and modification on the 
+client-side by interacting with the Document Object Model tree of the HTML 
+document being dispalyed by the browser. You will learn the event handling model 
+and mechanisms in JavaScript.</p>
+<p class="MsoNormal" style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto; margin-top:0; margin-bottom:0">
+&nbsp;</p>
+<p class="MsoNormal" style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto; margin-top:0; margin-bottom:0">
+<u>Do 
+not use JQuery in doing this assignment</u>.</p>
+<p class="MsoNormal" style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto; margin-top:0; margin-bottom:0">
+&nbsp;</p>
+<p class="MsoNormal" style="margin-top: 0; margin-bottom: 0"><b style="mso-bidi-font-weight:normal">
+<span style="font-size:14.0pt">Problem Statement: </span></b></p>
+<p class="MsoNormal" style="mso-margin-top-alt:auto;mso-margin-bottom-alt:auto; margin-top:0; margin-bottom:0">
+You will create an interactive HTML page that will show photos and information 
+about various campus buildings. It will provide slide-show like functionality to 
+view the photos.&nbsp; This page will support <u>two modes</u> of operation. </p>
+<ol>
+	<li>
+	<p class="style1">In the <u>manual mode</u>, it will provide buttons for the 
+	user to manually browse the information about various campus buildings. </p>
+	<p class="style1">In this mode, the user may also click on an image 
+	thumbnail to display that image as a bigger image.</p>
+	</li>
+	<li>
+	<p class="style1">In the <u>slide show mode</u>, the page will 
+	automatically keep on displaying photos and&nbsp; information about various 
+	campus buildings.</p>
+	</li>
+</ol>
+<p class="style1">You will be writing an HTML page containing JavaScript code 
+along with&nbsp; a separate file containing CSS style sheet commands to 
+create an interactive campus building information&nbsp; page. This page should contain the following elements:</p>
+<ul>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">Five Buttons: Start, Next, Previous, Start Slide Show, Stop Slide Show</p>
+	</li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">A slider based 
+range input (using HTML5)&nbsp; to control the slide-show presentation rate.</p>
+	</li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">A Select&nbsp; element that contains the following options: 
+“None”, “Architect”, “Year”, and “Description” to choose the information to be 
+displayed along with the building photo.</p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">Thumbnail photos of building images.</p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">
+	<span style="font-style:normal; font-variant:normal; font-weight:normal; font-size:7.0pt; font-family:Times New Roman; mso-list:Ignore; mso-fareast-font-family:Symbol; mso-bidi-font-family:Symbol">&nbsp;</span>An area to display an image of a campus building in bigger 
+size.</p></li>
+</ul>
+<p class="style2"><b style="font-size:14pt">Functionality:<o:p></o:p></b></p>
+<ol>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">Clicking the "Start" button should display the 
+	photo of the first 
+building in the larger display area. You will also display the type of information that has been selected.</p>
+	</li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">Clicking the “Next” button should display the image of the next 
+building. You will also display the type of information that has been selected.
+	<span style="color: rgb(34, 34, 34); font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
+	Clicking&nbsp; "Next" button while last building is showing should move to 
+	first building. </span></p>
+	</li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">Clicking the&nbsp; “Previous” button should display the image of the 
+previous building. You will also display the type of information that has been 
+selected. C<span style="color: rgb(34, 34, 34); font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">licking 
+	"Previous" button while first building is showing should move to the last 
+	building.</span></p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">If a thumbnail image is clicked, it should be displayed 
+	in the larger&nbsp; image area.</p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">The thumbnail images should have the size 50 by 50 pixels.</p>
+	</li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">The larger&nbsp; image&nbsp; display area will have the size of 500 by 300 
+pixels.</p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">&nbsp;When the user selects an information type from the 
+	selection menu list:&nbsp;&nbsp; The information should appear on the right 
+	side of the bigger image. The information should appear in bold and font 
+	size 20.</p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">Clicking&nbsp; “Start Slide Show” button should start 
+	the slide show. When the last image is displayed, the slide show will 
+	continue again with the first image. When "Start Slide Show" is clicked, you 
+	should <span class="style3">disable</span> "Start", "Next", and "Previous" buttons. These buttons should 
+	be <span class="style3">enabled</span> when "Stop Slide Show" button is clicked.</p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">
+	<span style="font-style:normal; font-variant:normal; font-weight:normal; mso-list:Ignore; mso-fareast-font-family:Symbol; mso-bidi-font-family:Symbol">
+	Using the slider based range control, the user should be able to set the 
+	presentation rate from Slow (one image in 10 seconds) to Fast (one image 
+	every second).</span></p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">
+	<span style="mso-list:Ignore; font-family:Symbol; mso-fareast-font-family:Symbol; mso-bidi-font-family:Symbol">
+	<span style="font-style:normal; font-variant:normal; font-weight:normal; font-family:Times New Roman">
+	When making transition from the current image to the next, the currently 
+	displayed image should gradually f<span class="style3">ade-out</span> and 
+	the new image should&nbsp; <span class="style3">fade-in</span>. This you will do by controlling the </span>
+	<span style="font-variant:normal; font-weight:normal; font-family:Times New Roman; text-decoration:underline">
+	opacity </span>
+	<span style="font-style:normal; font-variant:normal; font-weight:normal; font-family:Times New Roman">&nbsp;property 
+	of the displayed image.</span></span></p></li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">While a slide show is active, it <u>should not</u> be 
+possible to start another slide show. You should display an alert if the “Start 
+Slide Show” button is clicked while the previous slide show is still active.</p>
+	</li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">Clicking “Stop Slide Show” button should stop the slide show.</p>
+	</li>
+	<li>
+	<p class="style1" style="margin-left:39.35pt;text-indent:-.25in;mso-list:l0 level1 lfo1;
+tab-stops:list 39.35pt">The specific thumbnail image that is being displayed in the 
+bigger image area should be highlighted in red color border box. This requirement should be satisfied in both 
+	<u>manual mode</u>, 
+and <u>slide show mode.</u><o:p>&nbsp;</o:p></p></li>
+</ol>
+<p class="MsoNormal">Here are the screenshots demonstrating the campus building 
+information HTML page corresponding to above functionality.</p>
+<ul style="margin-top:0in" type="disc">
+	<li class="MsoNormal" style="mso-list:l1 level1 lfo2;tab-stops:list .15in">
+	<a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Screen-Initial.png">Screenshot 1:</a> This is the initial screen shot 
+	when no button&nbsp; is clicked.</li>
+	<li class="MsoNormal" style="mso-list:l1 level1 lfo2;tab-stops:list .5in">
+	<a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Screen-Start.png">Screenshot 2:</a> This is the screen shot after 
+	“Start” button is clicked.</li>
+	<li class="MsoNormal" style="mso-list:l1 level1 lfo2;tab-stops:list .5in">
+	<a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Screen-Architect.png">Screenshot 3:</a> This is the screen shot 
+	after selecting "Architect" in the selection menu..&nbsp; Notice 
+	that “Architect”information&nbsp; is being displayed.</li>
+	<li class="MsoNormal" style="mso-list:l1 level1 lfo2;tab-stops:list .5in">
+	<a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Screen-Next.png">Screenshot 4:</a> This is the screen 
+	shot after “Next” button is clicked.</li>
+	<li class="MsoNormal" style="mso-list:l1 level1 lfo2;tab-stops:list .5in">
+	<a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Screen-Year.png">Screenshot 5: </a>This is the screen shot after 
+	selecting "Year" in the selection menu.</li>
+	<li class="MsoNormal" style="mso-list:l1 level1 lfo2;tab-stops:list .5in">
+	<a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Screen-Transition.png">Screenshot 6:</a> This shows a faded image 
+	when transitioning to the next image. The slide show rate is set to Fast, 
+	i.e. one photo per second.</li>
+</ul>
+<p class="style1">You can download the images <a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/building_images">here</a>, and building information <a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/building_info">here</a>.</p>
+<p class="style1">You can download ALL of the the images and information by clicking here for <a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Datafiles.tar">tar</a> 
+or <a href="http://www-users.cselabs.umn.edu/classes/Fall-2015/csci4131/assignments/Assignment2/Datafiles.tgz">compressed tar - tgz</a> formats.</p>
+<p class="style1">We are giving you information about ten campus buildings. You 
+should use the following order while displaying the photos and&nbsp; information 
+for the following<strong> 10</strong> buildings:</p>
+<p class="style1">Armory, Pillsbury Hall, Folwell Hall, Jones Hall, Pillsbury 
+Statue, Wesbrook Hall, Nicholson Hall, Eddy Hall, Music Education, Wulling Hall.</p>
+<p class="style1"><o:p>&nbsp;</o:p></p>
+<p style="margin-top: 0; margin-bottom: 0"><b style="font-size:14pt">Design Guidelines:</b></p>
+<p style="margin-top: 0; margin-bottom: 0">You can assume that the images are stored in the same 
+directory as your HTML files.&nbsp; </p>
+
+
+<p class="style1"><o:p>&nbsp;<br>
+<b style="font-size:14pt"> Grading Criteria:</b></o:p></p>
+<p class="style1">&nbsp;</p>
+<p class="style1"><o:p>1. Functionality of Start, Next and Previous buttons - 
+<u><b>
+<strong>15</strong>
+points</b></u></o:p></p>
+<p class="style1">
+<o:p>&nbsp;&nbsp;&nbsp; Appropriate image and related information should be 
+displayed as specified in the requirement above.</o:p></p>
+<p class="style1">2.
+<o:p>Display Information Functionality (architect, year, description)- <u> <b>10 points</b></u></o:p></p>
+<p class="style1">
+<o:p>3.<b> </b>Thumbnails are displayed and have red border for the selected 
+current image for display in the larger window- <u> <b>10 points</b></u></o:p></p>
+<p class="style1">4. Images have specified dimensions - <u><b>5 points</b></u></p>
+<p class="style1">5.
+<o:p>Slideshow Functionality - <b> <u><strong>50</strong> points</u><br>
+</b>&nbsp;&nbsp;&nbsp; a. Functionality of </o:p>Start Slide Show<o:p>&nbsp; (10 
+points) and </o:p>
+Stop Slide Show<o:p>&nbsp; (5 points) - <b><i>15</i></b><i><b> points</b></i></o:p></p>
+<p class="style1"><i><b>&nbsp;</b></i>&nbsp;&nbsp; b. Enabling/disabling of the 
+buttons "Start", "Next", and "Previous" on starting/stopping of the slide show.-<b><i> 
+5 points</i></b></p>
+<p class="style1">&nbsp;&nbsp;&nbsp; c.
+<o:p> Fade-out and fade-in during image transitions in the slide show.&nbsp; -&nbsp;
+<i><b>10 points</b></i></o:p></p>
+<p class="style1">&nbsp;&nbsp;&nbsp; d. Correctly controlling the rate between S<o:p>low 
+and Fast. The display periods should be roughly around 10 second and 1 second 
+for the two extremes of this range.&nbsp;- <b><i>10 points</i><br>
+&nbsp;&nbsp;&nbsp; </b>e. Starting another slide show while once slide show is 
+active should not be allowed - <i><b>5 points</b></i></o:p></p>
+<p class="style1">&nbsp;&nbsp;&nbsp; f. If the user selects a different information type 
+while the slide show is active, appropriate information should be displayed 
+along with the images - <i><b>5 points</b></i></p>
+<p class="style1">6. HTML and CSS files should pass W3 validator check using&nbsp;
+<a href="http://validator.w3.org/">http://validator.w3.org</a>&nbsp; (There 
+should be no errors but warnings are acceptable.) - <u> <strong>5 points&nbsp;
+</strong></u></p>
+<p class="style1"><strong>7. </strong>Proper coding style and indentation<strong> 
+-&nbsp; <u>5 points</u></strong></p>
+<p class="style1">&nbsp;</p>
+<p class="style1"><b style="font-size:14pt">Submission Instructions:</b></p>
+<p class="style1">You will submit a <u>tar file</u> of the directory containing the 
+following files</p>
+<ol start="1" style="margin-top:0in" type="1">
+	<ol start="1" style="margin-top:0in" type="a">
+		<li class="MsoNormal" style="mso-list:l2 level2 lfo4;tab-stops:list 1.0in">
+		<p class="style1">An HTML file containing&nbsp;and JavaScript 
+		code, and a CSS file. Name the files as <span class="auto-style4">assignment2.html 
+		and assignment2.css.</span></p>
+		</li>
+		<li class="MsoNormal" style="mso-list:l2 level2 lfo4;tab-stops:list 1.0in">
+		<p class="style1">All image files&nbsp; and any other files used in your code 
+		should be included.</p>
+		</li>
+		<li class="MsoNormal" style="mso-list:l2 level2 lfo4;tab-stops:list 1.0in">
+		<p class="style1">A README file</p>
+		<ol start="1" style="margin-top:0in" type="a">
+			<li class="MsoNormal" style="mso-list:l2 level2 lfo4;tab-stops:list 1.0in">
+			<p class="style1">It should state any special cases or exception 
+			cases that the graders should keep in consideration.</p>
+			</li>
+		</ol>
+		</li>
+	</ol>
+</ol>
+<p class="style1"><o:p>&nbsp;</o:p></p>
+<p>
+
+</p>
+
+
+
+
+</body></html>
