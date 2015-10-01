@@ -16,11 +16,11 @@
 
 <nav>
 	<button name="start" onclick="startShow()"> Start</button>
-	<button name="next"> Next</button>
-	<button name="previous"> Previous </button>
+	<button name="next" onclick="next()"> Next</button>
+	<button name="previous" onclick="prev()"> Previous </button>
 
 	Select Information Type:
-		<select>
+		<select id="infoTypeSelection">
 			<option value="none">None</option>
 			<option value="architect">Architect</option>
 			<option value="year">Year</option>
@@ -40,8 +40,8 @@ Slow<input id="slideshow_speed" type="range" min="1" max="10"/>Fast
 	<div class="slideshow">
 		<img id="theatre" src="" width="500" height="300"/>
 
-		<div id="infopanel">
 		<h1> Image Information: </h1>
+		<div id="infoPanel">
 		</div>
 	</div>
 </body>

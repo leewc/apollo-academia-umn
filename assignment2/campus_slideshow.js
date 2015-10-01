@@ -1,6 +1,7 @@
 var buildings;
 var selectedImage;
 var selectedBuilding;
+var selectedId;
 var thumbnails;
 var started;
 
@@ -40,28 +41,39 @@ function loadThumbnails(){
 	for (var i = 0; i < buildings.length; ++i){
 		thumb = document.createElement("img");
 		thumb.src = buildings[i].image.src;
-		thumb.onclick = function(){ setBorder(this); }
+		thumb.id = i;
+		thumb.onclick = function(){ setBorderAndBuilding(this); }
 		thumbnails.appendChild(thumb);
 	}
 }
 
 function startShow(){
 	started = true;
-	setBorder(thumbnails.getElementsByTagName("img")[0])
-	// theatreDisplay();
+	setBorderAndBuilding(document.getElementById("0"));
+	theatreDisplay();
 }
 
-function theatreDisplay(){
+function next(){
+	if(!started)
+		return;
 
+	selectedId++;
+	if(selectedId == buildings.length)
+		selectedId = 0;
+	setBorderAndBuilding(document.getElementById(selectedId));
 }
 
-function setBorder(self) {
-	for(var i = 0; i < buildings.length; i++) // same as thumbnails.childElementCount
-	{
-		if(thumbnails.children[i] == self)
-			selectedBuilding = buildings[i];
-	}
+function prev(){
+	if(!started)
+		return;
 
+	selectedId--;
+	if(selectedId == -1)
+		selectedId = buildings.length - 1;
+	setBorderAndBuilding(document.getElementById(selectedId));
+}
+
+function setBorderAndBuilding(self) {
 	if(!started)
 		return;
 	if(selectedImage != null)
@@ -69,5 +81,38 @@ function setBorder(self) {
 	selectedImage = self;
 	selectedImage.style.borderStyle = "solid";
 	selectedImage.style.borderColor = "red";
-	console.log("Chosen Building is :" + selectedBuilding.name);
+
+	selectedId = parseInt(self.id);
+	selectedBuilding = buildings[selectedId];
+
+	theatreDisplay();
+	updateInfoPanel();
+}
+
+function theatreDisplay(){
+	var imgTheatre = document.getElementById("theatre");
+	imgTheatre.src = selectedBuilding.image.src;
+}
+
+function updateInfoPanel(){
+	var infoPanel = document.getElementById("infoPanel");
+	var infoTypeSelection = document.getElementById("infoTypeSelection");
+	infoType = infoTypeSelection.options[infoTypeSelection.selectedIndex].value;
+
+	var buildingInfo = "<b> Building: " + selectedBuilding.name + "</b> <br />";
+
+	switch (infoType){
+		case "none":
+			break;
+		case "architect":
+			buildingInfo += "<b> Architect: " + selectedBuilding.architect + "</b>"; 
+			break;
+		case "year":
+			buildingInfo += "<b> Year: " + selectedBuilding.year +"</b>";
+			break;
+		case "description":
+			buildingInfo += "<b> Description: " + selectedBuilding.description + "</b>";
+			break;
+	}
+	infoPanel.innerHTML = buildingInfo;
 }

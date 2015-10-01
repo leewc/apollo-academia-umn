@@ -13,18 +13,19 @@ nav img {
 	height: 50px;
 }
 
-.slideshow {
-	display: block;
-	margin-left: 5em;
-	padding-left: 5em;
-}
-
 .slideshow img {
 	float: left;
 	padding: 0 2em 0 0;
 }
 
-.slideshow #infopanel {
+.slideshow b {
+	font-size: 20px;
+}
+
+.slideshow {
+	display: block;
+	margin-left: 5em;
+	padding-left: 5em;
 	font-family: arial;
 	position: relative;
 	border-spacing: 0.5em;
