@@ -5,17 +5,17 @@
 	<title>Campus Building Information</title>
 	<link rel="stylesheet" href="assignment2.css" />
 
-	<script src="campus_slideshow.js"></script>
+	<script src="campus_slideshow.js" type="text/javascript"></script>
 <!-- 
 	<script type="text/javascript">
 	</script>
 -->
 
 </head>
-<body>
+<body onload="setUp()">
 
 <nav>
-	<button name="start"> Start</button>
+	<button name="start" onclick="startShow()"> Start</button>
 	<button name="next"> Next</button>
 	<button name="previous"> Previous </button>
 
@@ -40,11 +40,9 @@ Slow<input id="slideshow_speed" type="range" min="1" max="10"/>Fast
 	<div class="slideshow">
 		<img id="theatre" src="" width="500" height="300"/>
 
-	<div id="infopanel">
-	<h1> Image Information: </h1>
+		<div id="infopanel">
+		<h1> Image Information: </h1>
+		</div>
 	</div>
-	</div>
-
-
 </body>
 </html>
