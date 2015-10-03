@@ -2,8 +2,9 @@ var buildings;
 var selectedImage;
 var selectedBuilding;
 var selectedId;
-var thumbnails;
 var started;
+var startedSlideshow;
+var slideshowTimer;
 
 function setUp(){
 	buildings = initBuildings();
@@ -37,12 +38,16 @@ function initBuildings(){
 }
 
 function loadThumbnails(){
-	thumbnails = document.getElementById("thumbnails");
+	var thumbnails = document.getElementById("thumbnails");
 	for (var i = 0; i < buildings.length; ++i){
 		thumb = document.createElement("img");
 		thumb.src = buildings[i].image.src;
 		thumb.id = i;
-		thumb.onclick = function(){ setBorderAndBuilding(this); }
+		thumb.onclick = function(){ 
+							setBorderAndBuilding(this);
+							theatreDisplay();
+							updateInfoPanel();
+						}
 		thumbnails.appendChild(thumb);
 	}
 }
@@ -51,6 +56,7 @@ function startShow(){
 	started = true;
 	setBorderAndBuilding(document.getElementById("0"));
 	theatreDisplay();
+	updateInfoPanel();
 }
 
 function next(){
@@ -61,6 +67,8 @@ function next(){
 	if(selectedId == buildings.length)
 		selectedId = 0;
 	setBorderAndBuilding(document.getElementById(selectedId));
+	theatreDisplay();
+	updateInfoPanel();
 }
 
 function prev(){
@@ -71,6 +79,39 @@ function prev(){
 	if(selectedId == -1)
 		selectedId = buildings.length - 1;
 	setBorderAndBuilding(document.getElementById(selectedId));
+	theatreDisplay();
+	updateInfoPanel();
+}
+
+function startSlideShow(){
+	if (startedSlideshow == true){
+		alert("A slideshow has already started. Please stop the previous slideshow before starting a new one.")
+		return;
+	}
+	startedSlideshow = true;
+	toggleButtonDisable(startedSlideshow);
+
+	//get slidervalue -- negative because the slider is flipped
+	var speed = -document.getElementById("slideshow_speed").value;
+	
+	if(selectedBuilding == null)
+		startShow();
+	slideshowTimer = setInterval(next, speed*1000);  //1s = 1000ms 
+	//different from setInterval(next(),1000), that's just invocation and returns undefined.
+}
+
+function stopSlideShow(){
+	if (!started || !startedSlideshow || startedSlideshow == null) 
+		return;
+	startedSlideshow = false;
+	clearInterval(slideshowTimer);
+	toggleButtonDisable();
+}
+
+function updateSlideshowInterval(){
+	var speed = -document.getElementById("slideshow_speed").value; // negative bc slider is flipped.
+	clearInterval(slideshowTimer);
+	slideshowTimer = setInterval(next, speed * 1000); 
 }
 
 function setBorderAndBuilding(self) {
@@ -84,14 +125,15 @@ function setBorderAndBuilding(self) {
 
 	selectedId = parseInt(self.id);
 	selectedBuilding = buildings[selectedId];
-
-	theatreDisplay();
-	updateInfoPanel();
 }
 
 function theatreDisplay(){
 	var imgTheatre = document.getElementById("theatre");
-	imgTheatre.src = selectedBuilding.image.src;
+	fadeOutAndCallback(imgTheatre,
+						function(){
+							imgTheatre.src = selectedBuilding.image.src;
+							fadeIn(imgTheatre);
+						});
 }
 
 function updateInfoPanel(){
@@ -115,4 +157,33 @@ function updateInfoPanel(){
 			break;
 	}
 	infoPanel.innerHTML = buildingInfo;
+}
+
+function toggleButtonDisable(state){
+	var buttons = document.getElementsByName("ctrl");
+	for(var i = 0; i < buttons.length; i++)
+		buttons[i].disabled = state;
+}
+
+function fadeOutAndCallback(imgElement, callback){
+	var opacity = 1;
+	var timer = setInterval(function(){
+		if(opacity < 0.1){
+			clearInterval(timer);
+			callback();
+		}
+		imgElement.style.opacity = opacity;
+		opacity -=  0.1;
+	}, 25);
+}
+
+function fadeIn(imgElement){
+	var opacity = 0.1;
+	var timer = setInterval(function(){
+		if(opacity > 1){
+			clearInterval(timer);
+		}
+		imgElement.style.opacity = opacity;
+		opacity += 0.1;
+	}, 25);
 }

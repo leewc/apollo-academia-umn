@@ -15,9 +15,9 @@
 <body onload="setUp()">
 
 <nav>
-	<button name="start" onclick="startShow()"> Start</button>
-	<button name="next" onclick="next()"> Next</button>
-	<button name="previous" onclick="prev()"> Previous </button>
+	<button name="ctrl" onclick="startShow()"> Start</button>
+	<button name="ctrl" onclick="next()"> Next</button>
+	<button name="ctrl" onclick="prev()"> Previous </button>
 
 	Select Information Type:
 		<select id="infoTypeSelection">
@@ -31,10 +31,10 @@
 	</div>
 </nav>
 
-<button name="slideshow_start">Start Slide Show</button>
-<button name="slideshow_stop">Stop Slide Show</button>
+<button name="slideshow_start" onclick="startSlideShow()">Start Slide Show</button>
+<button name="slideshow_stop" onclick="stopSlideShow()">Stop Slide Show</button>
 <br/>
-Slow<input id="slideshow_speed" type="range" min="1" max="10"/>Fast
+Slow<input id="slideshow_speed" type="range" min="-10" max="-1" onchange="updateSlideshowInterval()" />Fast
 
 <br />
 	<div class="slideshow">
