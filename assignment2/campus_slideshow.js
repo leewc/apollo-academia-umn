@@ -10,6 +10,7 @@ function setUp(){
 	buildings = initBuildings();
 	loadThumbnails();
 	started = false;
+	document.getElementById("theatre").src="";
 }
 
 function Building(name, imgPath, year, architect, description){
