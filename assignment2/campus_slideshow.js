@@ -44,6 +44,8 @@ function loadThumbnails(){
 		thumb.src = buildings[i].image.src;
 		thumb.id = i;
 		thumb.onclick = function(){ 
+							if(!started)
+								return;
 							setBorderAndBuilding(this);
 							theatreDisplay();
 							updateInfoPanel();
@@ -75,7 +77,7 @@ function prev(){
 	if(!started)
 		return;
 
-	selectedId--;
+	selectedId = selectedId - 1;
 	if(selectedId == -1)
 		selectedId = buildings.length - 1;
 	setBorderAndBuilding(document.getElementById(selectedId));
@@ -91,7 +93,7 @@ function startSlideShow(){
 	startedSlideshow = true;
 	toggleButtonDisable(startedSlideshow);
 
-	//get slidervalue -- negative because the slider is flipped
+	//get slidervalue is negative because the slider is flipped
 	var speed = -document.getElementById("slideshow_speed").value;
 	
 	if(selectedBuilding == null)
@@ -109,6 +111,8 @@ function stopSlideShow(){
 }
 
 function updateSlideshowInterval(){
+	if (!startedSlideshow) 
+		return;
 	var speed = -document.getElementById("slideshow_speed").value; // negative bc slider is flipped.
 	clearInterval(slideshowTimer);
 	slideshowTimer = setInterval(next, speed * 1000); 
@@ -174,7 +178,7 @@ function fadeOutAndCallback(imgElement, callback){
 		}
 		imgElement.style.opacity = opacity;
 		opacity -=  0.1;
-	}, 25);
+	}, 50);
 }
 
 function fadeIn(imgElement){
@@ -185,5 +189,5 @@ function fadeIn(imgElement){
 		}
 		imgElement.style.opacity = opacity;
 		opacity += 0.1;
-	}, 25);
+	}, 50);
 }
