@@ -1,16 +1,20 @@
+#define _GNU_SOURCE
+#define DELIMITERS " \n" //space, newlines are delimiters
+#define STACK_SIZE (1024 * 1024) //Taken from example in man page
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-#define DELIMITERS " \n" //space, newlines are delimiters
+#include <sched.h>
 
 void shell_loop();
 int getInputWithoutDelimiter(char** input);
 int makeargv(const char *s, const char *delimiters, char ***argvp);
 int forkAndExecute(char** argvp, int waitForProcess); 
+int cloneInterface(int interface);
 
 int main(int argc, char *argv[])
 {
@@ -36,7 +40,7 @@ void shell_loop()
   int run = 1;
   while(run)
   {
-    printf("-$ ");
+    printf("--$ ");
 
     char** argvp;
     char *input = NULL;
@@ -58,31 +62,39 @@ void shell_loop()
       continue; // restart
     }
 
-    int procStatus;
+    /* ---- Begin Body of Process Control ---- */
     if(strcmp(argvp[0],"exit") == 0 || strcmp(argvp[0],"quit") == 0)
     {
       run = 0;
       continue;
     }
-
+    else if(strcmp(argvp[0], "clone") == 0)
+    {
+	 if(argvSize == 1)
+	 {
+	      printf("Please specify additional parameters. Try: \n\t clone net \n\t clone fs\n");
+	      free(input);
+	      free(argvp);
+	      continue;
+	 }
+	 if(strcmp(argvp[1], "net") == 0)
+	      cloneInterface(CLONE_NEWNET);
+    }
     else if(strcmp(argvp[argvSize-1],"&") == 0)
     {
-      procStatus = forkAndExecute(argvp, 0);
+      argvp[argvSize-1] = '\0';
+      // no wait for bg process
+      forkAndExecute(argvp, 0);
     }
-
     else
     {
-      procStatus = forkAndExecute(argvp, 1);
+      forkAndExecute(argvp, 1);
     }
-
-    /*
-    int i;
-    for (i = 0; i < argvSize; i++)
-    printf("%s \n", argvp[i]);
-    */
+    /* ---- End Body of Process Control ---- */
+  
     free(input);
     free(argvp);
-    }
+  }
 }
 
 
@@ -166,23 +178,23 @@ int makeargv(const char *s, const char *delimiters, char ***argvp)
 int forkAndExecute(char** argvp, int waitForProcess)
 {
   pid_t pid;
-
-  int i=0;
-
-  printf("Time to fork.. \n");
   pid = fork();
-  int status;
+  int status = 0;
   if (pid == 0) //child process
   {
-    execvp(argvp[0], argvp);
+    printf("CHILD process: %d \n", pid);
+    if(execvp(argvp[0], argvp) < 0)
+    {
+	 fprintf(stderr,"Error, no command '%s' found or incorrect arguments.\n", argvp[0]);
+	 exit(EXIT_FAILURE);
+    } 
+    _exit(0);
+    //exit call is reached unless execvp returns with an error
+    //execvp will replace the current running proc with the called proc
   }
-  else if (pid < 0) //error
+  else if (pid > 0) //parent process
   {
-    fprintf(stderr, "Error Forking Process. \n");
-    status = -1;
-  }
-  else //parent process
-  {
+    printf("PARENT process: %d \n", pid);
     if(waitForProcess)
     {
       while(waitpid(pid, &status, 0) < 0)
@@ -195,5 +207,44 @@ int forkAndExecute(char** argvp, int waitForProcess)
       }
     }
   }
+  else //error
+  {
+    fprintf(stderr, "Error Forking Process. \n");
+    status = -1;
+  }
   return status;
+}
+
+int fn_testNetwork() {
+     printf("\t --- NEW Network Namespace PID: %ld --- \n", (long)getpid());
+     system("ip link");
+     return 0;
+}
+
+int cloneInterface(int interface)
+{
+     char* stack = malloc(STACK_SIZE);
+     char* stackTop = stack + STACK_SIZE;
+     pid_t child_pid;
+
+     if(interface == CLONE_NEWNET)
+     {
+	  printf("\t --- ORIGINAL Net Namespace: --- \n");
+	  system("ip link");
+	  // have to fork and exec to use this execl("/bin/sh", "sh", "-c", "ip link", (char*)0);
+     }
+
+
+     child_pid = clone(fn_testNetwork, stackTop, interface |CLONE_NEWPID | SIGCHLD, NULL);
+     if(child_pid == -1)
+	  printf("ERROR: Failed to clone interface. Are you running shell as sudo? \n");
+     else
+     {
+	  printf("\n Cloned PID is: %ld\n", (long)child_pid);
+	  waitpid(child_pid, NULL, 0);
+     }
+
+     free(stack);
+     // cannot free stacktop, it will exit the shell.
+     return child_pid;
 }
