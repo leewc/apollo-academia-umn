@@ -72,13 +72,23 @@ void shell_loop()
     {
 	 if(argvSize == 1)
 	 {
-	      printf("Please specify additional parameters. Try: \n\t clone net \n\t clone fs\n");
+	      printf("Please specify additional parameters. Try: \n\t clone files\n\t clone fs \n\t clone io\n\t clone net\n\t clone ns\n\t clone vm\n");
 	      free(input);
 	      free(argvp);
 	      continue;
 	 }
-	 if(strcmp(argvp[1], "net") == 0)
+	 else if(strcmp(argvp[1], "net") == 0)
 	      cloneInterface(CLONE_NEWNET);
+	 else if(strcmp(argvp[1], "ns") == 0)
+	      cloneInterface(CLONE_NEWNS);
+	 else if(strcmp(argvp[1], "files") == 0)
+	      cloneInterface(CLONE_FILES);
+	 else if(strcmp(argvp[1], "fs") == 0)
+	      cloneInterface(CLONE_FS);
+	 else if(strcmp(argvp[1], "io") == 0)
+	      cloneInterface(CLONE_IO);
+	 else if(strcmp(argvp[1], "vm") == 0)
+	      cloneInterface(CLONE_VM);
     }
     else if(strcmp(argvp[argvSize-1],"&") == 0)
     {
@@ -215,9 +225,42 @@ int forkAndExecute(char** argvp, int waitForProcess)
   return status;
 }
 
-int fn_testNetwork() {
-     printf("\t --- NEW Network Namespace PID: %ld --- \n", (long)getpid());
+int fn_testNetwork() 
+{
+     printf("\t --- NEW Cloned Network is PID: %ld ---\n", (long)getpid());
      system("ip link");
+     return 0;
+}
+
+int fn_testNs()
+{
+     printf("\t --- BASH Subshell has PID: %ld ---\n", (long)getpid());
+     unshare(CLONE_NEWNS);
+     system("bash");
+     return 0;
+}
+
+int fn_testFiled()
+{
+     printf("Test shared file descriptor. \n");
+     return 0;
+}
+
+int fn_testFs()
+{
+     printf("Test shared File System. \n");
+     return 0;
+}
+
+int fn_testIO()
+{
+     printf("Test shared IO namespace. \n");
+     return 0;
+}
+
+int fn_testMem()
+{
+     printf("Test shared memory. \n");
      return 0;
 }
 
@@ -227,24 +270,45 @@ int cloneInterface(int interface)
      char* stackTop = stack + STACK_SIZE;
      pid_t child_pid;
 
-     if(interface == CLONE_NEWNET)
+     if(interface == CLONE_NEWNS)
      {
-	  printf("\t --- ORIGINAL Net Namespace: --- \n");
+	  printf("\t --- Spawning bash subshell, original PID: %ld --- \n", (long)getpid());
+	  child_pid = clone(fn_testNs, stackTop, interface | CLONE_NEWNS | SIGCHLD, NULL);
+     }
+     else if(interface == CLONE_IO)
+     {
+	  printf("\t Sharing IO namespaces. \n");
+	  child_pid = clone(fn_testIO, stackTop, interface | CLONE_IO | SIGCHLD, NULL);
+     }
+     else if(interface == CLONE_FILES)
+     {
+	  printf("\t --- Sharing File Descriptor Table --- \n");
+	  child_pid = clone(fn_testFiled, stackTop, interface | CLONE_NEWNS | SIGCHLD, NULL);
+     }
+     else if(interface == CLONE_FS)
+     {
+	  printf("\t --- Sharing Filesystem --- \n");
+	  child_pid = clone(fn_testFs, stackTop, interface | CLONE_FS | SIGCHLD, NULL);
+     }
+     else if(interface == CLONE_VM)
+     {
+	  printf("\t --- Running Child Process in Parent Memory --- \n");
+	  child_pid = clone(fn_testMem, stackTop, interface | CLONE_VM | SIGCHLD, NULL);
+     }
+     else if(interface == CLONE_NEWNET)
+     {
+	  printf("\t --- ORIGINAL Network is PID: %ld  --- \n", (long)getpid());
 	  system("ip link");
 	  // have to fork and exec to use this execl("/bin/sh", "sh", "-c", "ip link", (char*)0);
+
+	  child_pid = clone(fn_testNetwork, stackTop, interface | CLONE_NEWPID | SIGCHLD, NULL);
      }
 
-
-     child_pid = clone(fn_testNetwork, stackTop, interface |CLONE_NEWPID | SIGCHLD, NULL);
      if(child_pid == -1)
 	  printf("ERROR: Failed to clone interface. Are you running shell as sudo? \n");
      else
      {
-	  printf("\n Cloned PID is: %ld\n", (long)child_pid);
 	  waitpid(child_pid, NULL, 0);
      }
-
-     free(stack);
-     // cannot free stacktop, it will exit the shell.
      return child_pid;
 }
