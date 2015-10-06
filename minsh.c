@@ -11,7 +11,6 @@
 #include <sched.h>
 
 void shell_loop();
-int getInputWithoutDelimiter(char** input);
 int makeargv(const char *s, const char *delimiters, char ***argvp);
 int forkAndExecute(char** argvp, int waitForProcess); 
 int cloneInterface(int interface);
@@ -26,6 +25,8 @@ int main(int argc, char *argv[])
 /*
   Starts the shell prompt to wait for user input and loop until an EOF or exit
   command is given, passes commands to other functions for handling.
+  If it is a built in command (clone), call clone functions.
+  Else run fork and execute using execvp. If there is a background operator (&), there shell will not wait for the system.
 
   Adapted: 
   http://stackoverflow.com/questions/7831755/what-is-the-simplest-way-of-getting-user-input-in-c
@@ -40,7 +41,7 @@ void shell_loop()
   int run = 1;
   while(run)
   {
-    printf("--$ ");
+    printf("--> $ ");
 
     char** argvp;
     char *input = NULL;
@@ -89,6 +90,13 @@ void shell_loop()
 	      cloneInterface(CLONE_IO);
 	 else if(strcmp(argvp[1], "vm") == 0)
 	      cloneInterface(CLONE_VM);
+	 else 
+	 {
+	      printf("Not recognized. Type 'clone' for help. \n");
+	      free(input);
+	      free(argvp);
+	      continue;
+	 }
     }
     else if(strcmp(argvp[argvSize-1],"&") == 0)
     {
@@ -107,28 +115,7 @@ void shell_loop()
   }
 }
 
-
-int getInputWithoutDelimiter(char** input)
-{
-  size_t len = 0;
-  ssize_t numchars = getline(input, &len, stdin);
-  
-  if(numchars == -1)
-  {
-    fprintf(stderr, "Failed to read input. \n");
-    return -1;
-  }
-
-  if(*(*input + numchars -1)  == '\n')
-  {
-    *(*input + numchars -1) = '\0'; //null terminator
-    --numchars;
-  }
-
-  return numchars;
-}
-
-
+// Credit: Unix Systems Programming Book, Program 2.2 -- makeargv.c
 int makeargv(const char *s, const char *delimiters, char ***argvp)
 {
   int error;
@@ -185,6 +172,11 @@ int makeargv(const char *s, const char *delimiters, char ***argvp)
   return numTokens;
 }
 
+/*
+ * Helper function that received a proper argument array
+ * and passes it to fork and exec. 
+ * waitpid if and only if told to waitForProcess (1 or 0)
+*/
 int forkAndExecute(char** argvp, int waitForProcess)
 {
   pid_t pid;
@@ -192,7 +184,7 @@ int forkAndExecute(char** argvp, int waitForProcess)
   int status = 0;
   if (pid == 0) //child process
   {
-    printf("CHILD process: %d \n", pid);
+    //printf("CHILD process: %d \n", pid);
     if(execvp(argvp[0], argvp) < 0)
     {
 	 fprintf(stderr,"Error, no command '%s' found or incorrect arguments.\n", argvp[0]);
@@ -204,7 +196,7 @@ int forkAndExecute(char** argvp, int waitForProcess)
   }
   else if (pid > 0) //parent process
   {
-    printf("PARENT process: %d \n", pid);
+    //printf("PARENT process: %d \n", pid);
     if(waitForProcess)
     {
       while(waitpid(pid, &status, 0) < 0)
@@ -225,45 +217,26 @@ int forkAndExecute(char** argvp, int waitForProcess)
   return status;
 }
 
+/* ---- Child Functions passed to clone calls in Clone Interface ----*/
+int fn_SpawnShell()
+{
+     printf("\n\t --- Spawning new BASH Subshell with PID: %ld ---\n", (long)getpid());
+     system("/bin/bash");
+     // unshare(CLONE_NEWNS); //this has the same effect as CLONE_NEWNS
+     return 0;
+}
+
 int fn_testNetwork() 
 {
-     printf("\t --- NEW Cloned Network is PID: %ld ---\n", (long)getpid());
+     printf("\n\t --- NEW Cloned Network is PID: %ld ---\n", (long)getpid());
      system("ip link");
-     return 0;
+     return fn_SpawnShell();
 }
+/* ---- End child functions ----*/
 
-int fn_testNs()
-{
-     printf("\t --- BASH Subshell has PID: %ld ---\n", (long)getpid());
-     unshare(CLONE_NEWNS);
-     system("bash");
-     return 0;
-}
-
-int fn_testFiled()
-{
-     printf("Test shared file descriptor. \n");
-     return 0;
-}
-
-int fn_testFs()
-{
-     printf("Test shared File System. \n");
-     return 0;
-}
-
-int fn_testIO()
-{
-     printf("Test shared IO namespace. \n");
-     return 0;
-}
-
-int fn_testMem()
-{
-     printf("Test shared memory. \n");
-     return 0;
-}
-
+/*
+ * Helper function that receives an interface (enum), allocate stack space appropriately for the cloned interface. SIGCHLD passed in case we need to avoid zombie processes.
+*/
 int cloneInterface(int interface)
 {
      char* stack = malloc(STACK_SIZE);
@@ -272,43 +245,72 @@ int cloneInterface(int interface)
 
      if(interface == CLONE_NEWNS)
      {
-	  printf("\t --- Spawning bash subshell, original PID: %ld --- \n", (long)getpid());
-	  child_pid = clone(fn_testNs, stackTop, interface | CLONE_NEWNS | SIGCHLD, NULL);
+	  printf("\t --- Copying namespace, original PID: %ld --- \n", (long)getpid());
+	  child_pid = clone(fn_SpawnShell, stackTop, interface | CLONE_NEWNS | SIGCHLD, NULL);
      }
      else if(interface == CLONE_IO)
      {
-	  printf("\t Sharing IO namespaces. \n");
-	  child_pid = clone(fn_testIO, stackTop, interface | CLONE_IO | SIGCHLD, NULL);
+	  printf("\t --- Sharing IO namespaces. \n");
+	  child_pid = clone(fn_SpawnShell, stackTop, interface | CLONE_IO | SIGCHLD, NULL);
      }
      else if(interface == CLONE_FILES)
      {
-	  printf("\t --- Sharing File Descriptor Table --- \n");
-	  child_pid = clone(fn_testFiled, stackTop, interface | CLONE_NEWNS | SIGCHLD, NULL);
+	  printf("\t --- Sharing File Descriptor Table ---");
+	  child_pid = clone(fn_SpawnShell, stackTop, interface | CLONE_FILES | SIGCHLD, NULL);
      }
      else if(interface == CLONE_FS)
      {
-	  printf("\t --- Sharing Filesystem --- \n");
-	  child_pid = clone(fn_testFs, stackTop, interface | CLONE_FS | SIGCHLD, NULL);
+	  printf("\t --- Sharing Filesystem ---");
+	  child_pid = clone(fn_SpawnShell, stackTop, interface | CLONE_FS | SIGCHLD, NULL);
      }
      else if(interface == CLONE_VM)
      {
 	  printf("\t --- Running Child Process in Parent Memory --- \n");
-	  child_pid = clone(fn_testMem, stackTop, interface | CLONE_VM | SIGCHLD, NULL);
+	  child_pid = clone(fn_SpawnShell, stackTop, interface | CLONE_VM | SIGCHLD, NULL);
      }
      else if(interface == CLONE_NEWNET)
      {
 	  printf("\t --- ORIGINAL Network is PID: %ld  --- \n", (long)getpid());
 	  system("ip link");
-	  // have to fork and exec to use this execl("/bin/sh", "sh", "-c", "ip link", (char*)0);
 
-	  child_pid = clone(fn_testNetwork, stackTop, interface | CLONE_NEWPID | SIGCHLD, NULL);
+	  child_pid = clone(fn_testNetwork, stackTop, interface | SIGCHLD, NULL);
+	  //note:  CLONE_NEWPID flag will break child away from parent and not return execution to parent
+     }
+     else //should never happen
+     {
+	  printf("Invalid/Unimplemented CLONE flags. \n");
+	  return -1;
      }
 
+// have to fork and exec to use this execl("/bin/sh", "sh", "-c", "ip link", (char*)0);
+
      if(child_pid == -1)
-	  printf("ERROR: Failed to clone interface. Are you running shell as sudo? \n");
-     else
+	  printf("\nERROR: Failed to clone interface. Are you running shell as root/sudo? \n");
+     else //wait for child.
      {
 	  waitpid(child_pid, NULL, 0);
      }
      return child_pid;
+}
+
+//not used in final version
+//gets input from getline and replaces newline with null terminator
+int getInputWithoutDelimiter(char** input)
+{
+  size_t len = 0;
+  ssize_t numchars = getline(input, &len, stdin);
+  
+  if(numchars == -1)
+  {
+    fprintf(stderr, "Failed to read input. \n");
+    return -1;
+  }
+
+  if(*(*input + numchars -1)  == '\n')
+  {
+    *(*input + numchars -1) = '\0'; //null terminator
+    --numchars;
+  }
+
+  return numchars;
 }
