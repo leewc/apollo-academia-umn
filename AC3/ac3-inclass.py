@@ -42,8 +42,8 @@ def allDiff( constraints, v ):
 	# constraints is a preconstructed list. v is a list of ConstraintVar instances.
 	# call example: allDiff( constraints, [A1,A2,A3] ) will generate BinaryConstraint instances for [[A1,A2],[A2,A1],[A1,A3] ...
     fn = lambda x,y: x != y
-    for i in v.keys():
-        for j in v.keys():
+    for i in range(len(v)):
+        for j in range(len(v)):
             if ( i != j ) :
                 constraints.append(BinaryConstraint( v[i],v[j],fn ))
     
@@ -94,21 +94,27 @@ def setUpKenKen( variables, constraints ):
 def Revise( bc ):
 	# The Revise() function from AC-3, which removes elements from var1 domain, if not arc consistent
 	# A single BinaryConstraint instance is passed in to this function. 
-	# MISSSING the part about returning sat to determine if constraints need to be added to the queue
+	# MISSING the part about returning sat to determine if constraints need to be added to the queue
 	
     # copy domains for use with iteration (they might change inside the for loops)
     dom1 = list(bc.var1.domain)
     dom2 = list(bc.var2.domain)
-    
+
     # for each value in the domain of variable 1
     for x in dom1:
-#>>>>        
+#>>>>   
+        failedConstraints = 0
         # for each value in the domain of variable 2
         for y in dom2:
-#>>>>>            
+#>>>>>         
         # if nothing in domain of variable2 satisfies the constraint when variable1==x, remove x
-#>>>>>
-        
+#>>>>>  # have to keep track since if I just did a single check = True or False the final case might be 
+        # false and remove a valid element while it was ok previously.
+            if (bc.func(x,y) == False and bc.func(y,x) == False):
+                failedConstraints += 1
+            if (failedConstraints == len(dom2)):
+                bc.var1.domain.remove(x)
+
 def nodeConsistent( uc ):
     domain = list(uc.var.domain)
     for x in domain:
@@ -139,6 +145,17 @@ def tryAC3():
     ######          FILL IN REST OF BINARY CONSTRAINTS. NOTE that they need to be reciprocal A!=B, as well as B!=A
     constraints.append( BinaryConstraint( variables['A1'], variables['A2'], lambda x,y: abs(x-y) == 2 ) )
     constraints.append( BinaryConstraint( variables['A2'], variables['A1'], lambda x,y: abs(x-y) == 2 ) )
+
+    constraints.append( BinaryConstraint( variables['B1'], variables['C1'], lambda x,y: x/y == 2))
+    constraints.append( BinaryConstraint( variables['C1'], variables['B1'], lambda x,y: x/y == 2))
+
+    constraints.append( BinaryConstraint( variables['B2'], variables['B3'], lambda x,y: x/y == 3))
+    constraints.append( BinaryConstraint( variables['B3'], variables['B2'], lambda x,y: x/y == 3))
+
+    constraints.append( BinaryConstraint( variables['C2'], variables['C3'], lambda x,y: abs(x-y) == 1))
+    constraints.append( BinaryConstraint( variables['C3'], variables['C2'], lambda x,y: abs(x-y) == 1))
+
+
 
     for c in constraints:
         Revise( c )
