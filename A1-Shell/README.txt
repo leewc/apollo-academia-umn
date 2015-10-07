@@ -25,8 +25,9 @@ After that just run the shell with './minsh'
   Command	Usage
   exit		terminate the shell session
   quit		terminate the shell session
-  clone		displays available clone options
   <command> &	ampersand [&] runs a process in the background, shell will not wait for child to finish execution
+
+  clone		displays available clone options
   clone net	creates a new virtual network namespace, calls ip link to demonstrate (needs root)
   clone ns 	creates a new mount namespace (needs root)
   clone files	shares file descriptor table between parent (us) and child (subshell)

@@ -255,12 +255,12 @@ int cloneInterface(int interface)
      }
      else if(interface == CLONE_FILES)
      {
-	  printf("\t --- Sharing File Descriptor Table ---");
+	  printf("\t --- Sharing File Descriptor Table --- \n");
 	  child_pid = clone(fn_SpawnShell, stackTop, interface | CLONE_FILES | SIGCHLD, NULL);
      }
      else if(interface == CLONE_FS)
      {
-	  printf("\t --- Sharing Filesystem ---");
+	  printf("\t --- Sharing Filesystem --- \n");
 	  child_pid = clone(fn_SpawnShell, stackTop, interface | CLONE_FS | SIGCHLD, NULL);
      }
      else if(interface == CLONE_VM)
