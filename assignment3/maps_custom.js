@@ -1,15 +1,36 @@
 var map;
-var buildings;
-var markers = [];
+var directionsService;
+var directionsDisplay;
+
+var buildings; //array to store building info
+var markers = []; //array to hold building markers (not used, kept for reference & debug)
+var buildingSelector; //reference to html select element (populated by js)
+var droppedMarker;
+var displayRoute;
 
 function initMap() {
+	directionsService = new google.maps.DirectionsService;
+  	directionsDisplay = new google.maps.DirectionsRenderer;
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 44.974802, lng:-93.235301 }, 
 		zoom: 16
 	});
+	directionsDisplay.setMap(map);
+
 	buildings = loadBuildings();
+	buildingSelector = document.getElementById("buildingSelector")
 	generateMarkersAndCards();
+	populateSelector();
 	listenToMapClicksAndDropMarker();
+	displayRoute = false;
+
+	//bind onchange event handler to route calculator function
+	var onChangeHandler = function() {
+		displayRoute = true; //start displaying route after first change.
+		calculateAndDisplayRoute(directionsService, directionsDisplay);
+	};
+	buildingSelector.addEventListener('change', onChangeHandler);
+	document.getElementById('travelSelector').addEventListener('change', onChangeHandler);
 }
 
 function Building(name, imgPath, latitude, longtitude, architect, description){
@@ -84,7 +105,11 @@ function generateMarkersAndCards(){
 
 function listenToMapClicksAndDropMarker(){
 	map.addListener('click', function(event){
-		var marker = new google.maps.Marker({
+		if(droppedMarker != null)
+		{	//clears previous marker, only one
+			droppedMarker.setMap(null);
+		}
+		droppedMarker = new google.maps.Marker({
 			position : event.latLng,
 			map: map,
 			title : event.latLng.lat() + ', ' + event.latLng.lng(),
@@ -92,8 +117,47 @@ function listenToMapClicksAndDropMarker(){
 				content: 'Hello'
 				}) 
 		});
-		marker.addListener('click', function() {
+		droppedMarker.addListener('click', function() {
 			return this.infowindow.open(map, this);
 		});
+		if(displayRoute)
+			calculateAndDisplayRoute(directionsService, directionsDisplay)
 	});
+}
+
+function populateSelector(){
+	for(var i = 0; i < buildings.length; ++i)
+	{
+		//Add building to the selector
+		var option = document.createElement('option');
+		option.value = i;
+		option.innerHTML = buildings[i].name;
+		buildingSelector.appendChild(option);
+	}
+
+	//THIS: document.getElementById('buildingSelector').value
+	//is equal to the longer: buildingSelector.options[buildingSelector.selectedIndex].value
+}
+
+function calculateAndDisplayRoute(directionsService, directionsDisplay){
+	if(droppedMarker == null || displayRoute == false)
+		return;
+
+	var selectedMode = document.getElementById("travelSelector").value;
+
+	//directionsService.route has params of an object with {origin, destination, travelMode}
+	// and a callback function that receives response and status parameters.
+	// note again buildingSelector = document.getElementById('buildingSelector')
+	directionsService.route({
+		origin: droppedMarker.position,
+		destination: buildings[buildingSelector.value].latLong, 
+		travelMode: google.maps.TravelMode[selectedMode]
+	}, function(response, status) {
+		if (status === google.maps.DirectionsStatus.OK) {
+			directionsDisplay.setDirections(response);
+		} 
+		else {
+			window.alert('Directions request failed due to ' + status);
+		}
+  });
 }

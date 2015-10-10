@@ -24,10 +24,53 @@
       #bodyContent p {
       	text-align: left;
       }
+
+      #floating-panel-left {
+	  	position: absolute;
+	  	top: 10px;
+	  	left: 25%;
+	  	z-index: 5;
+	  	background-color: #fff;
+	  	padding: 5px;
+	  	border: 1px solid #999;
+	  	text-align: center;
+	  	font-family: 'Roboto','sans-serif';
+	  	line-height: 30px;
+	  	padding-left: 10px;
+	  }
+
+	  #floating-panel-right {
+	  	position: absolute;
+	  	top: 10px;
+	  	right: 25%;
+	  	z-index: 5;
+	  	background-color: #fff;
+	  	padding: 5px;
+	  	border: 1px solid #999;
+	  	text-align: center;
+	  	font-family: 'Roboto','sans-serif';
+	  	line-height: 30px;
+	  	padding-right: 10px;
+	  }
+
     </style>
   </head>
 
   <body>
+  	<div id ="floating-panel-left">
+  		<b>Building: </b>
+  		<!-- Populated by JS -->
+  		<select id="buildingSelector"></select>
+  	</div>
+  	<div id ="floating-panel-right">
+  		<b>Mode of Travel: </b>
+  		<select id="travelSelector">
+  			<option value="DRIVING"> Driving </option>
+  			<option value="WALKING"> Walking </option>
+  			<option value="BICYCLING"> Bicycling </option>
+  			<option value="TRANSIT"> Transit </option>
+  		</select>
+  	</div>
     <div id="map"></div>
    <!--  
    <script>
