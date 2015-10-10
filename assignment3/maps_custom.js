@@ -5,8 +5,7 @@ var directionsDisplay;
 var buildings; //array to store building info
 var markers = []; //array to hold building markers (not used, kept for reference & debug)
 var buildingSelector; //reference to html select element (populated by js)
-var droppedMarker;
-var displayRoute;
+var droppedMarker; //reference to get dropped marker's coordinates
 
 function initMap() {
 	directionsService = new google.maps.DirectionsService;
@@ -15,14 +14,12 @@ function initMap() {
 		center: {lat: 44.974802, lng:-93.235301 }, 
 		zoom: 16
 	});
-	directionsDisplay.setMap(map);
 
 	buildings = loadBuildings();
-	buildingSelector = document.getElementById("buildingSelector")
+	buildingSelector = document.getElementById("buildingSelector");
 	generateMarkersAndCards();
 	populateSelector();
 	listenToMapClicksAndDropMarker();
-	displayRoute = false;
 
 	//bind onchange event handler to route calculator function
 	var onChangeHandler = function() {
@@ -112,7 +109,7 @@ function listenToMapClicksAndDropMarker(){
 		droppedMarker = new google.maps.Marker({
 			position : event.latLng,
 			map: map,
-			title : event.latLng.lat() + ', ' + event.latLng.lng(),
+			title : 'Location: ' + event.latLng.lat() + ', ' + event.latLng.lng(),
 			infowindow : new google.maps.InfoWindow({
 				content: 'Hello'
 				}) 
@@ -120,8 +117,10 @@ function listenToMapClicksAndDropMarker(){
 		droppedMarker.addListener('click', function() {
 			return this.infowindow.open(map, this);
 		});
-		if(displayRoute)
-			calculateAndDisplayRoute(directionsService, directionsDisplay)
+
+		//call route display (will check if building is selected)
+		// needed to ensure route changes on new marker
+		calculateAndDisplayRoute(directionsService, directionsDisplay)
 	});
 }
 
@@ -140,9 +139,12 @@ function populateSelector(){
 }
 
 function calculateAndDisplayRoute(directionsService, directionsDisplay){
-	if(droppedMarker == null || displayRoute == false)
+	if(droppedMarker == null || buildingSelector.value == -1){
+		directionsDisplay.setMap(null); //remove previous directions (if any)
 		return;
+	}
 
+	directionsDisplay.setMap(map); //re-attach renderer
 	var selectedMode = document.getElementById("travelSelector").value;
 
 	//directionsService.route has params of an object with {origin, destination, travelMode}
