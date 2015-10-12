@@ -1,4 +1,5 @@
 from queue import Queue
+import pdb 
 
 """This is where the problem is defined. Initial state, goal state and other information that can be got from the problem"""
 
@@ -7,26 +8,91 @@ class Problem(object):
 
     def __init__(self, initial, goal=None):
         """This is the constructor for the Problem class. It specifies the initial state, and possibly a goal state, if there is a unique goal.  You can add other arguments if the need arises"""
-        self.initial = initial
-        self.goal = goal
+        self.initial = initial  # Lists of Lists
+        
+        if goal is not None:
+            self.goal = goal
+        else: 
+            # goal state is the initial state 1st peg on another peg, sort it just in case
+            self.goal = sorted(self.initial[0], reverse=True) 
+
+        assert(len(initial) == 3)  # Can't have more than 3 pegs
+        self.pegs = [i for i in range(0, len(initial))]
+        # Get number of disks
+        self.numberOfDisks = len(self.initial[0])
+        # Add sentinel value
+        self.sentinel = self.initial[0][0] + 1
+
+        for peg in self.initial:
+            peg.insert(0, self.sentinel)
+
+        self.goal.insert(0, self.sentinel)
+
+    def printHanoi(self):
+        for peg in self.initial:
+            print(peg, end=" ")
+        print("","Sentinel Value:", self.sentinel)
 
     def actions(self, state):
         """Return the actions that can be executed in the given
         state. The result would typically be a list, but if there are
         many actions, consider yielding them one at a time in an
         iterator, rather than building them all at once."""
+        actions = []
+        tops = [peg[-1] for peg in state]
+        idxSmallest = tops.index(1) #Since smallest(1) is always on top, this will always be true
+        moveSmallTo = list(self.pegs) 
+        moveSmallTo.remove(idxSmallest) #Empty move if move to itself
+
+        nextSmall = min(tops[moveSmallTo[0]], tops[moveSmallTo[1]])
+        idxNextSmall = tops.index(nextSmall)
+        for move in moveSmallTo:
+                actions.append(Action(idxSmallest, move, 1))
+
+        if nextSmall is self.sentinel:
+            # 1 disk to move only (cannot move sentinel)
+            return actions
+        else:
+            moveSmallTo.remove(idxNextSmall)
+            assert(len(move) == 1)
+            actions.append(Action(idxNextSmall, move[0], nextSmall))
+            return actions
+
 
     def result(self, state, action):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
+        result = state[:]   # Make a copy
+        value = result[action.src].pop()
+        print(value, " vs ", action.value)
+        assert(value == action.value)
+        if value is self.sentinel:
+            raise(ValueError,"Attempted to Move Sentinel Value")
+        result[action.dest].append(value)
+        return result
+
 
     def goal_test(self, state):
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
         method if checking against a single self.goal is not enough.
         This must be written by students"""
-        return False
+        if state[0][0] is not self.sentinel:
+            return False
+        elif state[1] is not self.goal and state[2] is not self.goal:
+            return False
+        return True
+
+
+class Action:
+    def __init__(self, src, dest, value):
+        self.src = src
+        self.dest = dest
+        self.value = value
+
+    def __str__(self):
+        return "Move " + self.value + " from peg " + self.src + " to peg " + self.dest
 
 
 class Node:
@@ -84,3 +150,9 @@ def breadth_first_search(problem):
             # Add every new child to the frontier
             frontier.put(child)
     return None
+
+x = Problem([[3,2,1],[],[]])
+x.printHanoi()
+
+y = breadth_first_search(x)
+print(y.state)
