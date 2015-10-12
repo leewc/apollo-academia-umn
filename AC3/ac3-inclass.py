@@ -1,5 +1,15 @@
 import functools
 from functools import reduce
+import pdb
+
+"""
+In class exercise, team:
+
+Sihan Chen chen2436
+Sean Lin linx0486
+Austin Kostreba kostr009
+Wen Chuan Lee leex7095
+"""
 
 # This is demonstrating a "class" implementation of AC3. You can accomplish the same with lists. For the project, you can choose either.
 
@@ -88,6 +98,36 @@ def setUpKenKen( variables, constraints ):
                 aCol.append( variables[k] )
         allDiff( constraints, aCol )
 
+def setUpProblem2(variables, constraints):
+    rows = ['Alex', 'Jessica', 'Ryan', 'Sophie']
+    # columns = ['Baseball', 'Tennis', 'Basketball', 'Soccer']
+    varNames = []
+    for var in rows:
+        variables[var] = ConstraintVar( ['Baseball', 'Tennis', 'Basketball', 'Soccer'], var) 
+        varNames.append(variables[var])
+        #Either Fav, or Not Fav
+
+    # Alex = { Bseball, Tennis, Basketball, Soccer}
+    # Jessica = { Bseball, Tennis, Basketball, Soccer}
+
+    allDiff(constraints, varNames)
+
+def setUpProblem3(variables, constraints):
+    rows = ['Ashlee', 'Chase', 'Michelle', 'Paul', 'Steven']
+
+    animals = ['Polar Bears', 'Monkeys', 'Lions', 'Kangaroos', 'Elephants']
+    colors = ['Yellow', 'White', 'Red', 'Purple', 'Black']
+
+    # make a massive list tuple of animal and color permutations
+    favourites = [(animal,color) for animal in animals for color in colors]
+
+    varNames = []
+    for var in rows:
+        variables[var] = ConstraintVar(favourites, var)
+        varNames.append(variables[var])
+
+    allDiff(constraints, varNames)
+
 #--------------------------------------------------------------------------------------------
 #########################            COMPLETE REVISE               ##########################
 
@@ -130,9 +170,12 @@ def printDomains( vars, n=3 ):
             print(' ')
         
 def tryAC3():
+
+    ### Ken Ken Solution Solving ###
     # create a dictionary of ConstraintVars keyed by names in VarNames.
     variables = dict()
     constraints = []
+
     setUpKenKen( variables, constraints)
     
     print("initial domains")
@@ -172,6 +215,91 @@ def tryAC3():
     print("all constraints pass 3")
     printDomains( variables )
 
+    ### End Ken Ken Solution Solving ###
+
+
+### Problem 2 Solution Solving ###
+
+def tryAC3Problem2():
+    variables = dict()
+    constraints = []
+    setUpProblem2(variables, constraints)
+
+    constraints.append( UnaryConstraint( variables['Jessica'], lambda x: x != "Soccer"))
+    constraints.append( UnaryConstraint( variables['Jessica'], lambda x: x != "Basketball"))
+
+
+    constraints.append( UnaryConstraint( variables['Ryan'], lambda x: x != "Basketball"))
+    constraints.append( UnaryConstraint( variables['Ryan'], lambda x: x != "Baseball"))
+    # neither of the boys like soccer
+    constraints.append( UnaryConstraint( variables['Ryan'], lambda x: x != "Soccer"))
+    constraints.append( UnaryConstraint( variables['Alex'], lambda x: x != "Soccer"))
+
+    for c in constraints:
+        if(isinstance(c, BinaryConstraint)):
+            Revise( c )
+        else:
+            nodeConsistent(c)
+    print("All constraints pass 1")
+    printDomains( variables, 1)
+
+    for c in constraints:
+        if(isinstance(c, BinaryConstraint)):
+            Revise( c )
+        else:
+            nodeConsistent(c)
+    print("All constraints pass 2")
+    printDomains( variables, 1)
+
+    for c in constraints:
+        if(isinstance(c, BinaryConstraint)):
+            Revise( c )
+        else:
+            nodeConsistent(c)
+    print("All constraints pass 3")
+    printDomains( variables, 1)
+
+### Not complete ###
+
+def tryAC3Problem3():
+    variables = dict()
+    constraints = []
+    setUpProblem3(variables, constraints)
+
+    constraints.append(UnaryConstraint(variables['Steven'], lambda x: (x[1] == "Black" and x[0] == "Kangaroos")))
+    constraints.append(UnaryConstraint(variables['Steven'], lambda x: (x[1] != "Red")))
+    
+    constraints.append(UnaryConstraint(variables['Ashlee'], lambda x: (x[1] == "Yellow" and x[0] != "Lions")))
+    constraints.append(UnaryConstraint(variables['Chase'], lambda x: (x[1] != "Red" and x[0] == "Lions")))
+    constraints.append(UnaryConstraint(variables['Paul'], lambda x: (x[0] != "Elephants")))
+    constraints.append(UnaryConstraint(variables['Michelle'], lambda x: (x[1] == "Red" and x[0] == "Monkeys")))
+
+    constraints.append(UnaryConstraint(variables['Paul'], lambda x: (x[1] != "Purple")))
+    constraints.append(UnaryConstraint(variables['Michelle'], lambda x: (x[1] != "Purple")))
+    constraints.append(UnaryConstraint(variables['Ashlee'], lambda x: (x[1] != "Purple")))
+
+   
+
+    for c in constraints:
+        if(isinstance(c, BinaryConstraint)):
+            Revise( c )
+        else:
+            nodeConsistent(c)
+    print("All constraints pass 1")
+    printDomains( variables, 1)
+
+    for c in constraints:
+        if(isinstance(c, BinaryConstraint)):
+            Revise( c )
+        else:
+            nodeConsistent(c)
+    print("All constraints pass 2")
+    printDomains( variables, 1)
+
+
+
+
+
     #print('----------------------------------------------------------')
     #print('TO DO:')
     #print('1) Write the function revise().')
@@ -190,7 +318,10 @@ def tryAC3():
     #print(' SUBMIT your code via TurnItIn (whatever state it is in when class is over is fine.')
 
 tryAC3()
-    
+print("")
+tryAC3Problem2() 
+print("")
+tryAC3Problem3()
 
     
     
