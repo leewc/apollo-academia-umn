@@ -3,7 +3,6 @@ import pdb
 
 """This is where the problem is defined. Initial state, goal state and other information that can be got from the problem"""
 
-
 class Problem(object):
 
     def __init__(self, initial, goal=None):
@@ -29,11 +28,6 @@ class Problem(object):
         self.goal.insert(0, self.sentinel)
 
         self.visited = dict() #keep visited states
-
-    def printHanoi(self):
-        for peg in self.initial:
-            print(peg, end=" ")
-        print("","Sentinel Value:", self.sentinel)
 
     def actions(self, state):
         """Return the actions that can be executed in the given
@@ -75,8 +69,7 @@ class Problem(object):
             action = Action(idxNextSmall, moveSmallTo[0], nextSmall)
             if check(action):
                 actions.append(action)
-            return actions
-
+            return actions        
 
     def result(self, state, action):
         """Return the state that results from executing the given
@@ -88,10 +81,9 @@ class Problem(object):
         if value is self.sentinel:
             raise(ValueError,"Attempted to Move Sentinel Value")
         result[action.dest].append(value)
-        print(action, end=" ")
-        print(result)
+        # print(action, end=" ")
+        # print(result)
         return result
-
 
     def goal_test(self, state):
         """Return True if the state is a goal. The default method compares the
@@ -113,7 +105,7 @@ class Action:
     def __init__(self, src, dest, value):
         self.src = src
         self.dest = dest
-        self.value = value
+        self.value = value # TODO: Can also remove this one dev is stable.
 
     def __str__(self):
         return "Move " + str(self.value) + " from peg " + str(self.src) + " to peg " + str(self.dest)
@@ -180,8 +172,50 @@ def breadth_first_search(problem):
             frontier.put(child)
     return None
 
-x = Problem([[5,4,3,2,1],[],[]])
-x.printHanoi()
+class Hanoi:
+    """Hanoi object based on number of disks. Makes Problem object with a list of lists"""
+    def __init__(self,numberOfDisks):
+        self.problem = Problem([ [i for i in range(numberOfDisks, 0, -1)], list(), list() ])
+        self.minSteps = 2**numberOfDisks - 1
+        self.sentinel = numberOfDisks + 1
+        self.numberOfDisks = numberOfDisks
+        self.solnNode = None
 
-y = breadth_first_search(x)
-print(y.state)
+    def stripSentinel(self, board):
+        return [[i for i in peg 
+                    if i != self.sentinel] 
+                    for peg in board]
+
+    def printHanoi(self, board, strip=False):
+        if strip: 
+            board = self.stripSentinel(board)
+        for peg in board:
+            print(peg, end=" ")
+        if self.sentinel in peg:
+            print("","Sentinel Value:", self.sentinel)
+        else:
+            print("")
+
+    def printProblem(self):
+        self.printHanoi(self.problem.initial, True)
+
+    def solveProblemBFS(self):
+        print('Solving Hanoi Puzzle with ', self.numberOfDisks, ' disks.')
+        self.solnNode = breadth_first_search(self.problem)
+        if self.solnNode is not None:
+            print("Solving Complete")
+        else:
+            raise(ValueError, "Solution Not Found")
+
+    def printSolution(self):
+        self.printHanoi(self.solnNode.state, True)
+
+    
+def runTests():
+    x = Hanoi(6)
+    x.printProblem()
+    x.solveProblemBFS()
+    x.printSolution()
+
+if(__name__ == '__main__'):
+    runTests()
