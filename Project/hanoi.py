@@ -14,19 +14,21 @@ class Problem(object):
             self.goal = goal
         else: 
             # goal state is the initial state 1st peg on another peg, sort it just in case
-            self.goal = sorted(self.initial[0], reverse=True) 
+            self.goal = sorted(self.initial[0], reverse=True)
 
         assert(len(initial) == 3)  # Can't have more than 3 pegs
         self.pegs = [i for i in range(0, len(initial))]
         # Get number of disks
         self.numberOfDisks = len(self.initial[0])
-        # Add sentinel value
+        # Make sentinel value
         self.sentinel = self.initial[0][0] + 1
 
         for peg in self.initial:
             peg.insert(0, self.sentinel)
 
         self.goal.insert(0, self.sentinel)
+
+        self.visited = dict() #keep visited states
 
     def printHanoi(self):
         for peg in self.initial:
@@ -38,6 +40,19 @@ class Problem(object):
         state. The result would typically be a list, but if there are
         many actions, consider yielding them one at a time in an
         iterator, rather than building them all at once."""
+
+        def check(action):
+            """Check to see if we'll end up in a loop by applying the action.
+            """
+            result = [peg[:] for peg in state]
+            value = result[action.src].pop()
+            # if value < result[action.dest][-1] or result[action.dest] == self.sentinel:
+            #     return True
+            result[action.dest].append(value)
+            if str(result) in self.visited:
+                return False
+            return True
+
         actions = []
         tops = [peg[-1] for peg in state]
         idxSmallest = tops.index(1) #Since smallest(1) is always on top, this will always be true
@@ -47,15 +62,19 @@ class Problem(object):
         nextSmall = min(tops[moveSmallTo[0]], tops[moveSmallTo[1]])
         idxNextSmall = tops.index(nextSmall)
         for move in moveSmallTo:
-                actions.append(Action(idxSmallest, move, 1))
+            action = Action(idxSmallest, move, 1)
+            if check(action):
+                actions.append(action)
 
         if nextSmall is self.sentinel:
             # 1 disk to move only (cannot move sentinel)
             return actions
         else:
             moveSmallTo.remove(idxNextSmall)
-            assert(len(move) == 1)
-            actions.append(Action(idxNextSmall, move[0], nextSmall))
+            assert(len(moveSmallTo) == 1)
+            action = Action(idxNextSmall, moveSmallTo[0], nextSmall)
+            if check(action):
+                actions.append(action)
             return actions
 
 
@@ -63,13 +82,14 @@ class Problem(object):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        result = state[:]   # Make a copy
+        result = [peg[:] for peg in state]   # Make a copy - fixed
         value = result[action.src].pop()
-        print(value, " vs ", action.value)
         assert(value == action.value)
         if value is self.sentinel:
             raise(ValueError,"Attempted to Move Sentinel Value")
         result[action.dest].append(value)
+        print(action, end=" ")
+        print(result)
         return result
 
 
@@ -78,11 +98,15 @@ class Problem(object):
         state to self.goal, as specified in the constructor. Override this
         method if checking against a single self.goal is not enough.
         This must be written by students"""
-        if state[0][0] is not self.sentinel:
+        # if state == self.initial:
+        #     raise(ValueError, "Back to Square 1")
+        # if state ==  [[4], [4], [4, 3, 2, 1]]:
+        #     pdb.set_trace()
+        if state[0][-1] != self.sentinel:
             return False
-        elif state[1] is not self.goal and state[2] is not self.goal:
-            return False
-        return True
+        if state[1] == self.goal or state[2] == self.goal:
+            return True
+        return False
 
 
 class Action:
@@ -92,7 +116,10 @@ class Action:
         self.value = value
 
     def __str__(self):
-        return "Move " + self.value + " from peg " + self.src + " to peg " + self.dest
+        return "Move " + str(self.value) + " from peg " + str(self.src) + " to peg " + str(self.dest)
+
+    def __cmp__(self, other): # not used
+        return (self.src == other.src) and (self.dest == other.dest) and (self.value and other.value)
 
 
 class Node:
@@ -122,6 +149,7 @@ class Node:
 
     def child_node(self, problem, action):
         next = problem.result(self.state, action)
+        # print("Depth ", self.depth)
         return Node(next, self, action)
 
 
@@ -137,12 +165,13 @@ def breadth_first_search(problem):
 
     # Loop until all nodes are explored(frontier queue is empty) or Goal_Test
     # criteria are met
-    while frontier:
+    while not frontier.empty():
         # Remove from frontier, for analysis
         node = frontier.get()
         # Loop over all children of the current node
         # Note: We consider the fact that a node can have multiple child nodes
         # here
+        problem.visited[str(node.state)] = 1 # add to visited nodes
         for child in node.expand(problem):
             # If child node meets Goal_Test criteria
             if problem.goal_test(child.state):
@@ -151,7 +180,7 @@ def breadth_first_search(problem):
             frontier.put(child)
     return None
 
-x = Problem([[3,2,1],[],[]])
+x = Problem([[5,4,3,2,1],[],[]])
 x.printHanoi()
 
 y = breadth_first_search(x)
