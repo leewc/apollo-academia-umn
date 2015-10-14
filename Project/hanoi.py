@@ -1,6 +1,8 @@
 from queue import Queue
 import pdb 
 
+import itertools # for bidirectional
+
 """This is where the problem is defined. Initial state, goal state and other information that can be got from the problem"""
 
 class Problem(object):
@@ -100,6 +102,106 @@ class Problem(object):
             return True
         return False
 
+"""Similar Problem to the original class, but handles which side to arrange disks to."""
+"""Inherits from Problem other than Action and Goal Test"""
+class BiDirectionalProblem(Problem):
+
+    def __init__(self, initial, goal=None):
+        """This is the constructor for the Problem class. It specifies the initial state, and possibly a goal state, if there is a unique goal.  You can add other arguments if the need arises"""
+        super().__init__(initial)
+
+        if goal is not None:
+            self.goal = goal
+        else: 
+        #    # goal state is the initial state 1st peg on another peg, sort it just in case
+             self.goal = [peg[:] for peg in self.initial]
+             self.goal.reverse() # in place hence the copy
+
+        self.StartVisited = dict()
+        self.GoalVisited = dict()
+
+#        self.visited = dict() #keep visited states
+
+    def actions(self, state, fromStart):
+        """Return the actions that can be executed in the given
+        state. The result would typically be a list, but if there are
+        many actions, consider yielding them one at a time in an
+        iterator, rather than building them all at once."""
+
+        """FromEnd is a boolean that will perform a separate action if starting from the end """
+
+        def check(action):
+            """Check to see if we'll end up in a loop by applying the action.
+            """
+            result = [peg[:] for peg in state]
+            value = result[action.src].pop()
+            # if value < result[action.dest][-1] or result[action.dest] == self.sentinel:
+            #     return True
+            result[action.dest].append(value)
+            if fromStart:
+                if str(result) in self.StartVisited:
+                    return False
+            else:
+                if str(result) in self.GoalVisited:
+                    return False
+            return True
+
+        actions = []
+        tops = [peg[-1] for peg in state]
+        idxSmallest = tops.index(1) #Since smallest(1) is always on top, this will always be true
+        moveSmallTo = list(self.pegs) 
+        moveSmallTo.remove(idxSmallest) #Empty move if move to itself
+
+        nextSmall = min(tops[moveSmallTo[0]], tops[moveSmallTo[1]])
+        idxNextSmall = tops.index(nextSmall)
+        for move in moveSmallTo:
+            action = Action(idxSmallest, move, 1)
+            if check(action):
+                actions.append(action)
+
+        if nextSmall is self.sentinel:
+            # 1 disk to move only (cannot move sentinel)
+            return actions
+        else:
+            moveSmallTo.remove(idxNextSmall)
+            assert(len(moveSmallTo) == 1)
+            action = Action(idxNextSmall, moveSmallTo[0], nextSmall)
+            if check(action):
+                actions.append(action)
+            return actions        
+
+    # def result(self, state, action):
+    #     """Return the state that results from executing the given
+    #     action in the given state. The action must be one of
+    #     self.actions(state)."""
+    #     result = [peg[:] for peg in state]   # Make a copy - fixed
+    #     value = result[action.src].pop()
+    #     assert(value == action.value)
+    #     if value is self.sentinel:
+    #         raise(ValueError,"Attempted to Move Sentinel Value")
+    #     result[action.dest].append(value)
+    #     # print(action, end=" ")
+    #     # print(result)
+    #     return result
+
+    def goal_test(self, stateFromStart, stateFromEnd):
+        """Return True if the state is a goal. The default method compares the
+        state to self.goal, as specified in the constructor. Override this
+        method if checking against a single self.goal is not enough.
+        This must be written by students"""
+        # if state == self.initial:
+        #     raise(ValueError, "Back to Square 1")
+        # if state ==  [[4], [4], [4, 3, 2, 1]]:
+        #     pdb.set_trace()
+        if stateFromStart == stateFromEnd:
+            print("MATCH")
+            return True
+        # Pausing this for now
+        # if state[0][-1] != self.sentinel:
+        #     return False
+        # if state[1] == self.goal or state[2] == self.goal:
+        #     return True
+        return False
 
 class Action:
     def __init__(self, src, dest, value):
@@ -134,10 +236,14 @@ class Node:
         if parent:
             self.depth = parent.depth + 1
 
-    def expand(self, problem):
+    def expand(self, problem, fromStart=None):
         # List the nodes reachable in one step from this node.
-        return [self.child_node(problem, action)
-                for action in problem.actions(self.state)]
+        if fromStart is None:
+            return [self.child_node(problem, action)
+                    for action in problem.actions(self.state)]
+        else:
+            return [self.child_node(problem, action)
+                    for action in problem.actions(self.state, fromStart)]
 
     def child_node(self, problem, action):
         next = problem.result(self.state, action)
@@ -171,6 +277,56 @@ def breadth_first_search(problem):
             # Add every new child to the frontier
             frontier.put(child)
     return None
+
+
+def bidirectional_BFS(problem): # where problem is biDirectionalProblem instance 
+    startNode = Node(problem.initial)
+    goalNode = Node(problem.goal)
+
+    if problem.goal_test(startNode.state, goalNode.state):
+        raise(ValueError,"SOLN NODES FOUND")
+
+    frontierFromStart = Queue()
+    frontierFromGoal = Queue()
+
+    frontierFromStart.put(startNode)
+    frontierFromGoal.put(goalNode)
+
+    while not (frontierFromStart.empty() or frontierFromGoal.empty()):
+        nodeFromStart = frontierFromStart.get()
+        nodeFromGoal = frontierFromGoal.get()
+
+        if nodeFromGoal is None or nodeFromStart is None:
+            pdb.set_trace()
+
+        problem.StartVisited[str(nodeFromStart.state)] = 1
+        problem.GoalVisited[str(nodeFromGoal.state)] = 1
+
+        for childFromStart, childFromGoal in itertools.zip_longest(nodeFromStart.expand(problem, True), nodeFromGoal.expand(problem, False)):
+          
+            if childFromStart is None:
+                print("Nothing in childFromStart")
+            if childFromGoal is None:
+                print("Nothing in childFromGoal")
+
+            if childFromStart is None and childFromGoal is not None:
+                frontierFromGoal.put(childFromGoal)
+                continue
+            if childFromGoal is None and childFromStart is not None:
+                frontierFromStart.put(childFromStart)
+                continue
+
+            if problem.goal_test(childFromStart.state, childFromGoal.state):
+                raise(ValueError, "SOLN NODE F FOUND")
+
+
+            print("childFromLeft ", childFromStart.state, end="")
+            print(" childFromGoal ", childFromGoal.state)
+            frontierFromStart.put(childFromStart)
+            frontierFromGoal.put(childFromGoal)
+        print("--")
+    return None
+
 
 class Hanoi:
     """Hanoi object based on number of disks. Makes Problem object with a list of lists"""
@@ -212,10 +368,14 @@ class Hanoi:
 
     
 def runTests():
-    x = Hanoi(6)
-    x.printProblem()
-    x.solveProblemBFS()
-    x.printSolution()
+    # x = Hanoi(6)
+    # x.printProblem()
+    # x.solveProblemBFS()
+    # x.printSolution()
+
+    print("START BDP Solve")
+    y = BiDirectionalProblem([[3,2,1],[],[]])
+    z = bidirectional_BFS(y)
 
 if(__name__ == '__main__'):
     runTests()
