@@ -119,7 +119,6 @@ class BiDirectionalProblem(Problem):
 
         self.StartVisited = dict()
         self.GoalVisited = dict()
-
 #        self.visited = dict() #keep visited states
 
     def actions(self, state, fromStart):
@@ -128,7 +127,10 @@ class BiDirectionalProblem(Problem):
         many actions, consider yielding them one at a time in an
         iterator, rather than building them all at once."""
 
-        """FromEnd is a boolean that will perform a separate action if starting from the end """
+        """FromEnd is a boolean that will perform a separate action if starting from the end
+        Exact code other than use of fromState routines. 
+        Makes code more efficient without having to check for fromStart existence even on BFS.
+        """
 
         def check(action):
             """Check to see if we'll end up in a loop by applying the action.
@@ -168,40 +170,13 @@ class BiDirectionalProblem(Problem):
             action = Action(idxNextSmall, moveSmallTo[0], nextSmall)
             if check(action):
                 actions.append(action)
-            return actions        
-
-    # def result(self, state, action):
-    #     """Return the state that results from executing the given
-    #     action in the given state. The action must be one of
-    #     self.actions(state)."""
-    #     result = [peg[:] for peg in state]   # Make a copy - fixed
-    #     value = result[action.src].pop()
-    #     assert(value == action.value)
-    #     if value is self.sentinel:
-    #         raise(ValueError,"Attempted to Move Sentinel Value")
-    #     result[action.dest].append(value)
-    #     # print(action, end=" ")
-    #     # print(result)
-    #     return result
+            return actions
 
     def goal_test(self, stateFromStart, stateFromEnd):
-        """Return True if the state is a goal. The default method compares the
-        state to self.goal, as specified in the constructor. Override this
-        method if checking against a single self.goal is not enough.
-        This must be written by students"""
-        # if state == self.initial:
-        #     raise(ValueError, "Back to Square 1")
-        # if state ==  [[4], [4], [4, 3, 2, 1]]:
-        #     pdb.set_trace()
-        if stateFromStart == stateFromEnd:
-            print("MATCH")
-            return True
-        # Pausing this for now
-        # if state[0][-1] != self.sentinel:
-        #     return False
-        # if state[1] == self.goal or state[2] == self.goal:
-        #     return True
-        return False
+        """Return True if the state is identical. Overrides the base Problem goal_test
+           since we 'found' the goal path once they converge.
+        """
+        return stateFromStart == stateFromEnd
 
 class Action:
     def __init__(self, src, dest, value):
@@ -279,52 +254,67 @@ def breadth_first_search(problem):
     return None
 
 
+"""
+- What to return for bidirectional? Since we have to stitch, can get lowest node first, then stitch
+-- nodeFromEnd.parent recurse to get 'lowest'
+-- pointer to nodeFromStart
+-- pointer to hold the next node from nodeFromEnd (next = nodeFromEnd.parent)
+-- current node flips it's parent to point to (pointer of nodeFromStart)
+-- set pointer of nodeFromStart to this node.
+
+- Having a node from start and another from end to check frontier from each side, 
+    isn't this bad. 
+- Do we need 2 visited dictionaries? doesn't seem like it?? test 
+- Memory profiler? guppy? or pympler? 
+"""
+
 def bidirectional_BFS(problem): # where problem is biDirectionalProblem instance 
     startNode = Node(problem.initial)
     goalNode = Node(problem.goal)
 
     if problem.goal_test(startNode.state, goalNode.state):
-        raise(ValueError,"SOLN NODES FOUND")
+        raise(ValueError,"SOLN NODES FOUND ON FIRST")
 
-    frontierFromStart = Queue()
-    frontierFromGoal = Queue()
+    frontierFromStart = []
+    frontierFromGoal = []
 
-    frontierFromStart.put(startNode)
-    frontierFromGoal.put(goalNode)
+    frontierFromStart.append(startNode)
+    frontierFromGoal.append(goalNode)
 
-    while not (frontierFromStart.empty() or frontierFromGoal.empty()):
-        nodeFromStart = frontierFromStart.get()
-        nodeFromGoal = frontierFromGoal.get()
-
-        if nodeFromGoal is None or nodeFromStart is None:
-            pdb.set_trace()
+    while frontierFromStart or frontierFromGoal:
+        nodeFromStart = frontierFromStart.pop(0)
+        nodeFromGoal = frontierFromGoal.pop(0)
 
         problem.StartVisited[str(nodeFromStart.state)] = 1
         problem.GoalVisited[str(nodeFromGoal.state)] = 1
 
-        for childFromStart, childFromGoal in itertools.zip_longest(nodeFromStart.expand(problem, True), nodeFromGoal.expand(problem, False)):
-          
-            if childFromStart is None:
-                print("Nothing in childFromStart")
-            if childFromGoal is None:
-                print("Nothing in childFromGoal")
+        listFromStart = nodeFromStart.expand(problem, True)
+        listFromEnd = nodeFromGoal.expand(problem, False)
 
-            if childFromStart is None and childFromGoal is not None:
-                frontierFromGoal.put(childFromGoal)
-                continue
-            if childFromGoal is None and childFromStart is not None:
-                frontierFromStart.put(childFromStart)
-                continue
+        for childFromStart in listFromStart:
+            for childFromGoal in listFromEnd:
 
-            if problem.goal_test(childFromStart.state, childFromGoal.state):
-                raise(ValueError, "SOLN NODE F FOUND")
+                if problem.goal_test(childFromStart.state, childFromGoal.state):
+                    raise(ValueError, "SOLN NODE FOUND ON SAME LEVEL")
 
 
-            print("childFromLeft ", childFromStart.state, end="")
-            print(" childFromGoal ", childFromGoal.state)
-            frontierFromStart.put(childFromStart)
-            frontierFromGoal.put(childFromGoal)
-        print("--")
+                for node in frontierFromStart: # Happens more
+                    if problem.goal_test(childFromGoal.state, node.state):
+                        pdb.set_trace()
+                        raise(ValueError, "GoalNode found in start frontier")
+
+                for node in frontierFromGoal:
+                    if problem.goal_test(childFromStart.state, node.state):
+                        raise(ValueError, "StartNode found in goal frontier")
+
+                if childFromGoal not in frontierFromGoal:
+                    frontierFromGoal.append(childFromGoal)
+            # if childFromStart not in frontierFromStart:
+            frontierFromStart.append(childFromStart)
+
+            # print("childFromLeft ", childFromStart.state, end="")
+            # print(" childFromGoal ", childFromGoal.state)
+        
     return None
 
 
