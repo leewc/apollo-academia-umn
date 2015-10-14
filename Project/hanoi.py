@@ -1,4 +1,5 @@
 from queue import Queue
+import time
 import pdb 
 
 import itertools # for bidirectional
@@ -281,9 +282,12 @@ def bidirectional_BFS(problem): # where problem is biDirectionalProblem instance
     frontierFromStart.append(startNode)
     frontierFromGoal.append(goalNode)
 
-    while frontierFromStart or frontierFromGoal:
+    while frontierFromStart and frontierFromGoal: # Both must not be empty
         nodeFromStart = frontierFromStart.pop(0)
         nodeFromGoal = frontierFromGoal.pop(0)
+
+        # print("Node from start ", nodeFromStart.state, end="")
+        # print(" Node from goal ", nodeFromGoal.state)
 
         problem.StartVisited[str(nodeFromStart.state)] = 1
         problem.GoalVisited[str(nodeFromGoal.state)] = 1
@@ -307,14 +311,12 @@ def bidirectional_BFS(problem): # where problem is biDirectionalProblem instance
                     if problem.goal_test(childFromStart.state, node.state):
                         raise(ValueError, "StartNode found in goal frontier")
 
-                if childFromGoal not in frontierFromGoal:
-                    frontierFromGoal.append(childFromGoal)
+                # if childFromGoal not in frontierFromGoal:
+                    # frontierFromGoal.append(childFromGoal)
             # if childFromStart not in frontierFromStart:
-            frontierFromStart.append(childFromStart)
-
-            # print("childFromLeft ", childFromStart.state, end="")
-            # print(" childFromGoal ", childFromGoal.state)
-        
+        frontierFromStart += listFromStart
+        frontierFromGoal += listFromEnd
+    
     return None
 
 
@@ -358,14 +360,20 @@ class Hanoi:
 
     
 def runTests():
-    # x = Hanoi(6)
+    # print("START BFS SOLVE")
+    # t = time.process_time()
+    # x = Hanoi(8)
     # x.printProblem()
     # x.solveProblemBFS()
-    # x.printSolution()
+    # # x.printSolution()
+    # print("\nElapsed time for soln: ", time.process_time() - t)
+    # print("COMPLETE BFS")
 
     print("START BDP Solve")
+    t = time.process_time()
     y = BiDirectionalProblem([[3,2,1],[],[]])
     z = bidirectional_BFS(y)
+    print("\nElapsed time for soln: ", time.process_time() - t)
 
 if(__name__ == '__main__'):
     runTests()
