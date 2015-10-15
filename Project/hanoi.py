@@ -142,10 +142,10 @@ class BiDirectionalProblem(Problem):
             #     return True
             result[action.dest].append(value)
             if fromStart:
-                if str(result) in self.StartVisited:
+                if self.StartVisited.get(str(result), None) is not None:
                     return False
             else:
-                if str(result) in self.GoalVisited:
+                if self.GoalVisited.get(str(result), None) is not None:
                     return False
             return True
 
@@ -172,12 +172,6 @@ class BiDirectionalProblem(Problem):
             if check(action):
                 actions.append(action)
             return actions
-
-    def goal_test(self, stateFromStart, stateFromEnd):
-        """Return True if the state is identical. Overrides the base Problem goal_test
-           since we 'found' the goal path once they converge.
-        """
-        return stateFromStart == stateFromEnd
 
 class Action:
     def __init__(self, src, dest, value):
@@ -273,7 +267,7 @@ def bidirectional_BFS(problem): # where problem is biDirectionalProblem instance
     startNode = Node(problem.initial)
     goalNode = Node(problem.goal)
 
-    if problem.goal_test(startNode.state, goalNode.state):
+    if startNode.state == goalNode.state:
         raise(ValueError,"SOLN NODES FOUND ON FIRST")
 
     frontierFromStart = []
@@ -289,34 +283,33 @@ def bidirectional_BFS(problem): # where problem is biDirectionalProblem instance
         # print("Node from start ", nodeFromStart.state, end="")
         # print(" Node from goal ", nodeFromGoal.state)
 
-        problem.StartVisited[str(nodeFromStart.state)] = 1
-        problem.GoalVisited[str(nodeFromGoal.state)] = 1
+        #Hold references so we can grab it out in O(1)
+        problem.StartVisited[str(nodeFromStart.state)] = nodeFromStart
+        problem.GoalVisited[str(nodeFromGoal.state)] = nodeFromGoal
 
         listFromStart = nodeFromStart.expand(problem, True)
-        listFromEnd = nodeFromGoal.expand(problem, False)
+        listFromGoal = nodeFromGoal.expand(problem, False)
 
         for childFromStart in listFromStart:
-            for childFromGoal in listFromEnd:
-
-                if problem.goal_test(childFromStart.state, childFromGoal.state):
+            # See if they are at same level
+            for childFromGoal in listFromGoal:
+                if childFromStart.state == childFromGoal.state:
                     raise(ValueError, "SOLN NODE FOUND ON SAME LEVEL")
 
-
                 for node in frontierFromStart: # Happens more
-                    if problem.goal_test(childFromGoal.state, node.state):
-                        pdb.set_trace()
+                    if childFromGoal.state ==  node.state:
                         raise(ValueError, "GoalNode found in start frontier")
 
                 for node in frontierFromGoal:
-                    if problem.goal_test(childFromStart.state, node.state):
+                    if childFromStart.state == node.state:
+                        return childFromStart
                         raise(ValueError, "StartNode found in goal frontier")
 
-                # if childFromGoal not in frontierFromGoal:
-                    # frontierFromGoal.append(childFromGoal)
-            # if childFromStart not in frontierFromStart:
+            if problem.GoalVisited.get(str(childFromStart.state), None) is not None:
+                raise(ValueError, "FOUND")
         frontierFromStart += listFromStart
-        frontierFromGoal += listFromEnd
-    
+        frontierFromGoal += listFromGoal
+
     return None
 
 
@@ -371,7 +364,7 @@ def runTests():
 
     print("START BDP Solve")
     t = time.process_time()
-    y = BiDirectionalProblem([[3,2,1],[],[]])
+    y = BiDirectionalProblem([[8,7,6,5,4,3,2,1],[],[]])
     z = bidirectional_BFS(y)
     print("\nElapsed time for soln: ", time.process_time() - t)
 
