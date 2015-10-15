@@ -104,7 +104,7 @@ class Problem(object):
         return False
 
 """Similar Problem to the original class, but handles which side to arrange disks to."""
-"""Inherits from Problem other than Action and Goal Test"""
+"""Inherits from Problem other than Actions, goal_test is not used as the goal is when 2 identical states are found"""
 class BiDirectionalProblem(Problem):
 
     def __init__(self, initial, goal=None):
@@ -114,13 +114,12 @@ class BiDirectionalProblem(Problem):
         if goal is not None:
             self.goal = goal
         else: 
-        #    # goal state is the initial state 1st peg on another peg, sort it just in case
+            # goal state is the initial state 1st peg on another peg, sort it just in case
              self.goal = [peg[:] for peg in self.initial]
              self.goal.reverse() # in place hence the copy
 
         self.StartVisited = dict()
         self.GoalVisited = dict()
-#        self.visited = dict() #keep visited states
 
     def actions(self, state, fromStart):
         """Return the actions that can be executed in the given
@@ -138,8 +137,6 @@ class BiDirectionalProblem(Problem):
             """
             result = [peg[:] for peg in state]
             value = result[action.src].pop()
-            # if value < result[action.dest][-1] or result[action.dest] == self.sentinel:
-            #     return True
             result[action.dest].append(value)
             if fromStart:
                 if self.StartVisited.get(str(result), None) is not None:
@@ -291,22 +288,15 @@ def bidirectional_BFS(problem): # where problem is biDirectionalProblem instance
         listFromGoal = nodeFromGoal.expand(problem, False)
 
         for childFromStart in listFromStart:
-            # See if they are at same level
-            for childFromGoal in listFromGoal:
-                if childFromStart.state == childFromGoal.state:
-                    raise(ValueError, "SOLN NODE FOUND ON SAME LEVEL")
-
-                for node in frontierFromStart: # Happens more
-                    if childFromGoal.state ==  node.state:
-                        raise(ValueError, "GoalNode found in start frontier")
-
-                for node in frontierFromGoal:
-                    if childFromStart.state == node.state:
-                        return childFromStart
-                        raise(ValueError, "StartNode found in goal frontier")
-
+            # Previously had a bunch of for-loop and if-conditionals in attempt 
+            # to short circuit the checking, turns out that makes runtime worse 
+            # as the frontier gets bigger since it's always O(n) everytime, just
+            # remove it all and check at the end. (On 8 disks it went from 27.76 to 3.5s)
             if problem.GoalVisited.get(str(childFromStart.state), None) is not None:
+                print("Found at the end")
+                return childFromStart
                 raise(ValueError, "FOUND")
+
         frontierFromStart += listFromStart
         frontierFromGoal += listFromGoal
 
@@ -346,21 +336,21 @@ class Hanoi:
         if self.solnNode is not None:
             print("Solving Complete")
         else:
-            raise(ValueError, "Solution Not Found")
+            raise(ValueError, "Solution Not Found -- This should not happen.")
 
     def printSolution(self):
         self.printHanoi(self.solnNode.state, True)
 
     
 def runTests():
-    # print("START BFS SOLVE")
-    # t = time.process_time()
-    # x = Hanoi(8)
-    # x.printProblem()
-    # x.solveProblemBFS()
-    # # x.printSolution()
-    # print("\nElapsed time for soln: ", time.process_time() - t)
-    # print("COMPLETE BFS")
+    print("START BFS SOLVE")
+    t = time.process_time()
+    x = Hanoi(8)
+    x.printProblem()
+    x.solveProblemBFS()
+    # x.printSolution()
+    print("\nElapsed time for soln: ", time.process_time() - t)
+    print("COMPLETE BFS")
 
     print("START BDP Solve")
     t = time.process_time()
