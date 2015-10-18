@@ -1,8 +1,13 @@
-from queue import Queue
 import time
+import csv
 import pdb 
 
-import itertools # for bidirectional
+"""
+ Name : Wen Chuan Lee (leex7095)
+ Class: CSCI 4511W
+ Note : I would like to thank Professor Larson on how to frame the Tower of Hanoi problem.
+        The use of sentinel values was suggested by her and thus credit for that idea goes to the Professor.
+"""
 
 """     BEGIN DEFINITION FOR PROBLEM FRAMEWORKS         """
 class Problem(object):
@@ -28,6 +33,7 @@ class Problem(object):
 
         self.goal.insert(0, self.sentinel)
         self.nodesTouched = 0
+        self.largestFrontier = 0
 
         self.visited = dict() #keep visited states
 
@@ -224,14 +230,14 @@ def breadth_first_search(problem):
     if problem.goal_test(node.state):
         return node
     # Create a Queue to store all nodes of a particular level.
-    frontier = Queue()
-    frontier.put(node)
+    frontier = []
+    frontier.append(node)
 
     # Loop until all nodes are explored(frontier queue is empty) or Goal_Test
     # criteria are met
-    while not frontier.empty():
+    while frontier:
         # Remove from frontier, for analysis
-        node = frontier.get()
+        node = frontier.pop(0)
         problem.nodesTouched +=1
         # Loop over all children of the current node
         # Note: We consider the fact that a node can have multiple child nodes
@@ -242,7 +248,9 @@ def breadth_first_search(problem):
             if problem.goal_test(child.state):
                 return child
             # Add every new child to the frontier
-            frontier.put(child)
+            frontier.append(child)
+        if len(frontier) > problem.largestFrontier: 
+            problem.largestFrontier = len(frontier)
     return None
 
 
@@ -305,6 +313,10 @@ def bidirectional_BFS(problem): # where problem is biDirectionalProblem instance
         frontierFromStart += listFromStart
         frontierFromGoal += listFromGoal
 
+
+        if max(len(frontierFromStart), len(frontierFromGoal)) > problem.largestFrontier: 
+            problem.largestFrontier = max(len(frontierFromStart), len(frontierFromGoal))
+
     return None
 
 def depth_first_search(problem):
@@ -324,6 +336,8 @@ def depth_first_search(problem):
                 return child
             # Add every new child to the frontier
             frontier.append (child)
+        if len(frontier) > problem.largestFrontier: 
+            problem.largestFrontier = len(frontier)
     return None        
 
 def iterative_deepening_DFS(problem):
@@ -351,7 +365,12 @@ def iterative_deepening_DFS(problem):
             problem.visited.clear()
             frontier.append(node)
             MAX_DEPTH += 1
+
+        if len(frontier) > problem.largestFrontier: 
+            problem.largestFrontier = len(frontier)
     return None        
+
+"""     END ALGORITHMS                                  """
 
 class Hanoi:
     """Hanoi object based on number of disks. Makes Problem object with a list of lists"""
@@ -362,6 +381,12 @@ class Hanoi:
         self.sentinel = numberOfDisks + 1
         self.numberOfDisks = numberOfDisks
         self.solnNode = None
+
+        #First value for stats in CSV is the number of disks, lists keep track of stats
+        self.times = [self.numberOfDisks]
+        self.nodesTouched = [self.numberOfDisks]
+        self.largestFrontier = [self.numberOfDisks]
+        self.elapsed = time.process_time()
 
     def stripSentinel(self, board):
         return [[i for i in peg 
@@ -388,7 +413,11 @@ class Hanoi:
         else:
             self.problem.visited.clear() #reset
         self.problem.nodesTouched = 0
-        # print('Solving Hanoi Puzzle with ', self.numberOfDisks, ' disks using ', alg)
+        self.problem.largestFrontier = 0
+        
+        print('Solving Hanoi Puzzle with ', self.numberOfDisks, ' disks using ', alg)
+
+        start_t = time.process_time()
 
         if alg is "Breadth_First_Search":
             self.solnNode = breadth_first_search(self.problem)
@@ -400,11 +429,17 @@ class Hanoi:
             self.solnNode = bidirectional_BFS(self.bidirectionalProblem)
             # have to transfer this over since we have a different instance, so it prints
             self.problem.nodesTouched = self.bidirectionalProblem.nodesTouched
+            self.problem.largestFrontier = self.bidirectionalProblem.largestFrontier
         else:
             print("Parameter Not Recognized, please try again.")
             return
 
         if self.solnNode is not None:
+            elapsed = time.process_time() - start_t
+            self.times.append(elapsed)
+            self.largestFrontier.append(self.problem.largestFrontier)
+            self.nodesTouched.append(self.problem.nodesTouched)
+
             print("Solving Complete, number of touched nodes", self.problem.nodesTouched)
             return self.solnNode
         else:
@@ -426,40 +461,73 @@ class Hanoi:
             currentNode = currentNode.parent
         print(self.stripSentinel(currentNode.state), "<-<START>")
 
-    
-def runTests():
-    x = Hanoi(8)
-    x.printProblem()
-    
-    print("START BFS SOLVE")
-    t = time.process_time()
-    x.solveProblem("Breadth_First_Search")
-    print("Elapsed time for soln: ", time.process_time() - t)
-    # print("COMPLETE BFS SOLVE: Solution is: ")
-    # x.printSolution()
-    # # x.printSolutionPath()
+    def saveStats(self):
+        """Only call after running ALGORITHMS in order"""
+        
+        with open("data_time.csv", 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(self.times)
 
-    print("START Bidirectional BFS Solve")
-    t = time.process_time()
-    x.solveProblem("Bidirectional_BFS")
-    print("Elapsed time for soln: ", time.process_time() - t)
-    # print("COMPLETE Bidirectional BFS SOLVE: Solution is: ")
-    # x.printSolution()
-    # x.printSolutionPath()
+        with open("data_touchedNodes.csv", 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(self.nodesTouched)
 
-    print("START DFS Solve")
+        with open("data_maxFrontier.csv", 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(self.largestFrontier)
+
+        with open("elapsed_time.txt", 'a') as file:
+            file.writelines("\nTEST ON numberOfDisks: " + str(self.numberOfDisks) + " FINISHED AT seconds: " + str(self.elapsed))
+    
+def runAllTests(start,stop):
+    
+    csvHeader = ["Number of Disks", "Depth_First_Search", "Bidirectional_BFS", "Breadth_First_Search", "Iterative_Deepening_DFS"]
+    with open("data_time.csv", 'a') as file:
+        writer = csv.writer(file)
+        writer.writerow(csvHeader)
+    with open("data_touchedNodes.csv", 'a') as file:
+        writer = csv.writer(file)
+        writer.writerow(csvHeader)
+    with open("data_maxFrontier.csv", 'a') as file:
+        writer = csv.writer(file)
+        writer.writerow(csvHeader)
+
+    for i in range(start, stop):
+        x = Hanoi(i)
+        x.solveProblem("Depth_First_Search")
+        x.solveProblem("Bidirectional_BFS")
+        x.solveProblem("Breadth_First_Search")
+        x.solveProblem("Iterative_Deepening_DFS")
+        x.saveStats()
+
+def runTestsInteractive(num):
+    x = Hanoi(num)
+    
     t = time.process_time()
     x.solveProblem("Depth_First_Search")
     print("Elapsed time for soln: ", time.process_time() - t)
-    # print("COMPLETE DFS SOLVE: Solution is: ")
-    # x.printSolution()
+    print("COMPLETE DFS SOLVE: Solution is: ")
+    x.printSolution()
 
-    print("START IDDFS Solve")
+    t = time.process_time()
+    x.solveProblem("Bidirectional_BFS")
+    print("Elapsed time for soln: ", time.process_time() - t)
+    print("COMPLETE Bidirectional BFS SOLVE: Solution is: ")
+    x.printSolution()
+    # x.printSolutionPath()
+
+    t = time.process_time()
+    x.solveProblem("Breadth_First_Search")
+    print("Elapsed time for soln: ", time.process_time() - t)
+    print("COMPELTE BFS SOLVE Solution is: ")
+    x.printSolution()
+
     t = time.process_time()
     x.solveProblem("Iterative_Deepening_DFS")
     print("Elapsed time for soln: ", time.process_time() - t)
-    # print("COMPLETE DFS SOLVE: Solution is: ")
-    # x.printSolution()
+    print("COMPLETE DFS SOLVE: Solution is: ")
+    x.printSolution()
 
 if(__name__ == '__main__'):
-    runTests()
+    runTestsInteractive(6) # Change the number of disks here
+    # runAllTests(0,25)
