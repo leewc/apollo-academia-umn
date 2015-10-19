@@ -4,13 +4,15 @@ x500: leex7095
 
 ## Running the Python Script
 
-Script should be executed on Python 3.4 or later, if on a CSELabs machine, first do
+Script should be executed on Python 3.4 or later, if on a CSELabs machine, first do:
 
-`module load soft/python/3.4`
+    module load soft/python/3.4
 
 This is required to load the modules or else the timer module way have syntax errors.
 
-After that, *execute the script with*: `python3 hanoi.py` 
+After that, **execute the script with**:
+
+    python3 hanoi.py 
 
 This will solve an instance of the Tower of Hanoi Problem and provide verbose output, edit the integer passed to `runTestsInteractive(number)` where `number` is the number of disks (at least 3).
 
@@ -22,4 +24,4 @@ I still based this Tower of Hanoi problem using the previously provided problem 
 
 ## State of Code
 
-All code is functional. Some tiny performance improvements can be made by removing certain assertions but all the algorithms and additional ones have been **correctly** implemented. 
+All code is functional. Some tiny performance improvements can be made by removing certain assertions but all the algorithms and additional ones have been *correctly* implemented. 
