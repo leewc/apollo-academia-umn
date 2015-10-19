@@ -25,3 +25,7 @@ I still based this Tower of Hanoi problem using the previously provided problem 
 ## State of Code
 
 All code is functional. Some tiny performance improvements can be made by removing certain assertions but all the algorithms and additional ones have been *correctly* implemented. 
+
+## References:
+
+Professor Amy Larson provided the idea of representing the Towers of Hanoi Problem with the use of sentinel values, I have referred to her advice and help on framing this problem. 

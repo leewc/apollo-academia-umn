@@ -1,7 +1,7 @@
 Name: Wen Chuan Lee
 x500: leex7095
 
-Code submission	: Moodle
+Code submission	: Moodle (also on GitHub: https://github.umn.edu/umn-csci-4511F15/repo-leex7095/releases)
 Problem			: Tower of Hanoi
 
 Algorithms Implemented:
@@ -28,3 +28,7 @@ Additional Work Done:
 I have implemented Iterative Depth-first search, which turns out to be the fastest, as well as Iterative Deepening Depth-first search. The difference between DFS and IDDFS is that there is a maximum depth in IDDFS with the goal of avoiding the infinite traversal down the tree. This however is not beneficial to the algorithm as the solution in towers of hanoi will always be at the leaves deep down the tree. The algorithm is the slowest as the solution is very deep down the tree and there are a lot of recalculations to arrive at the solution.
 
 Therefore, 2 additional algorithms (DFS and IDDFS) have been implemented to further expand my analysis for this project.
+
+References:
+
+Professor Amy Larson provided the idea of representing the Towers of Hanoi Problem with the use of sentinel values, I have referred to her advice and help on framing this problem. 
