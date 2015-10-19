@@ -1,0 +1,10 @@
+Number of Disks,Depth_First_Search,Bidirectional_BFS,Breadth_First_Search,Iterative_Deepening_DFS
+2,4,3,3,5
+3,9,8,14,10
+4,28,21,36,29
+5,81,79,156,82
+6,244,254,528,245
+7,729,1079,2164,730
+8,2188,4247,8256,2189
+9,6561,16599,33236,6562
+10,19684,66135,131328,19685

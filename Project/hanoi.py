@@ -5,8 +5,11 @@ import pdb
 """
  Name : Wen Chuan Lee (leex7095)
  Class: CSCI 4511W
- Note : I would like to thank Professor Larson on how to frame the Tower of Hanoi problem.
+ Note : I would like to thank Professor Larson for providing advice on how to frame the Tower of Hanoi problem.
         The use of sentinel values was suggested by her and thus credit for that idea goes to the Professor.
+
+ CSELABS: run `module load soft/python/3.4`
+
 """
 
 """     BEGIN DEFINITION FOR PROBLEM FRAMEWORKS         """
@@ -480,7 +483,7 @@ class Hanoi:
             file.writelines("\nTEST ON numberOfDisks: " + str(self.numberOfDisks) + " FINISHED AT seconds: " + str(self.elapsed))
     
 def runAllTests(start,stop):
-    
+    assert(start > 1)
     csvHeader = ["Number of Disks", "Depth_First_Search", "Bidirectional_BFS", "Breadth_First_Search", "Iterative_Deepening_DFS"]
     with open("data_time.csv", 'a') as file:
         writer = csv.writer(file)
@@ -506,28 +509,28 @@ def runTestsInteractive(num):
     t = time.process_time()
     x.solveProblem("Depth_First_Search")
     print("Elapsed time for soln: ", time.process_time() - t)
-    print("COMPLETE DFS SOLVE: Solution is: ")
+    print("COMPLETE DFS SOLVE. ")
     x.printSolution()
 
     t = time.process_time()
     x.solveProblem("Bidirectional_BFS")
     print("Elapsed time for soln: ", time.process_time() - t)
-    print("COMPLETE Bidirectional BFS SOLVE: Solution is: ")
+    print("COMPLETE Bidirectional BFS SOLVE. ")
     x.printSolution()
     # x.printSolutionPath()
 
     t = time.process_time()
     x.solveProblem("Breadth_First_Search")
     print("Elapsed time for soln: ", time.process_time() - t)
-    print("COMPELTE BFS SOLVE Solution is: ")
+    print("COMPELTE BFS SOLVE.")
     x.printSolution()
 
     t = time.process_time()
     x.solveProblem("Iterative_Deepening_DFS")
     print("Elapsed time for soln: ", time.process_time() - t)
-    print("COMPLETE DFS SOLVE: Solution is: ")
+    print("COMPLETE DFS SOLVE. ")
     x.printSolution()
 
 if(__name__ == '__main__'):
     runTestsInteractive(6) # Change the number of disks here
-    # runAllTests(0,25)
+    # runAllTests(2,50) # to reach 11 it took 6 hours

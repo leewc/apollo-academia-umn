@@ -1,0 +1,30 @@
+Name: Wen Chuan Lee
+x500: leex7095
+
+Code submission	: GitHub (Tag: project-part1-hanoi)
+Problem			: Tower of Hanoi
+
+Algorithms Implemented:
+
+1. Breadth-first search
+2. Bidirectional breadth-first search
+3. Iterative Depth-first search [Additional]
+4. Iterative Deepening Depth-first search [Additional]
+
+Hypothesis from Proposal:
+
+Bidirectional BFS will have a better performance and time complexity than BFS itself. As BFS has to explore each node at every level before moving on to the next, the memory and time required will be much longer while Bidirectional BFS will reduce the time of exploring each node at every level by running two simultaneous searches, that is one from the problem state and one from the goal state. 
+
+Conclusion based on preliminary experiments:
+
+For the additional algorithms, Iterative Depth-first search (DFS) is the fastest algorithm to find a solution for the problem, and Iterative Deepening Depth-First Search (IDDFS) is the slowest algorithm in this problem as the solution is always very deep down the tree, leading to a lot of recomputations and wasted calculations.
+
+Experiments were done in the Keller labs and ran for over 9 hours. Iterative Deepening DFS was the slowest, while BFS was the second slowest. Bidirectional BFS ranked second while DFS was the fastest. 
+
+Metrics collected where based on clock time, number of nodes explored/touched and maximum size of frontier as well as maximum depth. The preliminary resuls were running the 4 algorithms on a problem with 3 disks up to 11 disks. 
+
+Additional Work Done:
+
+I have implemented Iterative Depth-first search, which turns out to be the fastest, as well as Iterative Deepening Depth-first search. The difference between DFS and IDDFS is that there is a maximum depth in IDDFS with the goal of avoiding the infinite traversal down the tree. This however is not beneficial to the algorithm as the solution in towers of hanoi will always be at the leaves deep down the tree. The algorithm is the slowest as the solution is very deep down the tree and there are a lot of recalculations to arrive at the solution.
+
+Therefore, 2 additional algorithms (DFS and IDDFS) have been implemented to further expand my analysis for this project.
