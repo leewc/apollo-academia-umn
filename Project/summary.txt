@@ -1,7 +1,7 @@
 Name: Wen Chuan Lee
 x500: leex7095
 
-Code submission	: GitHub (Tag: project-part1-hanoi)
+Code submission	: Moodle
 Problem			: Tower of Hanoi
 
 Algorithms Implemented:
