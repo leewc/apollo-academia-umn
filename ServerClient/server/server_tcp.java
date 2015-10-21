@@ -10,7 +10,7 @@ class server_tcp
          if(argv.length < 1)
          {
             System.err.println("Usage: java server.server_tcp <port>");
-         return;
+            return;
          }
 
          try {

@@ -12,6 +12,9 @@ public class TCPClient {
 	Socket clientSocket;
 	ObjectOutputStream outToServer;
 	ObjectInputStream inFromServer;
+
+	BufferedWriter writer;
+	String fileName;
 	
 	public TCPClient(String serverIP, int port) throws IOException
 	{
@@ -21,6 +24,7 @@ public class TCPClient {
 
 		this.outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
 		this.inFromServer = new ObjectInputStream(clientSocket.getInputStream());
+		this.writer = null;
 	}
 	
 	public void writeToServer(Object obj) throws IOException  
@@ -28,11 +32,12 @@ public class TCPClient {
 		this.outToServer.writeObject(obj);
 	}
 
-	//This class is the main class that will do all file and packet operations
 	public Boolean getFileFromServer(char[] fileName) throws IOException, ClassNotFoundException
 	{
+		this.fileName = new String(fileName);
+
 		char[] payload = new char[MsgT.BUFFER_SIZE];
-		
+
 		for(int i = 0; i < fileName.length; i++)
 		{
 			payload[i] = fileName[i];
@@ -41,14 +46,47 @@ public class TCPClient {
 		Message getMsg = new Message(MsgT.MSG_TYPE_GET, payload, fileName.length);
 		writeToServer(getMsg);
 		
-		return getResponseFromServer();
+		return receiveFromServer();
 	}
 	
-	public Boolean getResponseFromServer() throws IOException, ClassNotFoundException
+	//This class is the main class that will do all file and packet operations
+	public Boolean receiveFromServer() throws IOException, ClassNotFoundException
 	{
 		Message recv = (Message) inFromServer.readObject(); //deserialize
 		System.out.println("client: RX " + recv.getStatus());
-		return true;
+		Message send; 
+		
+		switch(recv.msgType){
+			case MsgT.MSG_TYPE_FINISH:
+
+				if(MsgT.DEBUG)
+						System.out.println("Downloaded file: " + System.getProperty("user.dir") + "/"+ fileName);
+
+				send = new Message(MsgT.MSG_TYPE_FINISH, new char[0], 0);
+				writeToServer(send);
+				writer.close();
+				return true;
+			case MsgT.MSG_TYPE_GET_RESP:
+				if(writer == null) //First message, make a file and write out
+				{
+					writer = new BufferedWriter(new OutputStreamWriter(
+							new FileOutputStream(fileName, false), "US-ASCII")); //C unsigned chars are ASCII 0-255 
+				}
+				writer.write(recv.getPayload());
+
+				send = new Message(MsgT.MSG_TYPE_GET_ACK, new char[0], 0);
+				writeToServer(send);
+				break;
+			default:
+				System.err.println("DO NOT UNDERSTAND SERVER RESP");
+				throw new UnsupportedOperationException();
+		}
+
+		if(send != null && MsgT.DEBUG)
+			System.out.println("client: TX " + send.getStatus());
+
+		return receiveFromServer(); //recursively waits for server until we get MSG_TYPE_FINISH
+		
 		// int count;
 		// char[] buffer = new char[8192]; 
 		// while ((count = inFromServer.read(buffer)) > 0)

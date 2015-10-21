@@ -5,13 +5,13 @@ import java.io.Serializable;
 public class Message implements Serializable
 {
 	//Message container to send over the wire like a 'packet'
-	public static final long serialVersionUID = 42L;
+	public static final long serialVersionUID = 42L; //because that's the meaning of life.
 
 	public int msgType;
 	int cur_sequence;
 	int max_sequence;
 	int payload_len;
-	char[] payload;
+	char[] payload; //kept as a char array to simulate C, a req, hence the inefficient conversions
 
 	public Message(int msgType, int cur_sequence, int max_sequence, int payload_len, char[] payload)
 	{
@@ -22,7 +22,7 @@ public class Message implements Serializable
 		this.payload = payload;
 	}
 
-	//For GET requests
+	//For GET/ERROR/ACK requests
 	public Message(int msgType, char[] payload, int payload_len)
 	{
 		this.msgType = msgType;
@@ -48,9 +48,9 @@ public class Message implements Serializable
 		status.append(this.msgType);
 		status.append("-");
 		status.append(MsgT.str_map[this.msgType]);
-		status.append("    \t");
+		status.append(" \t");
 		status.append(this.cur_sequence);
-		status.append("    \t");
+		status.append(" \t");
 		status.append(this.max_sequence);
 		status.append("\t\t");
 		status.append(this.payload_len);
