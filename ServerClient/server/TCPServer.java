@@ -82,15 +82,17 @@ class TCPServer
 				processRequest(inFromClient, outToClient);
 				break;
 
-			case MsgT.MSG_TYPE_FINISH:
+			case MsgT.MSG_TYPE_FINISH: //cleanup
 				buffered_rdr.close();
-				System.out.println("WE DONE");
+				cur_seq = 0;
+				max_seq = 0; 
+				if(MsgT.DEBUG) System.out.println("File transfer complete.");
 				break;
 			default:
 				if(MsgT.DEBUG) System.err.println("DO NOT UNDERSTAND MSG_TYPE");
 				throw new UnsupportedOperationException();
 		}
-		// if(MsgT.DEBUG) System.out.println("\n Content " + new String (recv.getPayload()));
+		// if(MsgT.DEBUG) System.out.println("\n Content " + new String (recv.getPayload());
 	}
 
 	//Credit: http://stackoverflow.com/questions/1844688/read-all-files-in-a-folder
@@ -125,7 +127,7 @@ class TCPServer
 		}
 
 		// improvement: look at mark(int readLimit) for buffered reader to resume from error
-		return new Message(MsgT.MSG_TYPE_GET_RESP, cur_seq, max_seq, index+1, payload);
+		return new Message(MsgT.MSG_TYPE_GET_RESP, cur_seq, max_seq, index, payload);
 	}
 
     public FileInputStream getFile(String fileName)

@@ -32,6 +32,7 @@ public class Message implements Serializable
 		this.payload = payload;
 	}
 
+	// Data is still transmitted as a char, so properly serialized.
 	public char[] getPayload()
 	{
 		char[] data = new char[payload_len];
