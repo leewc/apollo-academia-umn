@@ -69,16 +69,18 @@ public class TCPClient {
 			case MsgT.MSG_TYPE_GET_RESP:
 				if(writer == null) //First message, make a file and write out
 				{
-					writer = new BufferedWriter(new OutputStreamWriter(
-							new FileOutputStream(fileName, false), "US-ASCII")); //C unsigned chars are ASCII 0-255 
-				}
+					// writer = new BufferedWriter(new OutputStreamWriter(
+							// new FileOutputStream(fileName, false), "US-ASCII")); //C unsigned chars are ASCII 0-255 
+					writer = new BufferedWriter(new FileWriter(fileName, false));
+					//use this because our payload is already a char else it flips the bits
+				}	
 				writer.write(recv.getPayload());
 
 				send = new Message(MsgT.MSG_TYPE_GET_ACK, new char[0], 0);
 				writeToServer(send);
 				break;
 			default:
-				System.err.println("DO NOT UNDERSTAND SERVER RESP");
+				System.err.println("CANNOT UNDERSTAND SERVER RESP.");
 				throw new UnsupportedOperationException();
 		}
 
