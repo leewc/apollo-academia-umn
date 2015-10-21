@@ -11,7 +11,7 @@ public class TCPClient {
 	int port;
 	Socket clientSocket;
 	ObjectOutputStream outToServer;
-	BufferedReader inFromServer;
+	ObjectInputStream inFromServer;
 	
 	public TCPClient(String serverIP, int port) throws IOException
 	{
@@ -20,7 +20,7 @@ public class TCPClient {
 		createSocket();
 
 		this.outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
-		this.inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		this.inFromServer = new ObjectInputStream(clientSocket.getInputStream());
 	}
 	
 	public void writeToServer(Object obj) throws IOException  
@@ -28,24 +28,27 @@ public class TCPClient {
 		this.outToServer.writeObject(obj);
 	}
 
-	public Boolean getFileFromServer(String fileName) throws IOException
+	//This class is the main class that will do all file and packet operations
+	public Boolean getFileFromServer(char[] fileName) throws IOException, ClassNotFoundException
 	{
-		char[] payload = new char[256];
+		char[] payload = new char[MsgT.BUFFER_SIZE];
+		
+		for(int i = 0; i < fileName.length; i++)
+		{
+			payload[i] = fileName[i];
+		}
 
-		Message getMsg = new Message(MsgT.MSG_TYPE_GET, payload, fileName.length());
+		Message getMsg = new Message(MsgT.MSG_TYPE_GET, payload, fileName.length);
 		writeToServer(getMsg);
-		return true;
+		
+		return getResponseFromServer();
 	}
 	
-	public void readLineFromServer() throws IOException
+	public Boolean getResponseFromServer() throws IOException, ClassNotFoundException
 	{
-		System.out.println("Reading a line from the server.");
-		String x;
-
-		while((x = inFromServer.readLine()) != null)
-		{
-			System.out.println("X IS: " + x.toString());
-		}
+		Message recv = (Message) inFromServer.readObject(); //deserialize
+		System.out.println("client: RX " + recv.getStatus());
+		return true;
 		// int count;
 		// char[] buffer = new char[8192]; 
 		// while ((count = inFromServer.read(buffer)) > 0)
@@ -60,7 +63,7 @@ public class TCPClient {
 		clientSocket = new Socket(serverIP, port);
 		System.out.println("Client Connection Established");
 		if(clientSocket.getPort() == 0)
-			System.out.print("Socket not connected yet");
+			System.err.println("Socket not connected yet");
 	}
 	
 	public void closeSocket() throws IOException

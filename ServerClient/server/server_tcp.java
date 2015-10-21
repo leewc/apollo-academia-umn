@@ -14,13 +14,14 @@ class server_tcp
          }
 
          try {
-            final File curDir = new File("server/.");
+            final File curDir = new File("server/");
             TCPServer tcpServer = new TCPServer(Integer.parseInt(argv[0]), curDir); 
 
             System.out.println("Server has files:");
             tcpServer.listFilesForFolder(curDir);
 
-            System.out.println("\nServer is listening ...");
+            System.out.println("\nServer is listening ...\n");
+
             tcpServer.start();
          }
          catch(Exception e)
