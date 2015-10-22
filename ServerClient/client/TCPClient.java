@@ -53,55 +53,50 @@ public class TCPClient {
 	public Boolean receiveFromServer() throws IOException, ClassNotFoundException
 	{
 		Message recv = (Message) inFromServer.readObject(); //deserialize
-		System.out.println("client: RX " + recv.getStatus());
 		Message send; 
 		
-		switch(recv.msgType){
-			case MsgT.MSG_TYPE_FINISH:
+		while(recv.msgType != MsgT.MSG_TYPE_FINISH)
+		{
+			System.out.println("client: RX " + recv.getStatus());
+			switch(recv.msgType)
+			{
+				case MsgT.MSG_TYPE_GET_RESP:
+					if(writer == null) //First message, make a file and write out
+					{
+						writer = new BufferedWriter(
+							new OutputStreamWriter(new FileOutputStream(fileName, false), "US-ASCII")); //C unsigned chars are ASCII 0-255 
+						// writer = new FileWriter("fileName.txt", false);
+						//Not using FileWriter because of encoding, bug was in index, not this.
+					}
+					writer.write(recv.getPayload());
 
-				if(MsgT.DEBUG)
-						System.out.println("Downloaded file: " + System.getProperty("user.dir") + "/"+ fileName);
+					send = new Message(MsgT.MSG_TYPE_GET_ACK, new char[0], 0);
+					writeToServer(send);
+					break;
 
-				send = new Message(MsgT.MSG_TYPE_FINISH, new char[0], 0);
-				writeToServer(send);
-				writer.close();
-				return true;
+				case MsgT.MSG_TYPE_GET_ERR:
+					send = new Message(MsgT.MSG_TYPE_FINISH, new char[0], 0);
+					writeToServer(send);
+					return false;
 
-			case MsgT.MSG_TYPE_GET_RESP:
-				if(writer == null) //First message, make a file and write out
-				{
-					writer = new BufferedWriter(
-						new OutputStreamWriter(new FileOutputStream(fileName, false), "US-ASCII")); //C unsigned chars are ASCII 0-255 
-					// writer = new FileWriter("fileName.txt", false);
-					//Not using FileWriter because of encoding, bug was in index, not this.
-				}
-				writer.write(recv.getPayload());
-
-				send = new Message(MsgT.MSG_TYPE_GET_ACK, new char[0], 0);
-				writeToServer(send);
-				break;
-
-			case MsgT.MSG_TYPE_GET_ERR:
-				send = new Message(MsgT.MSG_TYPE_FINISH, new char[0], 0);
-				writeToServer(send);
-				return false;
-
-			default:
-				System.err.println("CANNOT UNDERSTAND SERVER MSG RESPONSE.");
-				throw new UnsupportedOperationException();
+				default:
+					System.err.println("CANNOT UNDERSTAND SERVER MSG RESPONSE.");
+					throw new UnsupportedOperationException();
+			}
+			recv = (Message) inFromServer.readObject();
 		}
+		//Exit while loop
+		System.out.println("client: RX " + recv.getStatus());
+		
+		if(MsgT.DEBUG)
+			System.out.println("Downloaded file: " + System.getProperty("user.dir") + "/"+ fileName);
 
+		send = new Message(MsgT.MSG_TYPE_FINISH, new char[0], 0);
+		writeToServer(send);
+		writer.close();
+		return true;
 		// if(send != null && MsgT.DEBUG)
 			// System.out.println("client: TX " + send.getStatus());
-
-		return receiveFromServer(); //recursively waits for server until we get MSG_TYPE_FINISH
-		
-		// int count;
-		// char[] buffer = new char[8192]; 
-		// while ((count = inFromServer.read(buffer)) > 0)
-		// {
-		//   inFromServer.write(buffer, 0, count);
-		// }
 	}
 
 	public void createSocket() throws IOException, ConnectException

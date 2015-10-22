@@ -27,8 +27,8 @@ class TCPServer
 
 	public void start() throws Exception
 	{
-		while(true) 
-         {
+		// while(true) //commenting this out since we don't have to keep it alive after servicing a request 
+         // {
             Socket connectionSocket = serverSocket.accept();
             
             if(MsgT.DEBUG) System.out.println("Client Connected at port number:" + connectionSocket.getLocalPort());
@@ -39,61 +39,59 @@ class TCPServer
             ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
             
             processRequest(inFromClient, outToClient);
-         }
+         // }
 	}
 
 	/* Recursive function that will keep waiting for requests unti it receives finish signal! */
 	public void processRequest(ObjectInputStream inFromClient, ObjectOutputStream outToClient) throws Exception
 	{
 		Message recv = (Message) inFromClient.readObject(); //deserialize
-		System.out.println("server: RX " + recv.getStatus());
 		Message send;
 
-		switch(recv.msgType)
+		while(recv.msgType != MsgT.MSG_TYPE_FINISH)
 		{
-			case MsgT.MSG_TYPE_GET: //only one first get call each time.
-				FileInputStream fs = getFile(new String(recv.getPayload()));
-				if(fs != null) //getFile will have generated a stream by then.
-				{
-					//max seq is set by getFile
-					cur_seq = 0;
-					buffered_rdr = new BufferedReader(new InputStreamReader(fs, "US-ASCII"));
+			System.out.println("server: RX " + recv.getStatus());
+			switch(recv.msgType)
+			{
+				case MsgT.MSG_TYPE_GET: //only one first get call each time.
+					FileInputStream fs = getFile(new String(recv.getPayload()));
+					if(fs != null) //getFile will have generated a stream by then.
+					{
+						//max seq is set by getFile
+						cur_seq = 0;
+						buffered_rdr = new BufferedReader(new InputStreamReader(fs, "US-ASCII"));
+						send = getChunk();
+					}
+					else
+					{
+						send = new Message(MsgT.MSG_TYPE_GET_ERR, new char[0], 0);
+					}
+
+					outToClient.writeObject(send);
+					// if(MsgT.DEBUG)	System.out.println("server: TX " + send.getStatus());
+					break;
+
+				case MsgT.MSG_TYPE_GET_ACK:
 					send = getChunk();
-				}
-				else
-				{
-					send = new Message(MsgT.MSG_TYPE_GET_ERR, new char[0], 0);
-				}
+					outToClient.writeObject(send);
+					// if(MsgT.DEBUG) 	System.out.println("server: TX " + send.getStatus());
+					break;
 
-				outToClient.writeObject(send);
-
-				// if(MsgT.DEBUG)	System.out.println("server: TX " + send.getStatus());
-				
-				processRequest(inFromClient, outToClient);
-				break;
-
-			case MsgT.MSG_TYPE_GET_ACK:
-				send = getChunk();
-				outToClient.writeObject(send);
-
-				// if(MsgT.DEBUG) 	System.out.println("server: TX " + send.getStatus());
-				
-				processRequest(inFromClient, outToClient);
-				break;
-
-			case MsgT.MSG_TYPE_FINISH: //cleanup
-				if(buffered_rdr != null)
-					buffered_rdr.close();
-				cur_seq = 0;
-				max_seq = 0; 
-				if(MsgT.DEBUG) 	System.out.println("Clien Request complete.");
-				break;
-
-			default:
-				if(MsgT.DEBUG) 	System.err.println("DO NOT UNDERSTAND MSG_TYPE");
-				throw new UnsupportedOperationException();
+				default:
+					if(MsgT.DEBUG) 	System.err.println("DO NOT UNDERSTAND MSG_TYPE");
+					throw new UnsupportedOperationException();
+			}
+			recv = (Message) inFromClient.readObject();
+			// if(MsgT.DEBUG) System.out.println("\n Content " + new String (recv.getPayload());
 		}
-		// if(MsgT.DEBUG) System.out.println("\n Content " + new String (recv.getPayload());
+		//Exit while loop, received finished message.
+		System.out.println("server: RX " + recv.getStatus()); //print final status
+		if(buffered_rdr != null)
+			buffered_rdr.close();
+		cur_seq = 0;
+		max_seq = 0;
+
+		if(MsgT.DEBUG) 	System.out.println("Client Request complete.");
 	}
 
 	//Credit: http://stackoverflow.com/questions/1844688/read-all-files-in-a-folder
