@@ -42,7 +42,7 @@ class TCPServer
          }
 	}
 
-	/* Recursive call that will keep waiting for requests! */
+	/* Recursive function that will keep waiting for requests unti it receives finish signal! */
 	public void processRequest(ObjectInputStream inFromClient, ObjectOutputStream outToClient) throws Exception
 	{
 		Message recv = (Message) inFromClient.readObject(); //deserialize
@@ -67,29 +67,30 @@ class TCPServer
 
 				outToClient.writeObject(send);
 
-				if(MsgT.DEBUG)
-						System.out.println("server: TX " + send.getStatus());
-				processRequest(inFromClient, outToClient);
+				// if(MsgT.DEBUG)	System.out.println("server: TX " + send.getStatus());
 				
+				processRequest(inFromClient, outToClient);
 				break;
+
 			case MsgT.MSG_TYPE_GET_ACK:
 				send = getChunk();
-				
-				outToClient.writeObject(getChunk());
+				outToClient.writeObject(send);
 
-				if(MsgT.DEBUG)
-						System.out.println("server: TX " + send.getStatus());
+				// if(MsgT.DEBUG) 	System.out.println("server: TX " + send.getStatus());
+				
 				processRequest(inFromClient, outToClient);
 				break;
 
 			case MsgT.MSG_TYPE_FINISH: //cleanup
-				buffered_rdr.close();
+				if(buffered_rdr != null)
+					buffered_rdr.close();
 				cur_seq = 0;
 				max_seq = 0; 
-				if(MsgT.DEBUG) System.out.println("File transfer complete.");
+				if(MsgT.DEBUG) 	System.out.println("Clien Request complete.");
 				break;
+
 			default:
-				if(MsgT.DEBUG) System.err.println("DO NOT UNDERSTAND MSG_TYPE");
+				if(MsgT.DEBUG) 	System.err.println("DO NOT UNDERSTAND MSG_TYPE");
 				throw new UnsupportedOperationException();
 		}
 		// if(MsgT.DEBUG) System.out.println("\n Content " + new String (recv.getPayload());
@@ -111,18 +112,18 @@ class TCPServer
 		char[] payload = new char[MsgT.BUFFER_SIZE];
 		int r;
 		int index = 0;
-		while(  (r = buffered_rdr.read()) != -1 && index != MsgT.BUFFER_SIZE - 1)
+		//Got to check for buffer size first, else we over read() and eat a byte which gets lost.
+		while( index != MsgT.BUFFER_SIZE && (r = buffered_rdr.read()) != -1)
 		{
 			payload[index] = (char) r;
 			index++;
 		}
 		cur_seq ++;
 
-		System.out.println("CUR " + cur_seq + " MAX " + max_seq);
-		
 		if(cur_seq > max_seq) //this will happen when EOF
 		{
-			System.out.println("Complete transfer.");
+			if(MsgT.DEBUG)
+				System.out.println("Complete transfer.");
 			return new Message(MsgT.MSG_TYPE_FINISH, new char[0], 0); 
 		}
 
@@ -136,7 +137,6 @@ class TCPServer
     	try 
     	{
     		File file = new File(curDir, fileName);
-    		file.setReadOnly();
     		fstream = new FileInputStream(file);
     		max_seq = (int) Math.ceil(file.length() / (double) MsgT.BUFFER_SIZE);	//THIS IS UNSAFE, CHECK WITH REQS
 

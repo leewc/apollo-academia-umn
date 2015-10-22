@@ -66,26 +66,33 @@ public class TCPClient {
 				writeToServer(send);
 				writer.close();
 				return true;
+
 			case MsgT.MSG_TYPE_GET_RESP:
 				if(writer == null) //First message, make a file and write out
 				{
 					writer = new BufferedWriter(
 						new OutputStreamWriter(new FileOutputStream(fileName, false), "US-ASCII")); //C unsigned chars are ASCII 0-255 
 					// writer = new FileWriter("fileName.txt", false);
-					//No using FileWriter because of encoding, bug was in index, not this.
+					//Not using FileWriter because of encoding, bug was in index, not this.
 				}
 				writer.write(recv.getPayload());
 
 				send = new Message(MsgT.MSG_TYPE_GET_ACK, new char[0], 0);
 				writeToServer(send);
 				break;
+
+			case MsgT.MSG_TYPE_GET_ERR:
+				send = new Message(MsgT.MSG_TYPE_FINISH, new char[0], 0);
+				writeToServer(send);
+				return false;
+
 			default:
-				System.err.println("CANNOT UNDERSTAND SERVER RESP.");
+				System.err.println("CANNOT UNDERSTAND SERVER MSG RESPONSE.");
 				throw new UnsupportedOperationException();
 		}
 
-		if(send != null && MsgT.DEBUG)
-			System.out.println("client: TX " + send.getStatus());
+		// if(send != null && MsgT.DEBUG)
+			// System.out.println("client: TX " + send.getStatus());
 
 		return receiveFromServer(); //recursively waits for server until we get MSG_TYPE_FINISH
 		

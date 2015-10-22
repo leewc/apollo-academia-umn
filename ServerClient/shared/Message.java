@@ -40,6 +40,7 @@ public class Message implements Serializable
 		{
 			data[i] = this.payload[i];
 		}
+		assert(this.payload[payload_len] == '\0');
 		return data;
 	}
 

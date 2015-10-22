@@ -17,7 +17,7 @@ class server_tcp
             final File curDir = new File("server/");
             TCPServer tcpServer = new TCPServer(Integer.parseInt(argv[0]), curDir); 
 
-            System.out.println("Server has files:");
+            System.out.println("Server has these files:");
             tcpServer.listFilesForFolder(curDir);
 
             System.out.println("\nServer is listening ...\n");

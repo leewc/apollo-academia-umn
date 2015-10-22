@@ -24,6 +24,8 @@ public class client_tcp {
             
 			if(status)
 				System.out.println("File Download Complete.");
+			else
+				System.err.println("File not found on Server.");
 
 			tcpClient.closeSocket();
 		}
