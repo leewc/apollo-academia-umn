@@ -22,6 +22,7 @@ all:	$(classes) shared client server
 clean :
 	rm -Rf client/*.class
 	rm -Rf server/*.class
+	rm -Rf shared/*.class
 	rm -Rf *.class
 
 %.class : %.java
