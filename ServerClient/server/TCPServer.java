@@ -39,7 +39,6 @@ class TCPServer
             ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
             
             processRequest(inFromClient, outToClient);
-            System.out.println("Shutting Server Down.");
          // }
 	}
 

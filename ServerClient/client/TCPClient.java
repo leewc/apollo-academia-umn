@@ -69,7 +69,6 @@ public class TCPClient {
 	//This class is the main class that will do all file and packet operations
 	public Boolean receiveFromServer() throws IOException, ClassNotFoundException
 	{
-		long start = System.nanoTime();
 		Message recv = (Message) inFromServer.readObject(); //deserialize
 		Message send; 
 		
@@ -108,9 +107,6 @@ public class TCPClient {
 		
 		if(MsgT.DEBUG)
 			System.out.println("Downloaded file: " + System.getProperty("user.dir") + "/"+ fileName);
-
-		double elapsed_time = ((double) (System.nanoTime() - start )) / 1000000000.0;
-		System.out.println("Elapsed Time to Download File in seconds: " + elapsed_time);
 
 		send = new Message(MsgT.MSG_TYPE_FINISH, new char[0], 0);
 		writeToServer(send);
