@@ -20,10 +20,10 @@ public class TCPClient {
 	{
 		this.serverIP = serverIP;
 		this.port = port;
-		createSocket();
+		this.createSocket();
 
-		this.outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
-		this.inFromServer = new ObjectInputStream(clientSocket.getInputStream());
+		//this.outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
+		//this.inFromServer = new ObjectInputStream(clientSocket.getInputStream());
 		this.writer = null;
 	}
 	
@@ -44,9 +44,26 @@ public class TCPClient {
 		}
 
 		Message getMsg = new Message(MsgT.MSG_TYPE_GET, payload, fileName.length);
-		writeToServer(getMsg);
+
+		DataInputStream intest = new DataInputStream(clientSocket.getInputStream());
+
+		DataOutputStream test = new DataOutputStream(clientSocket.getOutputStream());
+		getMsg.serializeAsCStruct(test);
+		// test.write(getMsg.serializeAsCStruct());
+		// test.flush();
+
+		byte[] input = new byte[MsgT.BUFFER_SIZE + 16];
+		// int lol;
+		// while((lol = intest.read()) != -1 )
+		// 	System.out.println(lol); 
+
+		// System.out.println(java.util.Arrays.toString(input));
+		return false;
+
+
+		//writeToServer(getMsg);
 		
-		return receiveFromServer();
+		// return receiveFromServer();
 	}
 	
 	//This class is the main class that will do all file and packet operations
@@ -105,7 +122,7 @@ public class TCPClient {
 
 	public void createSocket() throws IOException, ConnectException
 	{
-		System.out.println("Creating socket on host: " + serverIP);
+		System.out.println("Creating TCP Socket on host: " + serverIP);
 		clientSocket = new Socket(serverIP, port);
 		System.out.println("Client Connection Established");
 		if(clientSocket.getPort() == 0)
