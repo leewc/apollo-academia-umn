@@ -6,22 +6,24 @@ import java.io.*;
 import java.net.*;
 import java.lang.Math;
 
-/* A simple TCP Server that will wait for a client to connect at a socket, and then serve files
+/* A simple UDP Server that will wait for a client to connect at a socket, and then serve files
  * in the local directory.
 */
-class TCPServer 
+class UDPServer 
 {
 	public int port;
-	public ServerSocket serverSocket;
+	public DatagramSocket serverSocket;
 	public final File curDir;
+
+	public InetAddress clientInet;
 
 	private Reader buffered_rdr;
 	private int cur_seq;
 	private int max_seq;
 
-	public TCPServer(int port, File curDir) throws Exception
+	public UDPServer(int port, File curDir) throws Exception
 	{
-		this.serverSocket = new ServerSocket(port);
+		this.serverSocket = new DatagramSocket(port);
 		this.curDir = curDir;
 	}
 
@@ -29,24 +31,18 @@ class TCPServer
 	{
 		// while(true) //commenting this out since we don't have to keep it alive after servicing a request 
          // {
-            Socket connectionSocket = serverSocket.accept();
-            
-            if(MsgT.DEBUG) System.out.println("Client Connected at port number:" + connectionSocket.getLocalPort());
+			System.out.println("server: RX <msg_type> <cur_seq> <max_seq> <payload_len>");
 
-            System.out.println("server: RX <msg_type> <cur_seq> <max_seq> <payload_len>");
-            
-            ObjectInputStream inFromClient = new ObjectInputStream(connectionSocket.getInputStream());
-            ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
-            
-            processRequest(inFromClient, outToClient);
+            this.processRequest();
+
             System.out.println("Shutting Server Down.");
          // }
 	}
 
 	/* Function that will keep waiting for requests unti it receives finish signal! */
-	public void processRequest(ObjectInputStream inFromClient, ObjectOutputStream outToClient) throws Exception
+	public void processRequest() throws Exception
 	{
-		Message recv = (Message) inFromClient.readObject(); //deserialize
+		Message recv = getAndDeserializeFromClient(); //deserialize
 		Message send;
 
 		while(recv.msgType != MsgT.MSG_TYPE_FINISH)
@@ -68,13 +64,13 @@ class TCPServer
 						send = new Message(MsgT.MSG_TYPE_GET_ERR, new char[0], 0);
 					}
 
-					outToClient.writeObject(send);
+					writeToClient(send);
 					// if(MsgT.DEBUG)	System.out.println("server: TX " + send.getStatus());
 					break;
 
 				case MsgT.MSG_TYPE_GET_ACK:
 					send = getChunk();
-					outToClient.writeObject(send);
+					writeToClient(send);
 					// if(MsgT.DEBUG) 	System.out.println("server: TX " + send.getStatus());
 					break;
 
@@ -82,7 +78,7 @@ class TCPServer
 					if(MsgT.DEBUG) 	System.err.println("DO NOT UNDERSTAND MSG_TYPE");
 					throw new UnsupportedOperationException();
 			}
-			recv = (Message) inFromClient.readObject();
+			recv = getAndDeserializeFromClient();
 			// if(MsgT.DEBUG) System.out.println("\n Content " + new String (recv.getPayload());
 		}
 		//Exit while loop, received finished message.
@@ -93,6 +89,51 @@ class TCPServer
 		max_seq = 0;
 
 		if(MsgT.DEBUG) 	System.out.println("Client Request complete.");
+	}
+
+	//Also updates the client Inet
+	public Message getAndDeserializeFromClient() throws IOException, ClassNotFoundException
+	{
+		//create a larger than needed ByteArray for deserialization to avoid truncation
+		byte[] buffer = new byte[4096];
+		DatagramPacket recvPacket = new DatagramPacket(buffer, buffer.length);
+		this.serverSocket.receive(recvPacket);
+
+		this.clientInet = recvPacket.getAddress();
+		if(MsgT.DEBUG) System.out.println("BEFORE PORT Assignment: " + port);
+		//This prevents IOException when sending (caused by sending to a port it has no permissions to send to)
+		//Although after testing it sends to literally the same port number. 
+		this.port = recvPacket.getPort(); 
+		if(MsgT.DEBUG) System.out.println("AFTER PORT Assignment from packet: " + port);
+
+		ByteArrayInputStream baiStream = new ByteArrayInputStream(buffer);
+		ObjectInputStream is = new ObjectInputStream( new BufferedInputStream(baiStream));
+
+		Message recv = (Message) is.readObject();
+		is.close();
+
+		return recv;
+	}
+
+	public void writeToClient(Object obj) throws IOException  
+	{
+		//Serialize the Message object into bytes using a stream
+		ByteArrayOutputStream baoStream = new ByteArrayOutputStream();
+		//Defer the stream with buffer, ObjectOutputStream serializes the Object
+		ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(baoStream));
+
+		os.writeObject(obj);
+		os.flush(); //force flush to retrieve all bytes
+
+		//Get byteArrayFromStream to send off.
+		byte[] serialized = baoStream.toByteArray();
+
+		//Create packet for transmission
+		DatagramPacket packet = new DatagramPacket(serialized, serialized.length, clientInet, port);
+
+		serverSocket.send(packet); 
+
+		os.close();
 	}
 
 	//Credit: http://stackoverflow.com/questions/1844688/read-all-files-in-a-folder
