@@ -100,11 +100,13 @@ class UDPServer
 		this.serverSocket.receive(recvPacket);
 
 		this.clientInet = recvPacket.getAddress();
-		if(MsgT.DEBUG) System.out.println("BEFORE PORT Assignment: " + port);
+		// if(MsgT.DEBUG) System.out.println("BEFORE PORT Assignment: " + port);
+
 		//This prevents IOException when sending (caused by sending to a port it has no permissions to send to)
 		//Although after testing it sends to literally the same port number. 
 		this.port = recvPacket.getPort(); 
-		if(MsgT.DEBUG) System.out.println("AFTER PORT Assignment from packet: " + port);
+
+		// if(MsgT.DEBUG) System.out.println("AFTER PORT Assignment from packet: " + port);
 
 		ByteArrayInputStream baiStream = new ByteArrayInputStream(buffer);
 		ObjectInputStream is = new ObjectInputStream( new BufferedInputStream(baiStream));

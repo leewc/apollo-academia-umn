@@ -14,6 +14,7 @@ public class UDPClient {
 
 	BufferedWriter writer;
 	String fileName;
+	long udpStartTimer;
 	
 	public UDPClient(String serverIP, int port) throws IOException
 	{
@@ -74,6 +75,7 @@ public class UDPClient {
 		}
 
 		Message getMsg = new Message(MsgT.MSG_TYPE_GET, payload, fileName.length);
+
 		writeToServer(getMsg);
 		
 		return receiveFromServer();
@@ -88,6 +90,7 @@ public class UDPClient {
 		
 		while(recv.msgType != MsgT.MSG_TYPE_FINISH)
 		{
+			udpStartTimer = System.nanoTime(); //set time sent packet was sent
 			System.out.println("client: RX " + recv.getStatus());
 			switch(recv.msgType)
 			{
@@ -115,6 +118,8 @@ public class UDPClient {
 					throw new UnsupportedOperationException();
 			}
 			recv = getAndDeserializeFromServer();
+			double udpElapsedTime = ((double) (System.nanoTime() - udpStartTimer )) / 1000000000.0;
+			if(MsgT.DEBUG) System.out.println("<stat> UDP Send-Recv Time: " + udpElapsedTime);	
 		}
 		//Exit while loop
 		System.out.println("client: RX " + recv.getStatus());
