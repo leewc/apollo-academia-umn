@@ -9,8 +9,8 @@ public class MsgT {
 	public static final int MSG_TYPE_FINISH  = 5;
 	public static final int MSG_TYPE_MAX = 6;
 
-	public static final int BUFFER_SIZE = 256;
-	public static final Boolean DEBUG = true; // false suppresses additional terminal messages
+	public static final int BUFFER_SIZE = 1536;
+	public static final Boolean DEBUG = false; // false suppresses additional terminal messages
 
 	public static String[] str_map = {
 	    "invalid",
