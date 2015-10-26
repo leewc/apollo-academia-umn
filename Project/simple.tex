@@ -106,18 +106,14 @@ Email: lee@leewc.com - leex7095@umn.edu}
 % As a general rule, do not put math, special symbols or citations
 % in the abstract
 \begin{abstract}
-The abstract goes here.
-(To be written in later drafts.)
+This paper compares the performance of 4 major search algorithms, the Breadth First Search, Bidirectional Breadth First Search, Depth First Search as well as Iterative Depth First Search on the Tower of Hanoi. The comparison is done emphrically based on concrete experiments and metrics such as runtime as well as nodes traversed to find a solution. Depth first search is the fastest and most memory efficient algorithm in solving the Tower of Hanoi, whereas Bidirectional Breadth First Search is the second fastest. The Tower of Hanoi problem was selected as the problem to be researched as the puzzle has multiple states and rules to be followed, with large search spaces as the number of disks are added.
+
 \end{abstract}
 
 \section{Introduction}
 
-\subsection{The Algorithms}
-Since the late 1950s, search has been considered to be influential to the field of Artificial Intelligence. Early AI programs had an algorithm that would search through possible states to arrive at an eventual solution, some even being able to backtrack when the algorithm reached a dead end. This paradigm was considered by McCorduck and others to be "reasoning by search" \cite{McCorduck01}. 
-
-One of the more well-known algorithms of search is the breadth-first search (BFS). As an uninformed search algorithm, BFS expands the root node and then the successors of the root node, followed by their successors and so on \cite{Textbook01}. All nodes at a specific depth are searched before the following depth are expanded. An advantage of the BFS algorithm is that it is complete, in which breadth first search will eventually find a solution that exists in the state space, if there is one. It is also considered to be the optimal if and only if the path cost is a nondecreasing function of the depth of the node \cite{Textbook01}.
-
-Bidirectional breadth-first search (bidirectional BFS) is a modified version of BFS in which two simultaneous BFS searches are started, one from the initial state and one from the final state. However, the key difference is that instead of a goal state test at every level, this is replaced by a check to see if the two frontiers have an intersecting node. If there is one, then the solution path is found. The distinction on this is the assumption that the sum of 2 simultaneous searches will be less than the complexity of a single search from the initial state. 
+\subsection{The Field of Search}
+Since the late 1950s, search has been considered to be influential to the field of Artificial Intelligence. Early AI programs had an algorithm that would search through possible states to arrive at an eventual solution, some even being able to backtrack when the algorithm reached a dead end. This paradigm was considered by McCorduck and others to be "reasoning by search" \cite{McCorduck01}. Search has also been an important to the field of computer science as it allows information to be gathered from data in a manner that would be nowhere fast nor accurate enough if done by human beings. There has been much emphasis on this field as computers aim to simplify our increasingly information-oriented lives. A good search algorithm not only provides the right results, but also accurate, precise and as efficient and possible. With the great increase in computing power, search algorithms are even used to solve puzzles and derive logic based on a set of rules, this can be demonstrated with the Towers of Hanoi.
 
 \subsection{The Tower of Hanoi Problem}
 
@@ -131,7 +127,20 @@ This mathematical problem has 3 simple rules:
 \item Only the top most disk of each peg can be moved to another peg. 
 \end{enumerate}
 
-In this paper I attempt to make an experimental analysis on the performance and memory of complexity of the breadth first search and the bidirectional breadth first search algorithm on the Tower of Hanoi problem. The problem will be represented in Python along with the search algorithms, after which problems of varying difficulty are provided to the algorithm by increasing the number of disks in the problem. Finally I will analyze and discuss the memory used and the time complexity of each algorithm to solve each of the problem, I will also provide a hypothesis by another team member, which consists of other algorithms used to solve another problem, the sliding puzzle, in which an A* algorithm and backtracking DFS algorithm is used. 
+In this paper I attempt to make an experimental analysis on the performance and memory of complexity of the 4 search algorithms on the Tower of Hanoi problem. The Tower of Hanoi problem was selected as the problem to be researched as the puzzle has multiple states and rules to be followed, with large search spaces as the number of disks are added. 4 well known algorithms are chosen in an attempt to find the fastest algorithm that provides solution path set. The problem will be represented in Python along with the search algorithms, after which problems of varying difficulty are provided to the algorithm by increasing the number of disks in the problem. Finally I will analyze and discuss the memory used and the time complexity of each algorithm to solve each of the problem, and provide some insight on the most performant algorithm based on time and memory that solves the Tower of Hanoi problem. The data collected will display a major difference of the runtime between algorithms to provide clarity on how the performance of these algorithms work. 
+
+The paper is organized as follows, the next section discusses the algorithms on a theoretical level, in which complexity is discussed, followed by a discussion on the experimental set up, and then presentation of the raw data, before an analysis and discussion based on the data and finally a conclusion that explores possible further research.
+
+\subsection{The Algorithms}
+
+One of the more well-known algorithms of search is the breadth-first search (BFS). As an uninformed search algorithm, BFS expands the root node and then the successors of the root node, followed by their successors and so on \cite{Textbook01}. All nodes at a specific depth are searched before the following depth are expanded. An advantage of the BFS algorithm is that it is complete, in which breadth first search will eventually find a solution that exists in the state space, if there is one. It is also considered to be the optimal if and only if the path cost is a nondecreasing function of the depth of the node \cite{Textbook01}.
+
+Bidirectional breadth-first search (bidirectional BFS) is a modified version of BFS in which two simultaneous BFS searches are started, one from the initial state and one from the final state. However, the key difference is that instead of a goal state test at every level, this is replaced by a check to see if the two frontiers have an intersecting node. If there is one, then the solution path is found. The distinction on this is the assumption that the sum of 2 simultaneous searches will be less than the complexity of a single search from the initial state. 
+
+Depth First Search (DFS) is another uninformed search algorithm that traverses down a tree vertically unlike the horizontal breadth first search. The algorithm will arrive at a solution faster if the path that is being traversed down is the solution path (i.e, contains the goal state). Upon finding an no other child nodes to traverse down to, the algorithm will then go back to the previous node and explore another node at the same level. There are 2 implementations of DFS, in which one is iterative, and the other recursive. This paper explores DFS using the iterative implementation.
+
+Iterative Deepening Depth First Search (IDDFS) is a modification of DFS, but instead of traversing down the search tree until no possible child nodes are generated before backtracking, IDDFS has a maximum depth of traversal that increases by 1 and then restarting the search again from the top. This would avoid the algorithm going endlessly going down the search tree and yield a solution state faster if the state is contained in the middle or the right side of the search tree. Despite being a depth first search, this depth limited search visits nodes in a breadth first fashion cumulatively.  
+
 
 \section{Hypothesis and Theoretical Analysis}
 
@@ -164,18 +173,86 @@ the following is true then bidirectional BFS will be much faster than running a 
 O(b^{d/2}) + O(b^{d/2}) \leq O(b^d)
 \end{equation}
 
+Depth First Search runs with 
+\begin{equation}
+ O(b^{d})
+\end{equation}
+
+for space and time complexity where d is the maximum depth limit traversed. Whereas Iterative Deepening Depth First Search (IDDFS) will have a time complexity of \begin{equation}
+O(b^{d})
+\end{equation} as well, but only a space complexity of \begin{equation} O(bd)\end{equation} as less memory is used for node storage on limited depths. Although the states are visited multiple times which may seem as a wasteful action, the behavior is not too costly as most of the nodes are at a lower level, making the multiple visits at the higher levels have less impact on performance.
+
+
 \section{Experimental Set-Up}
 The set up for testing both algorithms will be done by varying the number of disks, \textit{n}. This increases the size of the graph as well as the depth of the graph of states. A state graph (that also contains illegal actions) has a maximum of $3^n$ for a 3-peg Tower of Hanoi problem. The solution depth will have a size of $2^n-1$ as previously mentioned.
 
-After running 2 algorithms with an increasing number of disks and recording the number of nodes traversed to find a solution as well as the total computation time to find the solution, a graph of Number of Nodes Traversed to the Number of Disks will be generated, where both the algorithms can be compared. A graph of Computation time to the Number of Disks will also be generated for a concrete analysis of algorithms.
+The Tower of Hanoi problem is abstracted by representing each disk as a list, and the entire set up that consists of 3 pegs into another list, yield a state that is represented as a list of lists of integers. A sentinel value, which is a value to indicate the end of data (commonly used in searching \cite{CodeComplete}) is used to represent that no more disks are on a particular peg. The sentinel values have a value of {n+1} where {n} is the total number of disks this allows for simplified implementation and faster computations.
+
+The initial state will be when all disks are on the first peg, and the goal state is when all disks are placed in order from largest to smallest on the third peg. Pruning was built into the problem framework by ensuring that possible states generated conformed to the rules in the Tower of Hanoi, ensuring that illegal states (larger disks on top of smaller disks, moving multiple disks at a time without a specific order) are not generated, to reduce the size of the search space and avoid unneccessary computation. A dictionary of visited states are also kept in memory to ensure algorithms are not caught in a loop revisiting the same states infinitely.
+
+After running all 4 algorithms with an increasing number of disks and recording the number of nodes traversed to find a solution as well as the total computation time to find the solution, a graph of Number of Nodes Traversed to the Number of Disks will be generated, where both the algorithms can be compared. A graph of Computation time to the Number of Disks will also be generated for a concrete analysis of algorithms.
+
+The experiments where then executed on a Intel® Core™ i7-4790 machine running at 3.60GHz with 32GB of RAM. The computer used was a lab computer that had SSH access as well as the ability to keep background processes executing with the screen utility. The experiment ran for over 11 hours taking up over 6 GB of RAM. The experiment was halted at 11 disks because of the exponential increase in runtime.
+
+\section{Results}
+
+\subsection{Maximum Size of Frontier by Number of Disks}
+
+\begin{tabular}{ | p{0.97cm} | p{1cm} | p{2cm} | p{1cm} | p{1.2cm} |}
+    \hline
+    Number of \ Disks & Depth First \ Search & Bidirectional \ BFS & Breadth \ First Search & Iterative Deepening \ DFS \\ \hline
+    2 & 4 & 3 & 3 & 5 \\ \hline
+    3 & 9 & 8 & 14 & 10 \\ \hline
+    4 & 28 & 21 & 36 & 29 \\ \hline
+    5 & 81 & 79 & 156 & 82 \\ \hline
+    6 & 244 & 254 & 528 & 245 \\ \hline
+    7 & 729 & 1079 & 2164 & 730 \\ \hline
+    8 & 2188 & 4247 & 8256 & 2189 \\ \hline
+    9 & 6561 & 16599 & 33236 & 6562 \\ \hline
+    10 & 19684 & 66135 & 131328 & 19685 \\ \hline
+    11 & 59049 & 262999 & 526164 & 59050 \\ \hline
+\end{tabular}
 
 
-\subsection{Graph of Number of Nodes Traversed to Number of Disks}
+\begin{table*}[t]
+\subsection{Runtime (seconds) of each algorithm to Number of Disks}
+\begin{tabular}{ |l |l |l |l |l |}
+    \hline
+    Number of \ Disks & Depth First \ Search & Bidirectional \ BFS & Breadth \ First Search & Iterative Deepening \ DFS \\ \hline
+    2 & 0.000156392 & 0.000212669 & 0.000096286 & 0.000472911 \\ \hline
+    3 & 0.000204044 & 0.000455272 & 0.000719421 & 0.000987642 \\ \hline
+    4 & 0.000950633 & 0.001794590 & 0.003294816 & 0.009155311 \\ \hline
+    5 & 0.002016366 & 0.007936978 & 0.017867410 & 0.055075039 \\ \hline
+    6 & 0.006868233 & 0.041572044 & 0.106164721 & 0.537936986 \\ \hline
+    7 & 0.012976039 & 0.265300220 & 0.740262595 & 4.933634893 \\ \hline
+    8 & 0.067659920 & 2.026069019 & 6.571621341 & 55.26996347 \\ \hline
+    9 & 0.128477633 & 16.297773958 & 52.6292188720 & 744.907908745 \\ \hline
+    10 & 0.726265783 & 118.008149897 & 389.933532058 & 8319.07307241 \\ \hline
+    11 & 1.543463721 & 900.394615177 & 3774.456782876 & 84143.691529322 \\ \hline
+\end{tabular}
+\end{table*}
 
-(to be added later)
+\subsection{Number of Nodes Traversed to Number of Disks}
+\begin{tabular}{ | p{0.97cm} | p{1cm} | p{1.5cm} | p{2cm} | p{1.2cm} |}
+    \hline
+    Number of \ Disks & Depth First \ Search & Bidirectional \ BFS & Breadth \ First Search & Iterative Deepening \ DFS \\ \hline
+2 & 6 & 10 & 5 & 28 \\ \hline
+3 & 9 & 22 & 36 & 55 \\ \hline
+4 & 49 & 86 & 184 & 534 \\ \hline
+5 & 81 & 486 & 1194 & 3403 \\ \hline
+6 & 428 & 2506 & 6738 & 30992 \\ \hline
+7 & 729 & 15182 & 43288 & 266815 \\ \hline
+8 & 3831 & 91516 & 257792 & 2404618 \\ \hline
+9 & 6561 & 542326 & 1606086 & 21533203 \\ \hline
+10 & 34450 & 3286532 & 9671326 & 193828356 \\ \hline
+11 & 59049 & 19768542 & 59096340 & 1743480775 \\ \hline
+\end{tabular}
+
+\subsection{Graph of Traversed Nodes to Number of Disks}
+(to be added later, composite graphs that will illustrate the major differences between algorithms)
 
 \subsection {Graph of Runtime to Number of Disks}
-
+(to be added later)
 \begin{figure}
 \centering
 \includegraphics[width=2.5in]{samplefig}
@@ -183,11 +260,20 @@ After running 2 algorithms with an increasing number of disks and recording the 
 \label{fig:my_label}
 \end{figure}
 
+\subsection{Graph of Nodes Traversed to Number of Disks}
 (to be added later)
 
-\subsection{Graph of Program Memory Usage to Number of Disks}
-(to find a method of keeping track of memory usage)
-(to be added later)
+\section{Results Discussion}
+From the results it can be seen that Depth First Search is the fastest algorithm to obtain a goal state that is the solution. This is expected as the solutions are always deeper down the tree. Bidirectional Breadth First Search is the second fastest algorithm, although the algorithm takes an exponentially larger amount of time to solve larger number of disks. Although bidirectional BFS still yields a solution by over a factor of 2 faster than a single instance of the BFS. The results generated for number of nodes traversed, runtime and maximum size of frontier all confirm this. Bidirectional BFS manages to reduce the depth traversed by separating the problem into 2 instances (from initial state and goal state) as there are lesser number of nodes at shallow levels. This greatly reduces the number of states to visit before obtaining a solution. Iterative Deepening DFS however yielded the worst performance, as nodes are constantly revisited as the search is restarted, and the Tower of Hanoi problem only has solutions stored in the deepest level of the tree. This caused the algorithm to perform badly in terms of memory and runtime.
+
+There are negligible differences between the algorithms on small number of disks, but as the Tower of Hanoi problem increases in complexity exponentially as the number of disks increases, the difference is evident. On a problem with 11 disks, DFS only took 1.54 seconds to find a solution, while Bidirectional BFS took 900.4 seconds (15 minutes), and BFS took 3774.5 seconds (1.04 hours), and Iterative Deepening DFS took 84143.70 seconds (23.4 hours) to find the solution. 
+
+The results prove that the Iterative Deepening DFS algorithm do not work well for problems that have solution states at the leaves of the search tree. DFS is the fastest algorithm to yield a solution provided that there is a solution and the problem is not intractable.
+
+\section{Conclusion and Future Work}
+This paper has shown the performance of 4 search algorithms, BFS, DFS, Bidirectional BFS and, Iterative Deepening DFS on the Tower of Hanoi problem, based on metrics of runtime, nodes visited and maximum size of frontier. The algorithms worked on a search space that is continually pruned based on the rules of the problem. This proves that if a problem is known to have a solution, DFS will be the fastest algorithm to yield a solution, despite the possibility of not yielding the most optimal solution. 
+
+Further optimizations can be made to the DFS algorithm by introducing even more advanced pruning techniques, or to short circuit goal checking until the algorithm is at a certain depth. 
 
 
 % An example of a floating figure using the graphicx package. 
@@ -232,12 +318,7 @@ After running 2 algorithms with an increasing number of disks and recording the 
 %\label{fig_sim}
 %\end{figure*}
 %
-\section{Results}
-Discuss results here.
 
-\section{Conclusion and Future Work}
-The conclusion and discussion of what to do
-going forward go here.
 
 % references section
 
