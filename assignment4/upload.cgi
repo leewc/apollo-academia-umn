@@ -46,16 +46,20 @@ strings = {
 }
 
 
-def generate_thumbnail(filename):
-	img = Image.open(os.path.join(UPLOAD_DIR, filename + ".jpg"))
+def generate_thumbnail(imageFile, saveThumbPathName):
+	img = Image.open(imageFile)
 	img.thumbnail(THUMBNAIL_SIZE)
-	img.save(os.path.join(UPLOAD_DIR, filename + "_tn"), 'JPEG')
+	img.save(saveThumbPathName, 'JPEG')
 
 def save_title(filename, title):
-	with open(os.path.join(upload_dir, saveFileName + ".txt"), 'w') as file:
+	with open(filename, 'w') as file:
 		file.write(title)
 
 def save_uploaded_file (form_field, upload_dir):
+    fileName = str(time.time())
+    saveFilePathName = os.path.join(upload_dir, fileName + ".jpg")
+    saveThumbPathName = os.path.join(upload_dir, fileName + "_tn.jpg")
+    saveTitlePathName = os.path.join(upload_dir, fileName + ".txt")
     if not form.has_key(form_field): 
     	strings['body'] = "Error: Please Try Again, File Not Uploaded Correctly. \n" + strings['body']
         print HTML_TEMPLATE % strings
@@ -65,19 +69,28 @@ def save_uploaded_file (form_field, upload_dir):
     	strings['body'] = "Error: Please Try Again, Empty or Invalid File.\n" + strings['body'] 
         print HTML_TEMPLATE % strings
         return
+    try:
 
-    saveFileName = str(time.time())
-    with open(os.path.join(upload_dir, saveFileName + ".jpg"), 'wb') as file:
-    	chunk = fileitem.file.read(100000)
-        if not chunk:
-        	return
-        file.write(chunk)
+        with open(saveFilePathName, 'wb') as file:
+    	    chunk = fileitem.file.read(100000)
+            if not chunk:
+        	    return
+            file.write(chunk)
 
-    generate_thumbnail(saveFileName)
-
-    strings["body"] = "File Uploaded Successfully"
-    print HTML_TEMPLATE % strings
-
+        generate_thumbnail(saveFilePathName,saveThumbPathName)
+        save_title(saveTitlePathName, form['title'].value)
+        strings["body"] = "File Uploaded Successfully"
+        print HTML_TEMPLATE % strings
+    except Exception as e:
+        strings['body'] = "Error: Please Try Again, File Might not be a valid JPEG. \n" + strings['body']
+        print HTML_TEMPLATE % strings
+        print e # comment this to hide exception/errors
+        if os.path.isfile(saveFilePathName):
+            os.remove(saveFilePathName)
+        if os.path.isfile(saveTitlePathName):
+            os.remove(saveTitlePathName)
+    	if os.path.isfile(saveThumbPathName):
+            os.remove(saveThumbPathName)
 
 print 'content-type: text/html\n'
 
