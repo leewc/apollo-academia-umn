@@ -1,0 +1,6 @@
+Python CGI files for a simple Image Gallery
+
+Contains a simple `startserver.py` script that allows for local development so we don't directly push to a live server. (Only hosts cgi scripts, no CSS)
+
+Written in Python 2.x due to assignment requirements. (sigh)
+CSELabs server require cgi files to have the *.cgi extension hence why .py files are renamed as such.
