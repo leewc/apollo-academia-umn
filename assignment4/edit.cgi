@@ -11,7 +11,7 @@ msg = ""
 success = False
 
 if os.environ['REQUEST_METHOD'] == 'GET':
-    if fileid != "":
+    if fileid is not None:
         try:
             filePath = os.path.join(UPLOAD_DIR, fileid + ".txt")
             title = getTitle(filePath)
@@ -34,7 +34,7 @@ editForm = """
 <form name="editForm" action="edit.cgi" method="POST" enctype="multipart/form-data">
 %(msg)s 
 Title: <input name="title" type="text" value="%(prevTitle)s"></br>
-<input name="id" type="text" value="%(fileid)s"/>
+<input name="id" type="hidden" value="%(fileid)s"/>
 <input name="Update" type="submit"/>
 <a href="gallery.cgi"> <button type="button">Cancel</button></a>
 </form>

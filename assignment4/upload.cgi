@@ -2,6 +2,7 @@
 
 import cgi
 import os
+import glob
 import time  # time for file name
 import Image # for thumbnails :)
 from shared import * # import common templates and variables
@@ -80,20 +81,22 @@ def save_uploaded_file (form_field, upload_dir):
 
         generate_thumbnail(saveFilePathName,saveThumbPathName)
         save_title(saveTitlePathName, form['title'].value)
-        strings["body"] = "File Uploaded Successfully"
-        print HTML_TEMPLATE % strings
+        # strings["body"] = "File Uploaded Successfully"
+        # print HTML_TEMPLATE % strings
         print REDIRECT_TEMPLATE % {'URL' : 'gallery.cgi'}
     except Exception as e:
+        for aFile in glob.glob(os.path.join(upload_dir, fileName + "*")): # much cleaner
+                os.remove(aFile)
         strings['body'] = "Error: Please Try Again, File Might not be a valid JPEG. \n" + strings['body']
         print HTML_TEMPLATE % strings
         print "Python Image Library:" 
         print e # comment this to hide exception/errors
-        if os.path.isfile(saveFilePathName):
-            os.remove(saveFilePathName)
-        if os.path.isfile(saveTitlePathName):
-            os.remove(saveTitlePathName)
-    	if os.path.isfile(saveThumbPathName):
-            os.remove(saveThumbPathName)
+     #    if os.path.isfile(saveFilePathName):
+     #        os.remove(saveFilePathName)
+     #    if os.path.isfile(saveTitlePathName):
+     #        os.remove(saveTitlePathName)
+    	# if os.path.isfile(saveThumbPathName):
+     #        os.remove(saveThumbPathName)
 
 print 'content-type: text/html\n'
 

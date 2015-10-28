@@ -15,7 +15,7 @@ class ImageTile():
 
 	def tile(self):
 		return """<img id="%(filename)s" src="%(thumbnail)s" onclick="fbox(this)" alt="%(filePath)s" /> <br/>
-				<h1 id="title-%(filename)s"> %(title)s </h1> <br/>
+				<h1 id="title-%(filename)s"> %(title)s </h1>
 				<a href="edit.cgi?id=%(filename)s"> Edit </a> 
 				<a href="delete.cgi?id=%(filename)s"> Delete </a>
 				<br/>
