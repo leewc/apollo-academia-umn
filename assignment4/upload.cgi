@@ -64,11 +64,13 @@ def save_uploaded_file (form_field, upload_dir):
     saveTitlePathName = os.path.join(upload_dir, fileName + ".txt")
     if not form.has_key(form_field): 
     	strings['body'] = "Error: Please Try Again, File Not Uploaded Correctly. \n" + strings['body']
+        print 'content-type: text/html\n'
         print HTML_TEMPLATE % strings
         return
     fileitem = form[form_field]
     if not fileitem.file or len(fileitem.filename) ==0: 
     	strings['body'] = "Error: Please Try Again, Empty or Invalid File.\n" + strings['body'] 
+        print 'content-type: text/html\n'
         print HTML_TEMPLATE % strings
         return
     try:
@@ -83,11 +85,13 @@ def save_uploaded_file (form_field, upload_dir):
         save_title(saveTitlePathName, form['title'].value)
         # strings["body"] = "File Uploaded Successfully"
         # print HTML_TEMPLATE % strings
-        print REDIRECT_TEMPLATE % {'URL' : 'gallery.cgi'}
+        REDIRECT('gallery.cgi')
+        return
     except Exception as e:
         for aFile in glob.glob(os.path.join(upload_dir, fileName + "*")): # much cleaner
                 os.remove(aFile)
         strings['body'] = "Error: Please Try Again, File Might not be a valid JPEG. \n" + strings['body']
+        print 'content-type: text/html\n'
         print HTML_TEMPLATE % strings
         print "Python Image Library:" 
         print e # comment this to hide exception/errors
@@ -98,23 +102,23 @@ def save_uploaded_file (form_field, upload_dir):
     	# if os.path.isfile(saveThumbPathName):
      #        os.remove(saveThumbPathName)
 
-print 'content-type: text/html\n'
 
 ## This is what makes the cgi self contained and post to itself.
 # Credit: http://www-users.cs.umn.edu/~tripathi/python/LectureExamples/helloSingleFile.py
 
 # Client side check has removed need for nested ifs, but keeping this to ensure server has total control.
 if 'file' in form and 'title' in form:
-	# if 'cancel' in form:
-			# print REDIRECT_TEMPLATE % { 'URL' : 'google.com'}
 	if len(form['file'].value) > 0:
 		if len(form['title'].value) > 0 and len(form['title'].value) < 100: # validate title is not empty (won't be in form if empty)
 			save_uploaded_file ("file", UPLOAD_DIR)
 		else:
 			strings['body'] = "Picture Title Cannot Be Empty or Too Long." + strings['body']
+                        print 'content-type: text/html\n'
 			print HTML_TEMPLATE % strings
 	else:
+                print 'content-type: text/html\n'
 		print HTML_TEMPLATE % strings
 else:
+        print 'content-type: text/html\n'
 	print HTML_TEMPLATE % strings
 
