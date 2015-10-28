@@ -6,15 +6,11 @@ class ImageTile():
 	"""Class that holds the thumbnails and photo paths, used for easy generation of page.
 	fileName should be without the extension, so we can refer to the thumbnail and text
 	"""
-	def getTitle(self, path):
-		with open(path, 'r') as file:
-			return file.read()
-
 	def __init__(self, fileName):
 		self.fileName = fileName[:-4] # safe because we control what format goes in that folder
 		self.filePath = os.path.join(UPLOAD_DIR, self.fileName) #also of no extension
 		self.imgFilePath = self.filePath + ".jpg"
-		self.title = self.getTitle(self.filePath + ".txt")
+		self.title = getTitle(self.filePath + ".txt") # method from shared
 		self.thumbnail = self.filePath + "_tn.jpg"
 
 	def tile(self):

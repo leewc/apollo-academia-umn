@@ -1,6 +1,11 @@
 UPLOAD_DIR = "pictures"
 THUMBNAIL_SIZE = (140, 140)
 
+def getTitle(path):
+    with open(path, 'r') as file:
+        return file.read()
+
+
 """
 HTML_TEMPLATE requires a dictionary that must have the following key-values
 {
@@ -9,8 +14,6 @@ HTML_TEMPLATE requires a dictionary that must have the following key-values
     'body':
 }
 """
-
-
 HTML_TEMPLATE = """
 <!DOCTYPE html">
 <html>
