@@ -5,11 +5,11 @@ import os
 import time  # time for file name
 import Image # for thumbnails :)
 from shared import * # import common templates and variables
- 
+
+# https://docs.python.org/2/library/cgi.html # Only instantiate only and exactly once 
 form = cgi.FieldStorage()
 
 #  onClick="(function(){document.form["uploadForm"].onSubmit="return true";})
-# that does not work. TODO: DO we need server side redirect for cancel?
 
 uploadForm ="""
 <form name="uploadForm" action="upload.cgi" method="POST" enctype="multipart/form-data" onSubmit="return checkFile()">
@@ -47,6 +47,7 @@ strings = {
 
 
 def generate_thumbnail(imageFile, saveThumbPathName):
+	Image.LOAD_TRUNCATED_IMAGES = True
 	img = Image.open(imageFile)
 	img.thumbnail(THUMBNAIL_SIZE)
 	img.save(saveThumbPathName, 'JPEG')
@@ -81,9 +82,11 @@ def save_uploaded_file (form_field, upload_dir):
         save_title(saveTitlePathName, form['title'].value)
         strings["body"] = "File Uploaded Successfully"
         print HTML_TEMPLATE % strings
+        print REDIRECT_TEMPLATE % {'URL' : 'gallery.cgi'}
     except Exception as e:
         strings['body'] = "Error: Please Try Again, File Might not be a valid JPEG. \n" + strings['body']
         print HTML_TEMPLATE % strings
+        print "Python Image Library:" 
         print e # comment this to hide exception/errors
         if os.path.isfile(saveFilePathName):
             os.remove(saveFilePathName)

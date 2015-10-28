@@ -18,8 +18,8 @@ class ImageTile():
 		self.thumbnail = self.filePath + "_tn.jpg"
 
 	def tile(self):
-		return """<img src="%(thumbnail)s" alt="%(filePath)s" /> <br/>
-				<h1> %(title)s </h1> <br/>
+		return """<img id="%(filename)s" src="%(thumbnail)s" onclick="fbox(this)" alt="%(filePath)s" /> <br/>
+				<h1 id="title-%(filename)s"> %(title)s </h1> <br/>
 				<a href="edit.cgi?id=%(filename)s"> Edit </a> 
 				<a href="delete.cgi?id=%(filename)s"> Delete </a>
 				<br/>
@@ -42,7 +42,6 @@ def generateTiles():
 	htmlString += "</tr>"
 	return htmlString
 
-
 body = """<a href="gallery.cgi"><button type=button>Refresh</button></a> 
 		  <a href="upload.cgi"><button type=button>Upload New Picture</button></a>
 		  <table>
@@ -50,11 +49,26 @@ body = """<a href="gallery.cgi"><button type=button>Refresh</button></a>
 		  </table>
 	   """ % { 'allTiles': generateTiles() }
 
+fboxScript="""
+<script>
+function fbox(img){
+	var title = document.getElementById('title-' + img.id);
+	var screen = document.createElement('div');
+	screen.id = "screen";
+	screen.innerHTML = title.outerHTML + "<img src='pictures/" + img.id +".jpg' /> ";
+	screen.onclick = function(){
+					var screen = document.getElementById("screen");
+					screen.parentNode.removeChild(screen);
+	}
+	document.body.insertBefore(screen, document.body.firstChild);
+}
+</script>"""
 
 strings = {
 	'windowTitle': "Picture Gallery",
 	'title': "Picture Gallery",
-	'body': body
+	'body': body + fboxScript
 }
 
+print 'content-type: text/html\n'
 print HTML_TEMPLATE % strings

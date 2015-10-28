@@ -4,3 +4,5 @@ Contains a simple `startserver.py` script that allows for local development so w
 
 Written in Python 2.x due to assignment requirements. (sigh)
 CSELabs server require cgi files to have the *.cgi extension hence why .py files are renamed as such.
+
+- Note to self: Mixing tabs and spaces when sublime opens a python file as .cgi is very very bad, end up with a ton of bad unindentation errors.
