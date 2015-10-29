@@ -29,14 +29,11 @@ HTML_TEMPLATE = """
 </body>
 </html>"""
 
-# Takes a url to redirect to, template didn't work.
-def REDIRECT(url):
-    print "Content-Type: text/html"
-    print "Location:" + url
-    print
-    print "<!DOCTYPE html>"
-    print "<html>"
-    print "<head> </head>"
-    print "<body> </body>"
-    print "</html>"
-
+# Takes a url to redirect to
+REDIRECT_TEMPLATE = """
+Location: %(URL)s \n\n
+<!DOCTYPE html>"
+<html>"
+<head> </head>"
+<body> </body>"
+</html>"""

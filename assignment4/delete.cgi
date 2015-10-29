@@ -11,6 +11,7 @@ fileid = form.getvalue("id")
 title = ""
 msg = ""
 success = False
+print 'content-type: text/html\n'
 
 
 if os.environ['REQUEST_METHOD'] == 'GET':
@@ -60,14 +61,12 @@ strings = {
 if os.environ['REQUEST_METHOD'] == 'GET':
     if msg != "":
         strings['body'] = msg
-    print 'content-type: text/html\n'
     print HTML_TEMPLATE % strings
 
 # Only true here if we post and fail the top conditons. Else redirected.
 if not success and os.environ['REQUEST_METHOD'] == 'POST':
     strings['body'] = msg
-    print 'content-type: text/html\n'
     print HTML_TEMPLATE % strings
 
 if success and os.environ['REQUEST_METHOD'] == 'POST':
-    REDIRECT('gallery.cgi')
+    print REDIRECT_TEMPLATE % {'URL': 'gallery.cgi'}

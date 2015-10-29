@@ -26,7 +26,7 @@ else:
         with open(os.path.join(UPLOAD_DIR, fileid + ".txt"), "w") as file:
             file.write(newTitle)
         success = True
-        print REDIRECT('gallery.cgi')
+        print REDIRECT_TEMPLATE % {'URL': 'gallery.cgi'}
     else:
         msg = """<div id="message"> Please enter a valid title. </div>"""
 
