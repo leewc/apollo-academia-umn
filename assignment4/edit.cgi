@@ -16,8 +16,7 @@ if os.environ['REQUEST_METHOD'] == 'GET':
             filePath = os.path.join(UPLOAD_DIR, fileid + ".txt")
             title = getTitle(filePath)
         except Exception as e:
-            # msg = """<div id="message"> Invalid Image Title Requested, try another ID </div>"""
-            msg = """<div id="message"> Please enter a valid title. </div>"""
+            msg = """<div id="message"> Invalid Image ID. Please return to the <a href="gallery.cgi">Gallery</a> to select and image.</div>"""
     else:
         msg = """<div id="message"> Please enter a valid title. </div>"""
 else:
@@ -26,7 +25,7 @@ else:
         with open(os.path.join(UPLOAD_DIR, fileid + ".txt"), "w") as file:
             file.write(newTitle)
         success = True
-        print REDIRECT_TEMPLATE % {'URL': 'gallery.cgi'}
+        print REDIRECT('gallery.cgi')
     else:
         msg = """<div id="message"> Please enter a valid title. </div>"""
 
@@ -35,7 +34,7 @@ editForm = """
 %(msg)s 
 Title: <input name="title" type="text" value="%(prevTitle)s"></br>
 <input name="id" type="hidden" value="%(fileid)s"/>
-<input name="Update" type="submit"/>
+<button name="submit" type="submit">Update</button>
 <a href="gallery.cgi"> <button type="button">Cancel</button></a>
 </form>
 """ % { 'prevTitle' : title, 'msg': msg, 'fileid': fileid }

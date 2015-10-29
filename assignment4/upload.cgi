@@ -14,12 +14,13 @@ form = cgi.FieldStorage()
 
 uploadForm ="""
 <form name="uploadForm" action="upload.cgi" method="POST" enctype="multipart/form-data" onSubmit="return checkFile()">
+%(msg)s
 Title: <input name="title" type="text"></br>
-File: <input name="file" type="file"></br>
-<input name="submit" type="submit">
+File: <input name="file" type="file" ></br>
+<input name="submit" type="submit" value="Upload">
 <a href="gallery.cgi"> <button type="button">Cancel</button></a>
 </form>
-"""
+""" 
 
 clientSideCheckScript = """
 <script>
@@ -27,12 +28,16 @@ clientSideCheckScript = """
 		var fileName = document.forms["uploadForm"]["file"].value;
 		var ext = fileName.split('.').pop().toString().toLowerCase();
 		if (ext == null || (ext != "jpg" && ext != "jpeg")){
-			var x = document.createElement('p');
-			x.id = "warn";
-			if(document.getElementById("warn") == null){
-				x.innerHTML = "Please select a valid JPG/JPEG image";
-				document.body.insertBefore(x, document.forms["uploadForm"]);
+			var x = document.createElement('div');
+			x.id = "message";
+                        x.innerHTML = "Please select a valid JPG/JPEG image";	
+			if(document.getElementById("message") == null){
+				document.forms["uploadForm"].insertBefore(x, document.forms["uploadForm"].firstChild);
 			}
+                        else {
+                                var old = document.getElementById("message");
+                                old.parentNode.replaceChild(x, old);
+                        }
 			return false;
 		}
 		return true;
@@ -43,7 +48,7 @@ clientSideCheckScript = """
 strings = {
 	'windowTitle': "Upload New Photo",
 	'title': "Upload A New JPEG Picture",
-	'body': uploadForm + clientSideCheckScript
+	'body': "" # populated by functions
 }
 
 
@@ -63,12 +68,16 @@ def save_uploaded_file (form_field, upload_dir):
     saveThumbPathName = os.path.join(upload_dir, fileName + "_tn.jpg")
     saveTitlePathName = os.path.join(upload_dir, fileName + ".txt")
     if not form.has_key(form_field): 
-    	strings['body'] = "Error: Please Try Again, File Not Uploaded Correctly. \n" + strings['body']
+        msg = """<div id="message">Error: Please Try Again, File Not Uploaded Correctly. </div>"""
+    	strings['body'] =  (uploadForm % {'msg' : msg }) + clientSideCheckScript
+        print 'content-type: text/html\n'
         print HTML_TEMPLATE % strings
         return
     fileitem = form[form_field]
     if not fileitem.file or len(fileitem.filename) ==0: 
-    	strings['body'] = "Error: Please Try Again, Empty or Invalid File.\n" + strings['body'] 
+        msg = """<div id="message">Error: Please Try Again, Empty or Invalid File. </div>"""
+    	strings['body'] = (uploadForm % {'msg' : msg }) + clientSideCheckScript 
+        print 'content-type: text/html\n'
         print HTML_TEMPLATE % strings
         return
     try:
@@ -83,38 +92,42 @@ def save_uploaded_file (form_field, upload_dir):
         save_title(saveTitlePathName, form['title'].value)
         # strings["body"] = "File Uploaded Successfully"
         # print HTML_TEMPLATE % strings
-        print REDIRECT_TEMPLATE % {'URL' : 'gallery.cgi'}
+        REDIRECT('gallery.cgi')
+        return
     except Exception as e:
         for aFile in glob.glob(os.path.join(upload_dir, fileName + "*")): # much cleaner
                 os.remove(aFile)
-        strings['body'] = "Error: Please Try Again, File Might not be a valid JPEG. \n" + strings['body']
+        msg = """<div id="message">Error: Please Try Again, File Might not be a valid JPEG.</div>"""
+    	strings['body'] = (uploadForm % {'msg' : msg }) + clientSideCheckScript 
+
+        print 'content-type: text/html\n'
         print HTML_TEMPLATE % strings
         print "Python Image Library:" 
         print e # comment this to hide exception/errors
-     #    if os.path.isfile(saveFilePathName):
-     #        os.remove(saveFilePathName)
-     #    if os.path.isfile(saveTitlePathName):
-     #        os.remove(saveTitlePathName)
-    	# if os.path.isfile(saveThumbPathName):
-     #        os.remove(saveThumbPathName)
-
-print 'content-type: text/html\n'
 
 ## This is what makes the cgi self contained and post to itself.
 # Credit: http://www-users.cs.umn.edu/~tripathi/python/LectureExamples/helloSingleFile.py
 
 # Client side check has removed need for nested ifs, but keeping this to ensure server has total control.
 if 'file' in form and 'title' in form:
-	# if 'cancel' in form:
-			# print REDIRECT_TEMPLATE % { 'URL' : 'google.com'}
-	if len(form['file'].value) > 0:
+	if form['file'].file:
 		if len(form['title'].value) > 0 and len(form['title'].value) < 100: # validate title is not empty (won't be in form if empty)
 			save_uploaded_file ("file", UPLOAD_DIR)
 		else:
-			strings['body'] = "Picture Title Cannot Be Empty or Too Long." + strings['body']
+                        msg = """<div id="message">Picture Title Cannot Be Empty or Too Long.</div>"""
+            #            filename = "" # cannot repopulate file submission field server side, security issue
+            #            if form['file'].file:
+            #                    filename = form['file'].filename
+                        strings['body'] = (uploadForm % {'msg' : msg}) + clientSideCheckScript 
+
+                        print 'content-type: text/html\n'
 			print HTML_TEMPLATE % strings
 	else:
+                strings['body'] = (uploadForm % {'msg' : "" }) + clientSideCheckScript
+                print 'content-type: text/html\n'
 		print HTML_TEMPLATE % strings
 else:
+	strings['body'] = (uploadForm % {'msg' : "" }) + clientSideCheckScript
+        print 'content-type: text/html\n'
 	print HTML_TEMPLATE % strings
 

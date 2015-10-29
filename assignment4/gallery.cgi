@@ -14,11 +14,10 @@ class ImageTile():
 		self.thumbnail = self.filePath + "_tn.jpg"
 
 	def tile(self):
-		return """<img id="%(filename)s" src="%(thumbnail)s" onclick="fbox(this)" alt="%(filePath)s" /> <br/>
+		return """<img id="%(filename)s" src="%(thumbnail)s" onclick="fbox(this)" alt="%(filePath)s" />
 				<h1 id="title-%(filename)s"> %(title)s </h1>
-				<a href="edit.cgi?id=%(filename)s"> Edit </a> 
 				<a href="delete.cgi?id=%(filename)s"> Delete </a>
-				<br/>
+				<a href="edit.cgi?id=%(filename)s"> Edit </a> 
 		""" % {'thumbnail': self.thumbnail, 'filePath': self.filePath, 
 				'title': self.title, 'filename': self.fileName}
 
@@ -38,8 +37,9 @@ def generateTiles():
 	htmlString += "</tr>"
 	return htmlString
 
-body = """<a href="gallery.cgi"><button type=button>Refresh</button></a> 
-		  <a href="upload.cgi"><button type=button>Upload New Picture</button></a>
+body = """<div id="buttons"><a href="gallery.cgi"><button type=button>Refresh</button></a> 
+		  <a href="upload.cgi"><button type=button>Upload New Picture</button></a></div>
+                   <br/>
 		  <table>
 		  	%(allTiles)s
 		  </table>

@@ -11,7 +11,6 @@ fileid = form.getvalue("id")
 title = ""
 msg = ""
 success = False
-print 'content-type: text/html\n'
 
 
 if os.environ['REQUEST_METHOD'] == 'GET':
@@ -21,9 +20,10 @@ if os.environ['REQUEST_METHOD'] == 'GET':
             title = getTitle(filePath)
         except Exception as e:
             # msg = """<div id="message"> Invalid Image Title Requested, try another ID </div>"""
-            msg = """<div id="message"> Please return to the Gallery to select a VALID image for deletion. </div>"""
+            msg = """<div id="message"> Invalid ID. Please return to the <a href="gallery.cgi">Gallery </a> to select a VALID image for deletion.  </div>"""
+            
     else:
-        msg = """<div id="message"> Please return to the Gallery to select an image for deletion. </div>"""
+        msg = """<div id="message"> Please return to the <a href="gallery.cgi">Gallery </a>  to select an image for deletion. </div>"""
 else:  # delete the files!
     filePath = os.path.join(UPLOAD_DIR, fileid + ".jpg")
     if os.path.isfile(filePath):
@@ -61,12 +61,14 @@ strings = {
 if os.environ['REQUEST_METHOD'] == 'GET':
     if msg != "":
         strings['body'] = msg
+    print 'content-type: text/html\n'
     print HTML_TEMPLATE % strings
 
 # Only true here if we post and fail the top conditons. Else redirected.
 if not success and os.environ['REQUEST_METHOD'] == 'POST':
     strings['body'] = msg
+    print 'content-type: text/html\n'
     print HTML_TEMPLATE % strings
 
 if success and os.environ['REQUEST_METHOD'] == 'POST':
-    print REDIRECT_TEMPLATE % {'URL': 'gallery.cgi'}
+    REDIRECT('gallery.cgi')
