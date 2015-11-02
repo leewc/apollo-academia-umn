@@ -13,8 +13,6 @@
 
 #include "message.h"
 
-static int q_id;
-
 int init_q(int key)
 {
      int q_id;
@@ -26,51 +24,7 @@ int init_q(int key)
      return q_id;
 }
 
-int msgwriteUNUSED(void *buf, int len, int q_id)
-{
-     int error = 0;
-     MESSAGE *msg;
-     if(( msg = (MESSAGE*) malloc(sizeof(MESSAGE) + len - 1)) == NULL)
-     { /*len -1 because the struct has a byte for char already */
-	  return -1;
-     }
-     memcpy(msg->message_text, buf, len);
-     msg->message_type = getpid();
-     if(msgsnd(q_id, msg, len, 0) == -1)
-	  error = errno;
-
-     free(msg);
-     if (error) 
-     {
-	  errno = error;
-	  return -1;
-     }
-     return 0;     
-}
-
-int msgwrite(void *buf, int len, int q_id)
-{
-     int error = 0;
-     MESSAGE *msg;
-     if(( msg = (MESSAGE*) malloc(sizeof(MESSAGE) + len - 1)) == NULL)
-     { /*len -1 because the struct has a byte for char already */
-	  return -1;
-     }
-     memcpy(msg->message_text, buf, len);
-     msg->message_type = getpid();
-     if(msgsnd(q_id, msg, len, 0) == -1)
-	  error = errno;
-
-     free(msg);
-     if (error) 
-     {
-	  errno = error;
-	  return -1;
-     }
-     return 0;     
-}
-
-int msgwriteType(void *buf, int len, int q_id, int msg_type)
+int msgwrite(void *buf, int len, int q_id, int msg_type)
 {
      int error = 0;
      MESSAGE *msg;
@@ -92,7 +46,7 @@ int msgwriteType(void *buf, int len, int q_id, int msg_type)
      return 0;     
 }
 
-int msgprintf(char *fmt, ...) {               
+int msgprintf(int q_id, char *fmt, ...) {               
      /* output a formatted message */
      va_list ap;
      char ch;
@@ -120,6 +74,6 @@ int msgprintf(char *fmt, ...) {
      return 0;
 }
 
-int removequeue(void) {
+int removequeue(int q_id) {
      return msgctl(q_id, IPC_RMID, NULL);
 }

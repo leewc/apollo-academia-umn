@@ -1,9 +1,8 @@
 int init_q(int key);
-int msgprintf(char *fmt, ...);
+int msgprintf(int q_id, char *fmt, ...);
 int msgread(void *buf, int len);
-int msgwrite(void *buf, int len, int q_id);
-int msgwriteType(void *buf, int len, int q_id, int msg_type);
-int removequeue(void);
+int msgwrite(void *buf, int len, int q_id, int msg_type);
+int removequeue(int q_id);
 
 #define MESSAGE_PERMISSION 0600                                                                                                                       
                                                                                                                                                     
