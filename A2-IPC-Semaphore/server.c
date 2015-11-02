@@ -13,8 +13,6 @@
 
 #include "message.h"
 
-#define MAXSIZE 4096
-
 static int self_id;
 
 int init_client_q(int key);
@@ -33,37 +31,52 @@ int main(int argc, char** argv)
 	  perror("Failed to initialize Server Message Queue");
 	  return 1;
      }
-     printf("Server Initialized at Key Number: %i \n", key);
-     printf("Waiting for clients. \n");
+     printf("Server: PID: %i \n", getpid());
+     printf("Server: Server Initialized at Key Number: %i \n", key);
+     printf("Server: Waiting for clients to connect ... \n");
 
+     //necessary to avoid reading a just sent message (no semaphores implemented yet)
      int except = 0;
      while(1)
      {
 	  int receive;
-	  MESSAGE msg;
-	  if((receive = msgrcv(self_id, &msg, MAXSIZE, except, MSG_EXCEPT)) < 0)
+	  MESSAGE *msg;
+	  msg = (MESSAGE *) malloc(sizeof(MESSAGE) + MAX_SIZE -1 );
+	  if((receive = msgrcv(self_id, msg, MAX_SIZE, except, MSG_EXCEPT)) < 0)
 	  { //0 to indicate first message
 	       perror("Message Receive Failed.");
 	       return 1;
 	  }
-	  printf("Received message From Client of pid: %ld \n", msg.message_type);
+	  printf("Server: Received message From Client of pid: %ld \n", msg->message_type);
+	  printf("\t Message is: %s \n", msg->message_text); 
 
-	  //create a client_q using provided pid in message_type
-	  int client_key = msg.message_type;
+	  //create a client_q using provided pid in message_type, this also creates a message in the main queue
+	  int client_key = msg->message_type;
 	  int client_id = init_client_q(client_key);
 	  
-	  printf("Initialized client key: %i id: %i \n", client_key, client_id);
-	  //msgwrite("Server responding by putting message in main_q.", 47, client_id, client_key);
-	  msgwrite("R.", 1, client_id, client_key);
+	  printf("Server: Initialized Client Q with ID: %i Key: %i  \n", client_id, client_key);
 	  
-	  printf("Waiting for next client. \n");
+	  //Respond by putting message in client_q;
+	  msgwrite("Welcome client, this is your client Q!", 47, client_id, client_key);
 
-	  msgwrite("Hi. Client.", 11, client_id, self_id); //selfid no matter here.
+	  //Get a response from the client_q, through client_key
+	  if((receive = msgrcv(client_id, msg, MAX_SIZE, self_id, 0)) < 0)
+	  {
+	       printf("Response Error.\n");
+	       return 1;
+	  }
+	  printf("Server: \t Message from Client: %s \n", msg->message_text); 
+	  
+	  //printf("Server: Waiting for next client. \n");
+
 	  except = client_key;
+	  free(msg);
+	  break; //kill ownself after one client for now
      }
 
-     printf("Shutting Down Server .. \n");
+     printf("Shutting Down Server ... \n");
      removequeue(self_id);
+     return 0;
 }
 
 int init_client_q(int key)
@@ -75,14 +88,7 @@ int init_client_q(int key)
 	  return -1;
      }
      //Notify client we are ready
-     MESSAGE msg;
-     msg.message_type = key;
-     msg.message_text[0] = 'R'; //temporary.
-     if(msgsnd(self_id, &msg, 1, 0) == -1)
-     {
-	  fprintf(stderr, "Failed to send reponse to client.");
-	  return -1;
-     }
-     printf("Client Q initialized with id: %i \n", client_id);
+
+     msgwrite("Please go to new Client Q.", 27, self_id, key); 
      return client_id;
 }
