@@ -1,0 +1,15 @@
+# A simple config file for Python CGI to read and get information about the MySQL Server
+# mysql -uF15CS4131U66 -hegon.cs.umn.edu -P3307 -p F15CS4131U66
+# Yes it's really bad to store credentials in plaintext, the assignment doens't need salt and hashing. It's also bad to read them in as plaintext
+# https://docs.python.org/2/library/configparser.html
+
+# Cookie expiration is in number of seconds
+####################### Config File ###########################
+[Database]
+host: egon.cs.umn.edu
+port: 3307
+user: F15CS4131U66
+passwd: 7689
+db_name: F15CS4131U66
+cookie_expiration: 10
+#################### End of Config File ######################
