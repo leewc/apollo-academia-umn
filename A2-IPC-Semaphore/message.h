@@ -7,10 +7,10 @@ int removequeue(int q_id);
 #define MESSAGE_PERMISSION 0600                                          
 #define MAX_SIZE 4096
 
+#define RECEIVE_SZ sizeof(MESSAGE) + MAX_SIZE - 1
+
 typedef struct{
      long message_type;  // destination 
-     long pid;           // origin
+     long pid;           // origin (source)
      char message_text[1];
 }MESSAGE; 
-
-#define RECEIVE_SZ sizeof(MESSAGE) + MAX_SIZE - 1

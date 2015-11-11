@@ -15,8 +15,6 @@
 
 static int self_id;
 
-int init_client_q(int key);
-
 int main(int argc, char** argv)
 {
      if(argc != 2)
@@ -35,41 +33,32 @@ int main(int argc, char** argv)
      printf("Server: Server Initialized at Key Number: %i \n", key);
      printf("Server: Waiting for clients to connect ... \n");
 
-     //necessary to avoid reading a just sent message (no semaphores implemented yet)
-     int except = 0;
      while(1)
      {
 	  int receive;
 	  MESSAGE *msg;
 	  msg = (MESSAGE *) malloc(sizeof(MESSAGE) + MAX_SIZE -1 );
-	  if((receive = msgrcv(self_id, msg, RECEIVE_SZ, except, MSG_EXCEPT)) < 0)
+	  if((receive = msgrcv(self_id, msg, RECEIVE_SZ, 1, 0)) < 0)
 	  { //0 to indicate first message
 	       perror("Message Receive Failed.");
 	       return 1;
 	  }
-	  printf("Server: Received message From Client of pid: %ld \n", msg->message_type);
+	  printf("Server: Received message From Client of pid: %ld \n", msg->pid);
 	  printf("\t Message is: %s \n", msg->message_text); 
-
-	  //create a client_q using provided pid in message_type, this also creates a message in the main queue
-	  int client_key = msg->message_type;
-	  int client_id = init_client_q(client_key);
 	  
-	  printf("Server: Initialized Client Q with ID: %i Key: %i  \n", client_id, client_key);
-	  
-	  //Respond by putting message in client_q;
-	  msgprintf(client_id, client_key, "Welcome client, this is your client Q!");
+	  //Respond
+	  msgprintf(self_id, getpid(), "Welcome client!");
 
 	  //Get a response from the client_q, through client_key
-	  if((receive = msgrcv(client_id, msg, RECEIVE_SZ, self_id, 0)) < 0)
+	  if((receive = msgrcv(self_id, msg, RECEIVE_SZ, 1, 0)) < 0)
 	  {
 	       printf("Response Error.\n");
 	       return 1;
 	  }
 	  printf("Server: \t Message from Client: %s \n", msg->message_text); 
 	  
-	  //printf("Server: Waiting for next client. \n");
+	  printf("Server: Waiting for next client. \n");
 
-	  except = client_key;
 	  free(msg);
 	  break; //kill ownself after one client for now
      }
@@ -79,6 +68,7 @@ int main(int argc, char** argv)
      return 0;
 }
 
+// function not used after change in requirements
 int init_client_q(int key)
 {
      int client_id;
