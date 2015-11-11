@@ -1,0 +1,44 @@
+Script started on Wed 11 Nov 2015 04:58:30 PM CST;
+
+wclee@athena-tux: ~/Development/4061-Private-Assignments/A2-IPC-Semaphore
+
+wclee@athena-tux:~/Development/4061-Private-Assignments/A2-IPC-Semaphore$ ./server 9876
+Server: PID: 31261 
+Server: Server Initialized at Key Number: 9876 
+Info: Initializing 3 Threads ...
+Info: [3] Clients must connect before the server will shut down.
+Server: (pthread ID 140373769905920) has started. Waiting for client to connect ...
+Server: (pthread ID 140373761513216) has started. Waiting for client to connect ...
+Server: (pthread ID 140373778298624) has started. Waiting for client to connect ...
+Server: (pthread ID: 140373761513216) has the lock.
+Server: Received message From Client: PID: 31333 
+	 Message:  Hi from Client! 
+Server: Received message From Client: PID: 31333 
+	 Message:  Send me something! 
+Server: Received message From Client: PID: 31333 
+	 Message:  OK Thank you, shutting down. 
+Server: Waiting for next client... 
+Server: (pthread ID: 140373769905920) has the lock.
+Server: Received message From Client: PID: 31336 
+	 Message:  Hi from Client! 
+Server: Received message From Client: PID: 31336 
+	 Message:  Send me something! 
+Server: Received message From Client: PID: 31336 
+	 Message:  OK Thank you, shutting down. 
+Server: Waiting for next client... 
+Server: (pthread ID: 140373778298624) has the lock.
+Server: Received message From Client: PID: 31337 
+	 Message:  Hi from Client! 
+Server: Received message From Client: PID: 31337 
+	 Message:  Send me something! 
+Server: Received message From Client: PID: 31337 
+	 Message:  OK Thank you, shutting down. 
+Server: Waiting for next client... 
+Info: All threads complete. Shutting Down Server ... 
+
+wclee@athena-tux:~/Development/4061-Private-Assignments/A2-IPC-Semaphore$ 
+
+wclee@athena-tux:~/Development/4061-Private-Assignments/A2-IPC-Semaphore$ exit
+exit
+
+Script done on Wed 11 Nov 2015 04:59:29 PM CST
