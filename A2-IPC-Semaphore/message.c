@@ -16,7 +16,7 @@
 int init_q(int key)
 {
      int q_id;
-     q_id = msgget(key, IPC_CREAT | MESSAGE_PERMISSION);
+     q_id = msgget(key, IPC_CREAT | MESSAGE_PERMISSION);     
      if (q_id == -1)
      {
 	  return -1;

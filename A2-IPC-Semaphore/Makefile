@@ -6,7 +6,7 @@ client.o: client.c
 	gcc $(FLAGS) client.c -c
 
 server.o: server.c
-	gcc $(FLAGS) server.c -c
+	gcc $(FLAGS) -pthread server.c -c
 
 message.o: message.h message.c
 	gcc $(FLAGS) message.c -c
@@ -14,7 +14,7 @@ message.o: message.h message.c
 client: message.o client.o
 	gcc $(FLAGS) message.o client.o -o client
 server: message.o server.o
-	gcc $(FLAGS) message.o server.o -o server
+	gcc $(FLAGS) -pthread message.o server.o -o server
 
 clean:
 	rm *.o

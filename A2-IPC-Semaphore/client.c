@@ -35,7 +35,8 @@ int main(int argc, char** argv)
      }
 
      printf("Client: PID: %i \n", client_pid);
-     printf("Client: Connected to Server Queue ID: %i ...\nSending Initial Message to server... \n", server_qid);
+     printf("Client: Connected to Server Queue ID: %i ...\n", server_qid);
+     printf("Sending Initial Message to server... \n");
      
      // put a message in the queue to notify the server we are listening
      msgprintf(server_qid, 1, client_pid, "Hi from Client!"); 
@@ -63,7 +64,7 @@ int main(int argc, char** argv)
 	  }
 	  printf("Client: Received Message from Server:\n\t%s\n", msg->message_text);
 	  
-	  msgprintf(server_qid, 1, client_pid, "Thank you, shutting down.");
+	  msgprintf(server_qid, 1, client_pid, "OK Thank you, shutting down.");
 	  break; //client shuts down after receiving 2 messages. 
      }
      printf("Client: Shutting down client.\n");
