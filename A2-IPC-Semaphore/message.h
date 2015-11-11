@@ -1,5 +1,5 @@
 int init_q(int key);
-int msgprintf(int q_id, int msg_type, char *fmt, ...);
+int msgprintf(int q_id, int msg_type, int pid, char *fmt, ...);   /* Params: Q_ID, TO, FROM, MESSAGE */
 int msgread(void *buf, int len);
 int msgwrite(void *buf, int len, int q_id, int msg_type);
 int removequeue(int q_id);

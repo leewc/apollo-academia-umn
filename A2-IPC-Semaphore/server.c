@@ -12,8 +12,10 @@
 #include <unistd.h>
 
 #include "message.h"
+void receiveMessageFromClient(MESSAGE* msg, int receive); 
 
-static int self_id;
+static int q_id; // the IPC message Queue ID
+static int server_pid = 1; //Our 'pid' is set as 1 by default to distinguish messages for us, the server
 
 int main(int argc, char** argv)
 {
@@ -24,7 +26,7 @@ int main(int argc, char** argv)
      }
      
      int key = atoi(argv[1]);
-     if((self_id = init_q(key)) == -1)
+     if((q_id = init_q(key)) == -1)
      {
 	  perror("Failed to initialize Server Message Queue");
 	  return 1;
@@ -35,37 +37,38 @@ int main(int argc, char** argv)
 
      while(1)
      {
-	  int receive;
 	  MESSAGE *msg;
 	  msg = (MESSAGE *) malloc(sizeof(MESSAGE) + MAX_SIZE -1 );
-	  if((receive = msgrcv(self_id, msg, RECEIVE_SZ, 1, 0)) < 0)
-	  { //0 to indicate first message
-	       perror("Message Receive Failed.");
-	       return 1;
-	  }
-	  printf("Server: Received message From Client of pid: %ld \n", msg->pid);
-	  printf("\t Message is: %s \n", msg->message_text); 
-	  
-	  //Respond
-	  msgprintf(self_id, getpid(), "Welcome client!");
+	  int receive = 0;
 
-	  //Get a response from the client_q, through client_key
-	  if((receive = msgrcv(self_id, msg, RECEIVE_SZ, 1, 0)) < 0)
-	  {
-	       printf("Response Error.\n");
-	       return 1;
-	  }
-	  printf("Server: \t Message from Client: %s \n", msg->message_text); 
+	  receiveMessageFromClient(msg, receive);
 	  
-	  printf("Server: Waiting for next client. \n");
+	  msgprintf(q_id, msg->pid, server_pid, "Welcome client!"); //respond
+
+	  receiveMessageFromClient(msg, receive);
+
+	  msgprintf(q_id, msg->pid, server_pid, "Please shut down. Goodbye"); 
+	  
+	  printf("Server: Waiting for next client... \n");
 
 	  free(msg);
-	  break; //kill ownself after one client for now
+	  //break; //kill ownself after one client for now
      }
 
      printf("Shutting Down Server ... \n");
-     removequeue(self_id);
+     removequeue(q_id);
      return 0;
+}
+
+void receiveMessageFromClient(MESSAGE* msg, int receive)
+{
+     // receive messages of type 1 (which is our 'pid')
+     if((receive = msgrcv(q_id, msg, RECEIVE_SZ, server_pid, 0)) < 0)
+     {
+	  perror("Message Receive Failed.");
+     }
+     printf("Server: Received message From Client: PID: %ld \n", msg->pid);
+     printf("\t Message:  %s \n", msg->message_text); 	  
 }
 
 // function not used after change in requirements
@@ -78,7 +81,6 @@ int init_client_q(int key)
 	  return -1;
      }
      //Notify client we are ready
-
-     msgprintf(self_id, key, "Please go to new Client Q."); 
+     msgprintf(q_id, key, getpid(), "Please go to new Client Q."); 
      return client_id;
 }

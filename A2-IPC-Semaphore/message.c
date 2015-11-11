@@ -46,7 +46,7 @@ int msgwrite(void *buf, int len, int q_id, int msg_type)
      return 0;     
 }
 
-int msgprintf(int q_id, int msg_type, char *fmt, ...) {               
+int msgprintf(int q_id, int msg_type, int pid, char *fmt, ...) {               
      /* output a formatted message */
      va_list ap;
      char ch;
@@ -62,8 +62,10 @@ int msgprintf(int q_id, int msg_type, char *fmt, ...) {
 	  return -1;
      /* copy into the buffer */
      vsprintf(msg->message_text, fmt, ap);
-     /* message type will be getpid() to distinguish origin */    
+     /* message type is who its for */    
      msg->message_type = msg_type;
+     /* pid is used to keep track of origin */
+     msg->pid = pid;
      if (msgsnd(q_id, msg, sizeof(MESSAGE) + len - 1, 0) == -1) 
 	  error = errno;
      free(msg);

@@ -11,9 +11,11 @@
 
 #include "message.h"
 
+/* Client will send 3 messages in total and wait to receive 2 messages, then shutsdown. */
 int main(int argc, char** argv)
 {
-     int server_id;
+     int server_qid;
+     int client_pid = getpid(); /* our own pid */
      int key;
      MESSAGE *msg;
      msg = (MESSAGE*) malloc(sizeof(MESSAGE) + MAX_SIZE - 1);
@@ -26,45 +28,44 @@ int main(int argc, char** argv)
      
      //obtain the server through a common key.
      key = atoi(argv[1]);
-     if((server_id = init_q(key)) == -1)
+     if((server_qid = init_q(key)) == -1)
      {
 	  perror("Failed to get Server Message Queue");
 	  return 1;
      }
 
-     // put a message in the queue to notify the server we are listening
-     // null message since we just want to send the pid (saved in msg type over)
-     printf("Client: PID: %i \n", getpid());
-     printf("Client: Got server Queue: %i, Sending Initial Message to server... \n", server_id);
+     printf("Client: PID: %i \n", client_pid);
+     printf("Client: Connected to Server Queue ID: %i ...\nSending Initial Message to server... \n", server_qid);
      
-     msgprintf(server_id, 1, "Hi from Client!"); 
-     printf("Client:\t Waiting for server response. \n");
+     // put a message in the queue to notify the server we are listening
+     msgprintf(server_qid, 1, client_pid, "Hi from Client!"); 
+     printf("Client: Waiting for server response. \n");
 
      //wait for a reply (blocking read)
      int receive;
-     if((receive = msgrcv(server_id, msg, RECEIVE_SZ, getpid(), 0)) < 0)
+     if((receive = msgrcv(server_qid, msg, RECEIVE_SZ, client_pid, 0)) < 0)
      {
 	  perror("Message Receive Failed.");
 	  return 1;
      }
      
-     //We should get a reply with the new client queue
-     printf("Client: Received Message from Server: %s\n", msg->message_text);
+     //We should get a reply.
+     printf("Client: Received Message from Server:\n\t%s\n", msg->message_text);
 
      while(1) //same as for (;;)
      {
-	  // CHECK IF THIS SHOULD BE GETPID OR JUST --- 0 shld be getpid
-       if((receive = msgrcv(server_id, msg, RECEIVE_SZ, getpid(), 0)) < 0)
+       printf("Client: Sending Reply.. \n");
+       msgprintf(server_qid, 1, client_pid, "Send me something!");
+       if((receive = msgrcv(server_qid, msg, RECEIVE_SZ, client_pid , 0)) < 0)
 	  {
 	       perror("Message Receive Failed.");
 	       return 1;
 	  }
-	  printf("Client: Received Message from Server: %s\n", msg->message_text);
+	  printf("Client: Received Message from Server:\n\t%s\n", msg->message_text);
 	  
-	  msgprintf(server_id, 1, "Thank you, shutting down.");
-	  break; //let's just kill itself for now.
+	  msgprintf(server_qid, 1, client_pid, "Thank you, shutting down.");
+	  break; //client shuts down after receiving 2 messages. 
      }
-     printf("Shutting down client.\n");
+     printf("Client: Shutting down client.\n");
      return 0;
 }
-
