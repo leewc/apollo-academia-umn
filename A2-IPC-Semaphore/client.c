@@ -17,7 +17,7 @@ int main(int argc, char** argv)
      int client_id;
      int key;
      MESSAGE *msg;
-     msg = (MESSAGE*) malloc(sizeof(MESSAGE) + MAX_SIZE -1);
+     msg = (MESSAGE*) malloc(sizeof(MESSAGE) + MAX_SIZE - 1);
 
      if(argc != 2)
      {
@@ -37,12 +37,12 @@ int main(int argc, char** argv)
      printf("Client: PID: %i \n", getpid());
      printf("Client: Got server ID: %i, Sending Initial Message to server... \n", server_id);
      
-     msgwrite("Hi from Client!", 15, server_id, getpid()); //first msgtype here is who it's from, if who it's for then can't get origin
+     msgprintf(server_id, getpid(), "Hi from Client!"); //first msgtype here is who it's from, if who it's for then can't get origin
      printf("Client:\t Waiting for server response. \n");
 
      //wait for a reply (blocking read)
      int receive;
-     if((receive = msgrcv(server_id, msg, MAX_SIZE, getpid(), 0)) < 0)
+     if((receive = msgrcv(server_id, msg, RECEIVE_SZ, getpid(), 0)) < 0)
      {
 	  perror("Message Receive Failed.");
 	  return 1;
@@ -62,14 +62,14 @@ int main(int argc, char** argv)
      while(1) //same as for (;;)
      {
 	  // CHECK IF THIS SHOULD BE GETPID OR JUST --- 0 shld be getpid
-	  if((receive = msgrcv(client_id, msg, MAX_SIZE, 0, 0)) < 0)
+       if((receive = msgrcv(client_id, msg, RECEIVE_SZ, 0, 0)) < 0)
 	  {
 	       perror("Message Receive Failed.");
 	       return 1;
 	  }
 	  printf("Client: Received Message from Server: %s\n", msg->message_text);
 	  
-	  msgwrite("Thank you, shutting down.", 26, client_id, server_id);
+	  msgprintf(client_id, server_id, "Thank you, shutting down.");
 	  break; //let's just kill itself for now.
      }
      printf("Shutting down client.\n");

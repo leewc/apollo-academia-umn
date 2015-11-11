@@ -34,7 +34,7 @@ int msgwrite(void *buf, int len, int q_id, int msg_type)
      }
      memcpy(msg->message_text, buf, len);
      msg->message_type = msg_type;
-     if(msgsnd(q_id, msg, len, 0) == -1)
+     if(msgsnd(q_id, msg, sizeof(MESSAGE) + len - 1, 0) == -1)
 	  error = errno;
 
      free(msg);
@@ -46,7 +46,7 @@ int msgwrite(void *buf, int len, int q_id, int msg_type)
      return 0;     
 }
 
-int msgprintf(int q_id, char *fmt, ...) {               
+int msgprintf(int q_id, int msg_type, char *fmt, ...) {               
      /* output a formatted message */
      va_list ap;
      char ch;
@@ -58,13 +58,13 @@ int msgprintf(int q_id, char *fmt, ...) {
      va_start(ap, fmt);                       
      /* how long would it be ? */
      len = vsnprintf(&ch, 1, fmt, ap);              
-     if ((msg = (MESSAGE *)malloc(sizeof(MESSAGE) + len)) == NULL)
+     if ((msg = (MESSAGE *)malloc(sizeof(MESSAGE) + len - 1)) == NULL)
 	  return -1;
      /* copy into the buffer */
      vsprintf(msg->message_text, fmt, ap);
      /* message type will be getpid() to distinguish origin */    
-     msg->message_type = getpid();
-     if (msgsnd(q_id, msg, len + 1, 0) == -1) 
+     msg->message_type = msg_type;
+     if (msgsnd(q_id, msg, sizeof(MESSAGE) + len - 1, 0) == -1) 
 	  error = errno;
      free(msg);
      if (error) {

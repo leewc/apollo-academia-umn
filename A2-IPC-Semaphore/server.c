@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	  int receive;
 	  MESSAGE *msg;
 	  msg = (MESSAGE *) malloc(sizeof(MESSAGE) + MAX_SIZE -1 );
-	  if((receive = msgrcv(self_id, msg, MAX_SIZE, except, MSG_EXCEPT)) < 0)
+	  if((receive = msgrcv(self_id, msg, RECEIVE_SZ, except, MSG_EXCEPT)) < 0)
 	  { //0 to indicate first message
 	       perror("Message Receive Failed.");
 	       return 1;
@@ -57,10 +57,10 @@ int main(int argc, char** argv)
 	  printf("Server: Initialized Client Q with ID: %i Key: %i  \n", client_id, client_key);
 	  
 	  //Respond by putting message in client_q;
-	  msgwrite("Welcome client, this is your client Q!", 47, client_id, client_key);
+	  msgprintf(client_id, client_key, "Welcome client, this is your client Q!");
 
 	  //Get a response from the client_q, through client_key
-	  if((receive = msgrcv(client_id, msg, MAX_SIZE, self_id, 0)) < 0)
+	  if((receive = msgrcv(client_id, msg, RECEIVE_SZ, self_id, 0)) < 0)
 	  {
 	       printf("Response Error.\n");
 	       return 1;
@@ -89,6 +89,6 @@ int init_client_q(int key)
      }
      //Notify client we are ready
 
-     msgwrite("Please go to new Client Q.", 27, self_id, key); 
+     msgprintf(self_id, key, "Please go to new Client Q."); 
      return client_id;
 }
