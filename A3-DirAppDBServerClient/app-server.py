@@ -33,7 +33,7 @@ class App_server():
                 message = self.receive_till_delim(connection_socket)
                 if len(message) == 0:
                     break #connection closed, next client. 
-                print("RX: ", message)
+                print("app-server RX: ", message)
                 self.processMessage(connection_socket, message)
 
     def register_dir(self):
@@ -63,7 +63,7 @@ class App_server():
 
             elif len(split) == 1 and split[0] == "complete":
                 connection_socket.send(stob("success\r\n"))
-                print("Ready for next client.")
+                print("Ready for next file or client.")
 
             else:
                 print("Do not understand message. Something went wrong.") # drop it
@@ -82,13 +82,13 @@ class App_server():
         received = 0
         with open("downloaded_"+filename, 'wb') as file:
             while received < fileSize:
-                print("||||||||||| RECEIVED ", received, " Filesize ", fileSize)
                 data = connection_socket.recv(1024)
                 if not data:
                     break
                 file.write(data)
                 received += len(data)
-        print("Complete receive...")
+                print("Received ... ", received, " of ", fileSize, end ="\r")
+        print("\nTransfer complete...")
         return True
 
     def receive_till_delim(self, connection_socket):

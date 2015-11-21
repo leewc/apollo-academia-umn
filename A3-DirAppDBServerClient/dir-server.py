@@ -6,7 +6,7 @@ import sys  # for CLI
 class Dir_server(): # http://stackoverflow.com/q/15374857/ (it don't matter anymore)
     """A single threaded server that keeps track of the app_servers"""
     def __init__(self,ds_port):
-        self.hostname = 'localhost'
+        self.hostname = 'localhost' # apollo.cselabs.umn.edu
         self.app_server_list = list()
         self.ds_port = ds_port
         self.server_socket = socket(AF_INET, SOCK_STREAM)
