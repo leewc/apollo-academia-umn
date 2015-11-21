@@ -9,8 +9,8 @@ import time # for test runs
 class App_client:
     def __init__(self, ds_port, db_port):
         # self.server = 'localhost' 
-        self.dbserver = 'localhost' # change this if not running dbServer on atlas.cselabs.umn.edu
-        self.dir_server = 'localhost'
+        self.dbserver = 'atlas.cselabs.umn.edu' # change this if not running dbServer on atlas.cselabs.umn.edu
+        self.dir_server = 'apollo.cselabs.umn.edu'
         self.testRuns = 5
 
         self.ds_port = ds_port
@@ -59,7 +59,7 @@ class App_client:
             for i in range(self.testRuns):
                 t_start = time.time()
                 if self.transfer_file(filename):
-                    t_elapsed = time.time() - t_start
+                    t_elapsed = time.time() - t_start -1 #remove sleep time
                     print("Completed trial: ", i+1, "Time: ", t_elapsed)
                     t_total += t_elapsed
             t_average = t_total / self.testRuns
@@ -77,6 +77,9 @@ class App_client:
                     if not chunk:
                         break
                     self.client_socket.send(chunk)
+
+            time.sleep(1) # ensure 'complete' doesn't go into the file
+            # happens when there is latency
 
             self.client_socket.send( stob("complete\r\n" ) )
             resp = self.receive_till_delim(self.client_socket)
@@ -142,8 +145,8 @@ def main(argv):
             return
 
         # generate files this way: base64 /dev/urandom | head -c 100k > 100k.dat
-        # filenames = ['10k.dat', '100k.dat', '1000k.dat', '10000k.dat']
-        filenames = ['10k.dat', '100k.dat']
+        filenames = ['10k.dat', '100k.dat', '1000k.dat', '10000k.dat']
+        #filenames = ['100k.dat']
         app_client.sendfiles_test(filenames)
         app_client.get_db_stats()
         
@@ -156,12 +159,12 @@ def main(argv):
         app_client.shutdown()
         sys.exit()
 
-    # except Exception as e:
-    #     print("Error. <ds_port> is not an integer or something went wrong..")
-    #     print("Stack Trace: ")
-    #     print (e)
-    #     app_serv.shutdown()
-    #     return False
+    except Exception as e:
+         print("Error. Something went wrong..")
+         print("Stack Trace: ")
+         print (e)
+         app_serv.shutdown()
+         return False
 
 
 if __name__ == "__main__":

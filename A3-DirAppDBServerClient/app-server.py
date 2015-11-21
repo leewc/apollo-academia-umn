@@ -6,14 +6,14 @@ import sys  # for CLI
 class App_server():
     """A single threaded server that keeps track of the app_servers"""
     def __init__(self, ds_port):
-        self.dir_hostname = 'localhost' # where the dir-server is located at, change to apollo
+        self.dir_hostname = 'apollo.cselabs.umn.edu' # where the dir-server is located at, change to apollo
         self.ds_port = ds_port
         self.server_socket = socket(AF_INET, SOCK_STREAM)
 
     def start(self):
         self.server_socket.bind(('', 0)) # empty string as hostname for local host
         print("app-server: Socket Bound to following IP and Port:")
-        print(self.server_socket.getsockname()[0], ", ", self.server_socket.getsockname()[1])
+        print(gethostbyname(gethostname()), ",", self.server_socket.getsockname()[1])
 
         if self.register_dir():
             print("Registration with dir-server successful.")
@@ -39,7 +39,7 @@ class App_server():
     def register_dir(self):
         register_socket = socket(AF_INET,SOCK_STREAM)
         register_socket.connect( (self.dir_hostname, self.ds_port) )
-        register = "register " + str(self.server_socket.getsockname()[0]) + " " + str(self.server_socket.getsockname()[1]) +"\r\n"
+        register = "register " + str(gethostbyname(gethostname())) + " " + str(self.server_socket.getsockname()[1]) +"\r\n"
         register_socket.send( stob(register) )
         reply = self.receive_till_delim(register_socket)
 
@@ -127,12 +127,12 @@ def main(argv):
         app_serv.shutdown()
         sys.exit()
 
-    # except Exception as e:
-    #     print("Error. <ds_port> is not an integer or something went wrong..")
-    #     print("Stack Trace: ")
-    #     print (e)
-    #     app_serv.shutdown()
-    #     return False
+    except Exception as e:
+         print("Error. Something went wrong..")
+         print("Stack Trace: ")
+         print (e)
+         app_serv.shutdown()
+         return False
 
 if __name__ == "__main__":
     main(sys.argv)
