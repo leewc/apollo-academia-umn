@@ -6,6 +6,7 @@ import glob
 import time  # time for file name
 import Image # for thumbnails :)
 from shared import * # import common templates and variables
+from database import *
 
 # https://docs.python.org/2/library/cgi.html # Only instantiate only and exactly once 
 form = cgi.FieldStorage()
@@ -107,6 +108,16 @@ def save_uploaded_file (form_field, upload_dir):
 
 ## This is what makes the cgi self contained and post to itself.
 # Credit: http://www-users.cs.umn.edu/~tripathi/python/LectureExamples/helloSingleFile.py
+
+# only logged in, admins can use this
+if not isLoggedIn():
+    REDIRECT('login.html')
+else:
+    db = Database()
+    if not db.isOwnerFromCookie():
+        REDIRECT('gallery.cgi')
+
+
 
 # Client side check has removed need for nested ifs, but keeping this to ensure server has total control.
 if 'file' in form and 'title' in form:

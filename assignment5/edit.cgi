@@ -1,7 +1,9 @@
 #!/usr/bin/python
+
 import cgi
 import os
-from shared import *
+from shared import * # import common templates and variables
+from database import * # import database to check role
 
 form = cgi.FieldStorage()
 fileid = form.getvalue("id")
@@ -9,6 +11,13 @@ newTitle = form.getvalue("title")
 title = ""
 msg = ""
 success = False
+
+if not isLoggedIn():
+    REDIRECT('login.html')
+else:
+    db = Database()
+    if not db.isOwnerFromCookie():
+        REDIRECT('gallery.cgi')
 
 if os.environ['REQUEST_METHOD'] == 'GET':
     if fileid is not None:

@@ -4,7 +4,7 @@ import cgi
 import os
 import glob
 from shared import *  # import common templates and variables
-
+from database import * # import database to check role
 
 form = cgi.FieldStorage()
 fileid = form.getvalue("id")
@@ -12,6 +12,12 @@ title = ""
 msg = ""
 success = False
 
+if not isLoggedIn():
+    REDIRECT('login.html')
+else:
+    db = Database()
+    if not db.isOwnerFromCookie():
+        REDIRECT('gallery.cgi')
 
 if os.environ['REQUEST_METHOD'] == 'GET':
     if fileid is not None:
@@ -19,7 +25,6 @@ if os.environ['REQUEST_METHOD'] == 'GET':
             filePath = os.path.join(UPLOAD_DIR, fileid + ".txt")
             title = getTitle(filePath)
         except Exception as e:
-            # msg = """<div id="message"> Invalid Image Title Requested, try another ID </div>"""
             msg = """<div id="message"> Invalid ID. Please return to the <a href="gallery.cgi">Gallery </a> to select a VALID image for deletion.  </div>"""
             
     else:

@@ -1,7 +1,9 @@
 #!/usr/bin/python
 import os
+
 from shared import *
-from login import isLoggedIn, Database
+from database import *
+
 class ImageTile():
 	"""Class that holds the thumbnails and photo paths, used for easy generation of page.
 	fileName should be without the extension, so we can refer to the thumbnail and text
@@ -13,15 +15,21 @@ class ImageTile():
 		self.title = getTitle(self.filePath + ".txt") # method from shared
 		self.thumbnail = self.filePath + "_tn.jpg"
 
-	def tile(self):
-		return """<img id="%(filename)s" src="%(thumbnail)s" onclick="fbox(this)" alt="%(filePath)s" />
+	def tile(self,edits=True):
+                if edits:
+		    return """<img id="%(filename)s" src="%(thumbnail)s" onclick="fbox(this)" alt="%(filePath)s" />
 				<h1 id="title-%(filename)s"> %(title)s </h1>
 				<a href="delete.cgi?id=%(filename)s"> Delete </a>
 				<a href="edit.cgi?id=%(filename)s"> Edit </a> 
-		""" % {'thumbnail': self.thumbnail, 'filePath': self.filePath, 
+		    """ % {'thumbnail': self.thumbnail, 'filePath': self.filePath, 
+				'title': self.title, 'filename': self.fileName}
+                else:
+                    return """<img id="%(filename)s" src="%(thumbnail)s" onclick="fbox(this)" alt="%(filePath)s" />
+				<h1 id="title-%(filename)s"> %(title)s </h1>
+                    """ % {'thumbnail': self.thumbnail, 'filePath': self.filePath, 
 				'title': self.title, 'filename': self.fileName}
 
-def generateTiles():
+def generateTiles(edits=True):
 	listOfFiles = os.listdir(UPLOAD_DIR)
 	pictures = []
 	htmlString = "<tr>" # start table row
@@ -33,17 +41,18 @@ def generateTiles():
 	for i in range(len(pictures)):
 		if(i%4 == 0 and i != 0):
 			htmlString += "</tr> <tr>" #next row
-		htmlString += "<td>%(tile)s</td>" % {'tile': ImageTile(pictures[i]).tile()}
+		htmlString += "<td>%(tile)s</td>" % {'tile': ImageTile(pictures[i]).tile(edits)}
 	htmlString += "</tr>"
 	return htmlString
 
-body = """<div id="buttons"><a href="gallery.cgi"><button type=button>Refresh</button></a> 
-		  <a href="upload.cgi"><button type=button>Upload New Picture</button></a></div>
-                   <br/>
-		  <table>
-		  	%(allTiles)s
-		  </table>
-	   """ % { 'allTiles': generateTiles() }
+menu = """<div id="buttons"><a href="gallery.cgi"><button type=button>Refresh</button></a> 
+		  <a href="upload.cgi"><button type=button>Upload New Picture</button></a></div>"""
+
+body = """<br/>
+             <table>
+		 %(allTiles)s
+	     </table>
+       """
 
 fboxScript="""
 <script>
@@ -60,11 +69,23 @@ function fbox(img){
 }
 </script>"""
 
-strings = {
-	'windowTitle': "Picture Gallery",
-	'title': "Picture Gallery",
-	'body': body + fboxScript
-}
 
-print 'content-type: text/html\n'
-print HTML_TEMPLATE % strings
+
+if not isLoggedIn():
+    REDIRECT('login.html')
+else:
+    db = Database()
+    strings = {
+            'windowTitle': "Picture Gallery",
+            'title': "Picture Gallery",
+            'body': "" # populate based on role
+    }
+
+    if db.isOwnerFromCookie():
+        strings['body'] =  menu + body % { 'allTiles': generateTiles() } + fboxScript
+    else:
+        # false for generate tiles avoids the edit buttons
+        strings['body'] = body % {'allTiles': generateTiles(False) } + fboxScript
+
+    print 'content-type: text/html\n'
+    print HTML_TEMPLATE % strings
