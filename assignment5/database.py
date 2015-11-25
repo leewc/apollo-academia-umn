@@ -13,11 +13,11 @@ class Database:
         self.db_name = None #str
         self.cookie_expiration = None # int
         
-        self.readConfigFile('config') #populates the database
-        self.connectAndSelectDB()
+        self.readConfigFile('config') # populates the database class
+        self.connectAndSelectDB() # establish a connection to the DB, and select table
 
     def readConfigFile(self,filename):
-        # read information from config file
+        # read information from config file using the ConfigParser, built in Python
         Config = ConfigParser.ConfigParser()
         Config.read(filename)
         self.host = Config.get('Database', 'host')
@@ -27,6 +27,7 @@ class Database:
         self.db_name = Config.get('Database', 'db_name')
         self.cookie_expiration = Config.getint('Database','cookie_expiration')
 
+    # establish connection and select table
     def connectAndSelectDB(self):
         self.db = MySQLdb.connect(host=self.host, user=self.user, 
                              passwd=self.passwd, port=self.port)
@@ -37,54 +38,85 @@ class Database:
         """Each Row is checked to be unique before insertion,
         even if adding return at most one so fetchone only.
         args must be a tuple, that holds the string formats.
-        avoids sql injection. (Previous Version did not have this)
+        avoids SQL injection. (Previous Version did not have this)
         http://bobby-tables.com/python.html
         """
         cursor = self.db.cursor()
-        cursor.execute(query, args)
+        try:
+            cursor.execute(query, args)
+        except:
+            db.rollback()
         result = cursor.fetchone()
         cursor.close()
         return result
-
-    def login(self, username, passwd):
-        """Since username is unique before adding into the DB 
-        we don't have to check for it here."""
-        result = self.runQuery(("SELECT * FROM Users "
-                                "WHERE Name=%s AND Password=%s"),
-                               (username, passwd))
-	if result is None:
-	   return False
-        return True
-    
-    def addUser(self, username, password):
-        """Only have new visitor roles, no more Owners."""
-
-        exists = self.runQuery("SELECT * FROM Users "
-                               "WHERE Name=%s", username)
-        if exists is not None:
-            return False
-
-        result = self.runQuery("INSERT INTO Users "
-                               "(Name, Role, Password) "
-                               "VALUES (%s, 'Visitor',%s)")
-        if result is not None:
-            return False # failed
-        return True # success
-    
+        
+    # helper to determine if user is owner
     def isOwner(self, username):
         result = self.runQuery("SELECT Role FROM Users WHERE Name=%s", username)
         return 'Owner' in result
 
+    # helper to determine if user exists in the db before update,change,delete
+    def exists(self, username):
+        exists = self.runQuery("SELECT * FROM Users "
+                               "WHERE Name=%s", username)
+        return True if exists is not None else False
+
+    # checks if credentials match
+    def login(self, username, password):
+        """Since username is unique before adding into the DB 
+        we don't have to check for it here."""
+        result = self.runQuery(("SELECT * FROM Users "
+                                "WHERE Name=%s AND Password=%s"),
+                               (username, password))
+	if result is None:
+	   return False
+        return True
+
+    # adds a user to the DB, only visitors
+    def addUser(self, username, password):
+        """Only have new visitor roles, no more Owners."""
+        if self.exists(username):
+            return False
+
+        result = self.runQuery("INSERT INTO Users "
+                               "(Name, Role, Password) "
+                               "VALUES (%s, 'Visitor',%s)",
+                               (username, password))
+        self.db.commit() # else changes might not be commited
+        if result is not None:
+            return False # failed
+        return True # success
+
+    # updates a user's password with a new password
     def changePassword(self, username, password):
-        #Where will the field to change pwd be
-        raise NotImplementedError()
+        if not self.exists(username):
+            return False
         
+        result = self.runQuery("UPDATE Users " 
+                               "SET Password=%s "
+                               "WHERE Name=%s LIMIT 1",
+                               (password, username))
+        self.db.commit() # else changes might not be commited
+        if result is not None:
+            return False # failed
+        return True # success
+
+    # deletes a user if username exists and is not owner
     def deleteUser(self,username):
-        if self.isOwner(username):
+        if not self.exists(username):
+            return False
+
+        if self.isOwner(username): 
+            # could also have done it in one Query but this is more explicit
             return False
         result = self.runQuery("DELETE FROM Users WHERE Name=%s LIMIT 1",(username))
-        return True
+        self.db.commit()
+
+        if result is not None:
+            return False # failed
+        return True # success
     
+    # makes a cookie that expires based on time set in config file
     def makeCookie(self, username):
         cookie = Cookie.SimpleCookie()
         cookie['username'] = username
@@ -95,6 +127,7 @@ class Database:
         # Credit: http://raspberrywebserver.com/cgiscripting/using-python-to-set-retreive-and-clear-cookies.html
         return True
 
+    # reads a cookie and checks if user is owner
     def isOwnerFromCookie(self):
         cookie = Cookie.SimpleCookie()
         cookie_str = os.environ.get('HTTP_COOKIE')

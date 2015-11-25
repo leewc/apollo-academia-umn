@@ -70,7 +70,7 @@ function fbox(img){
 </script>"""
 
 
-
+# check if user is logged in and displays relevant version of the gallery
 if not isLoggedIn():
     REDIRECT('login.html')
 else:

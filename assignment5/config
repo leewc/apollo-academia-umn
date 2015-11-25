@@ -11,5 +11,5 @@ port: 3307
 user: F15CS4131U66
 passwd: 7689
 db_name: F15CS4131U66
-cookie_expiration: 10
+cookie_expiration: 120
 #################### End of Config File ######################

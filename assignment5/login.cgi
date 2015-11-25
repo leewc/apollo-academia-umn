@@ -24,6 +24,8 @@ login_form = """
 msg = """<div id="message">Error: Invalid Username and/or Password. </div>"""
 empty_msg = """<div id="message">Error: Please enter a username and password. </div>"""
 
+# handles the logic for login.
+# if user is logged in, check if they are owner and redirect accordingly
 def main():
     form = cgi.FieldStorage()
 
@@ -32,7 +34,11 @@ def main():
         if not isLoggedIn():
             REDIRECT('login.html')
         else:
-            REDIRECT('gallery.cgi')
+            db = Database()
+            if db.isOwnerFromCookie():
+                REDIRECT('owner.cgi')
+            else:
+                REDIRECT('gallery.cgi')
     else:
         db = Database()
         # Check for password or provide error (This is POST)
@@ -45,7 +51,10 @@ def main():
         else:
             if db.login(username, password): 
                 db.makeCookie(username)
-                REDIRECT('gallery.cgi')
+                if db.isOwner(username):
+                    REDIRECT('owner.cgi')
+                else:
+                    REDIRECT('gallery.cgi')
             else:
                 print HTML_TEMPLATE % {'windowTitle': 'Login Form', 
                                        'title' : 'Login', 

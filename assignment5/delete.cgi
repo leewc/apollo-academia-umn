@@ -12,6 +12,7 @@ title = ""
 msg = ""
 success = False
 
+# check if logged in and if owner
 if not isLoggedIn():
     REDIRECT('login.html')
 else:
@@ -19,6 +20,7 @@ else:
     if not db.isOwnerFromCookie():
         REDIRECT('gallery.cgi')
 
+# check query string (if GET) and display relevant message, else delete with POST
 if os.environ['REQUEST_METHOD'] == 'GET':
     if fileid is not None:
         try:
@@ -33,9 +35,6 @@ else:  # delete the files!
     filePath = os.path.join(UPLOAD_DIR, fileid + ".jpg")
     if os.path.isfile(filePath):
         try:
-            # os.remove(filePath)
-            # os.remove(os.path.join(UPLOAD_DIR, fileid + "_tn.jpg"))
-            # os.remove(os.path.join(UPLOAD_DIR, fileid + ".txt"))
             for fileName in glob.glob(os.path.join(UPLOAD_DIR, fileid + "*")): # much cleaner
                 os.remove(fileName)
             success = True # writing true wasted my half an hour, tired.

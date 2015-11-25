@@ -1,6 +1,29 @@
 # Assignment 5: Python CGI Programming and Database Connection
 
 Credientials
-username: admin
-role: Owner
-password: 4131
+Username: admin
+Role: Owner
+Password: 4131
+
+Directly connect to the DB with:
+
+	 mysql -uF15CS4131U66 -hegon.cs.umn.edu -P3307 -p F15CS4131U66
+
+Here are some users based on their roles:
+
+     mysql> SELECT * FROM Users;
+     +--------+---------+---------+----------+
+     | userID | Name    | Role    | Password |
+     +--------+---------+---------+----------+
+     |      1 | admin   | Owner   | 4131     |
+     |      2 | student | Visitor | 1234     |
+     |      9 | abel    | Visitor | cain     |
+     |     11 | Jane    | Visitor | Doe      |
+     |     13 | Bobby   | Visitor | Tables   |
+     +--------+---------+---------+----------+
+
+If there are file/folder permission errors, please untar with:
+
+`tar xpvzf assignment4.tar.gz`
+
+Credit: http://askubuntu.com/questions/225865/copy-files-without-losing-file-folder-permissions
