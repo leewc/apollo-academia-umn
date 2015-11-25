@@ -11,21 +11,6 @@ function initMap() {
 	});
     listenToMapClicksAndDropMarker();
     loadData();
-/*    buildings = loadBuildings();
-    buildingSelector = document.getElementById("buildingSelector");
-    generateMarkersAndCards();
-    populateSelector();
-    
-
-
-    //bind onchange event handler to route calculator function
-    var onChangeHandler = function() {
-	displayRoute = true; //start displaying route after first change.
-	calculateAndDisplayRoute(directionsService, directionsDisplay);
-	};
-    buildingSelector.addEventListener('change', onChangeHandler);
-    document.getElementById('travelSelector').addEventListener('change', onChangeHandler);
-*/
 }
 
 
@@ -40,9 +25,6 @@ function listenToMapClicksAndDropMarker(){
 	    map: map,
 	    title : 'Location: ' + event.latLng.lat() + ', ' + event.latLng.lng(),
 	    });
-	//call route display (will check if building is selected)
-	// needed to ensure route changes on new marker
-//	calculateAndDisplayRoute(directionsService, directionsDisplay)
 	});
 }
 
@@ -83,6 +65,8 @@ function loadData(){
 	    map: map,
 	    title : 'Location: ' + latLng.lat + ', ' + latLng.lng,
 	    });
+    //center the map
+    map.setCenter(latLng);
 
     if(fourSquareData == null)
 	return false;
