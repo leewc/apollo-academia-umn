@@ -48,6 +48,13 @@ function validate(form){
 	window.alert("Please, drop a marker on the map for nearby places!");
 	return false;
     }
+    prepFormData(form);
+    form.submit();
+    return true;
+}
+
+function prepFormData(form)
+{
     var lat = document.createElement("input");
     lat.type = 'hidden';
     lat.name = 'lat';
@@ -65,4 +72,15 @@ function validate(form){
     form.appendChild(lng);
     form.submit();
     return true;
+    
+    //check if categories are chosen else select all, no need since we do it in PHP
+/*    numCategories = 9;
+    for (var i = 0; i < numCategories; i++)
+    {
+	if(document.getElementsByName("category["+ i +"]")[0].checked)
+	    return;
+    }
+    for (var i = 0; i < numCategories; i++)
+	document.getElementsByName("category["+ i +"]")[0].checked = true;
+*/
 }
