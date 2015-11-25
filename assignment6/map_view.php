@@ -32,17 +32,17 @@ class View {
 			else{
 				$jsdata = array("latLng" =>"{ lat: ".$data['lat'].", lng: ".$data['lng']." }");
 				$jsdata['fourSquareData'] = $json;
-		    		$index = str_replace("{{jsdata}}", $this->makeJSVar($jsdata), $index);
+		    		$index = str_replace("{{jsdata}}", $this->loadJSVar($jsdata), $index);
 			}
 			echo $index;
 		}
       }
 
-      public function makeJSVar($jsdata)
+      public function loadJSVar($jsdata)
       {
          $jsString = "<script type='text/javascript'>\n";
 	 foreach($jsdata as $var => $val){
-	 	$jsString .= "var $var = $val ; \n";
+	 	$jsString .= "$var = $val ; \n";
 	 } 
 	 $jsString .= "</script>";
 	 return $jsString;

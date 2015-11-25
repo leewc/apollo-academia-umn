@@ -1,4 +1,6 @@
 var droppedMarker;
+var latLng;
+var fourSquareData;
 
 function initMap() {
     directionsService = new google.maps.DirectionsService;
@@ -8,6 +10,7 @@ function initMap() {
 	zoom: 16
 	});
     listenToMapClicksAndDropMarker();
+    loadData();
 /*    buildings = loadBuildings();
     buildingSelector = document.getElementById("buildingSelector");
     generateMarkersAndCards();
@@ -70,17 +73,55 @@ function prepFormData(form)
 
     form.appendChild(lat);
     form.appendChild(lng);
-    form.submit();
+}
+
+function loadData(){
+    if(latLng == null)
+	return false; //either first visit or no data POSTed
+    droppedMarker = new google.maps.Marker({
+	    position : latLng,
+	    map: map,
+	    title : 'Location: ' + latLng.lat + ', ' + latLng.lng,
+	    });
+
+    if(fourSquareData == null)
+	return false;
+
+    fourSquareData.response.venues.forEach(makeMarker);
     return true;
+}
+
+function makeMarker(venue){
+    if(venue === undefined) //safety check
+	return; //http://stackoverflow.com/questions/3390396/how-to-check-for-undefined-in-javascript
+
+    var marker = new google.maps.Marker({
+	position: { lat: venue.location.lat, lng: venue.location.lng },
+	map: map,
+	title: venue.name,
+	icon: venue.categories[0].icon.prefix+'bg_32'+venue.categories[0].icon.suffix
+    });
     
-    //check if categories are chosen else select all, no need since we do it in PHP
-/*    numCategories = 9;
-    for (var i = 0; i < numCategories; i++)
-    {
-	if(document.getElementsByName("category["+ i +"]")[0].checked)
-	    return;
-    }
-    for (var i = 0; i < numCategories; i++)
-	document.getElementsByName("category["+ i +"]")[0].checked = true;
-*/
+    //Can also prepare information for infocard and map to content key in infowindow
+    //var contentString = <div>htmlstuff</div>
+    //Address can be undefined if there is no set point
+    var address = ( (venue.location.address !== undefined) ? venue.location.address : venue.location.formattedAddress.toString());
+    var infowindow = new google.maps.InfoWindow({
+	content: 
+	'<div id="content">'+
+	    '<div id="siteNotice">'+
+	    '</div>'+
+	    '<h1 id="firstHeading" class="firstHeading">' + venue.name + '</h1>'+
+	    '<p><b> Address: </b><br/>' + address + '</p>' +
+	    '<p><b> Latitude: </b>' + venue.location.lat + '</p>' +
+	    '<p><b> Longtitude: </b>' + venue.location.lng + '</p>',
+	maxWidth: 400
+	});
+
+    //Add infowindow key to each marker, to avoid only having a reference to last marker
+    marker.infowindow = infowindow;
+
+    marker.addListener('click', function() {
+	return this.infowindow.open(map, this);
+	});
 }
