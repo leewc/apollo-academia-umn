@@ -9,16 +9,14 @@
   class Controller { 
    	private $view;
 	private $model;
-	private $foursq;
 	public function __construct(){
 	       $this->view = View::getInstance();	
-	       $this->model = Model::getInstance();
-	       $this->foursq = FourSq::getInstance();	
+	       $this->model = Model::getInstance();	
 	}
 
 	public function processdata($POST){
 	       if(empty($_POST)){
-		    $this->view->display("default");
+		    $this->view->display("default", ""); //no json data yet
 	       }
 	       else {
 	            if(isset($POST['category']))
@@ -31,11 +29,10 @@
 		    $this->model->setLimit($POST['limit']);
 		    $this->model->setRadius($POST['radius']);
 		    $this->model->setLatLng($POST['lat'], $POST['lng']);
-		    print_r($this->model->getData());
-		    $this->foursq->query($this->model->getData());
-		    //foreach($POST as $key=> $value)
-		    //    echo "<br>".$key."--> ".$value."</br>";
-		    $this->view->display("default");
+
+		    $json = $this->model->execute();
+		    $this->view->display("default", $json);
+    		    //print_r($this->model->getData());
  		}
  	}
 }

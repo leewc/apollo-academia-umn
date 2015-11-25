@@ -3,10 +3,12 @@
   define("SUCCESS", 1);
 
   class Model {
-   	private $data; //so the controller can change values, removes need for overloading accessors.. (small assignment)
+   	private $data;
+	private $foursq;
 
 	private function __construct(){
 		$this->data = array("","","","","","","","","","limit"=>25, "radius"=>1500); //initial values for the form
+	       	$this->foursq = FourSq::getInstance();
 	}
 
 	public static function getInstance(){
@@ -36,6 +38,10 @@
 
 	public function getData(){
 	    return $this->data;
+	}
+
+	public function execute(){
+	    return $this->foursq->query($this->getData());
 	}
   }
 
@@ -87,9 +93,7 @@
 
 	       
 	       $query = "https://api.foursquare.com/v2/venues/search?ll=$lat,$lng&intent=browse&oauth_token=$this->oauth&limit=$limit&radius=$radius&categoryId=$selectedCategories&v=$this->date";
-	       echo ""
-	       echo $query;
-	       return $query;
+	       return file_get_contents($query);
 	}
   } 
 

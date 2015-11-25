@@ -15,7 +15,7 @@ class View {
 	     return $instance;
       }
 
-      public function display($option){
+      public function display($option, $json){
        	     switch($option){
 		default:
 			$index = file_get_contents("index.html");
@@ -26,10 +26,26 @@ class View {
 				$_SESSION["error"] = "";
 			}
 
-			$index = preg_replace("/{{msg}}/", $_SESSION["error"], $index);
-			$_SESSION['error'] = "";
+			if($json == ""){
+				$index = str_replace("{{jsdata}}", "", $index);
+			}
+			else{
+				$jsdata = array("latLng" =>"{ lat: ".$data['lat'].", lng: ".$data['lng']." }");
+				$jsdata['fourSquareData'] = $json;
+		    		$index = str_replace("{{jsdata}}", $this->makeJSVar($jsdata), $index);
+			}
 			echo $index;
 		}
+      }
+
+      public function makeJSVar($jsdata)
+      {
+         $jsString = "<script type='text/javascript'>\n";
+	 foreach($jsdata as $var => $val){
+	 	$jsString .= "var $var = $val ; \n";
+	 } 
+	 $jsString .= "</script>";
+	 return $jsString;
       }
 
 }
