@@ -3,10 +3,11 @@ import java.net.*;
 
 import java.util.*;
 /* Questions:
-	- do we need to deal with http 1.0
 	- do we forward other metadata such as mozilla/cookies (think so)
-	- do we display ALL request headers
 	- do we need to post
+	- do we need to deal with http 1.0
+	- do we just respond with status code
+	- do we display ALL request headers
 	- do we always close the stream
 	- do we need a timeout
 	- microsoft.com has useragent string bot message
@@ -49,8 +50,6 @@ public class ProxyServer extends Thread
 
     /* 
        Returns a string that is read and also appends to the header string
-       WARNING: This function changes the header variable, a design choice
-       else we need to duplicate streams. (more code)
     */
     protected String readline(BufferedReader rdr) throws IOException
     {
@@ -59,9 +58,13 @@ public class ProxyServer extends Thread
 		{
 		  throw new IOException("End of Buffer.");
 		}
-		header.append(line);
-		header.append("\n"); //readLine consumes newlines
 		return line;
+    }
+
+    protected void addToHeader(String line)
+    {
+    	header.append(line);
+		header.append("\n"); //readLine consumes newlines
     }
 
 	protected Socket connectToServer() throws IOException
@@ -75,6 +78,21 @@ public class ProxyServer extends Thread
 		in_server = new BufferedInputStream(socket.getInputStream());
 		out_server = socket.getOutputStream();
 		return socket;
+	}
+
+	protected void getAndSetHost(String[] requestLine)
+	{
+		if (validator.hasHost(requestLine[0]))
+	    {
+      		host = requestLine[1].trim();
+      		port = 80; 		//default to port 80 first
+      		if(requestLine.length == 3)
+      			port = Integer.parseInt(requestLine[2]);
+      		
+      		System.out.println("DEBUG: HOST " + host + " PORT: " + port);
+	    }
+	    else 
+	      	throw new RuntimeException("No valid HOST found in header");
 	}
 
 	protected void send(byte[] resp) throws IOException
@@ -96,22 +114,25 @@ public class ProxyServer extends Thread
     	try 
     	{
     		String[] requestLine;
+	      	String line = new String("");
     		URL resourceURL;
 
 	      	// Request type
-	      	requestLine = readline(in_client).split(" "); //split by spaces
-	      	if (( validator.isGet(requestLine[0]) || validator.isHead(requestLine[0]) ) 
+	      	line = readline(in_client);
+	      	requestLine = line.split(" "); //split by spaces
+      	 	if (( validator.isGet(requestLine[0]) || validator.isHead(requestLine[0]) ) 
 	      			&& validator.isHTTP(requestLine[1]) )
 	      	{
+	      		addToHeader(line);
 		   		resourceURL = new URL(requestLine[1]);
 		   		host = resourceURL.getHost().trim(); //remove whitespace left by split
 		   		port = resourceURL.getPort();
 		   		if (port == -1)
 		   			port = 80;
 		   		System.out.println("DEBUG: Request Method=" +requestLine[0] + " " + resourceURL.toString());
-	      	}
-	      	else
-	      	{
+		  	}
+		  	else
+		  	{
 	      		System.out.println("DEBUG: Unsupported Request Method " + requestLine[0]);
 		   		send(validator.resp_notAcceptable);
 		   		System.out.println("Killing.");
@@ -119,29 +140,18 @@ public class ProxyServer extends Thread
 		   		return;
 		   	}
 
-	      	//HOST Header	      	
-	      	requestLine = readline(in_client).split(":");
-	      	if (validator.hasHost(requestLine[0]))
-	      	{
-	      		host = requestLine[1].trim();
-	      		port = 80; 		//default to port 80 first
-	      		if(requestLine.length == 3)
-	      		{
-	      			port = Integer.parseInt(requestLine[2]);
-	      		}
-	      		System.out.println("DEBUG: HOST " + host + " PORT: " + port);
-	      	}
-	      	else 
-	      		throw new UnsupportedOperationException(); //leave this here, TODO: clarify.
+	      	//HOST Header
+	      	line = readline(in_client);
+	      	addToHeader(line);
+	      	getAndSetHost(line.split(":"));
 
 	      	server = connectToServer();
 
-	      	System.out.println("Writing header to server.");
 
 	      	//read rest of the request
-	      	String line = new String("");
 			while((line = in_client.readLine()) != null && line.length() != 0)
 			{
+				addToHeader(line);
 				System.out.println(line);
 			}
 
@@ -153,6 +163,8 @@ public class ProxyServer extends Thread
 				header.append("\r\n");
 			
 			System.out.println("REQUEST HEADER SIZE: " + header.toString().length());
+	      	System.out.println("Writing header to server.");
+
 			out_server.write(header.toString().getBytes());
 
 			System.out.println("Receiving data and writing to client.");
@@ -173,7 +185,6 @@ public class ProxyServer extends Thread
 				System.out.println("Hmm. Timeout.");
 				send(validator.resp_timeout);
 			}
-
 			System.out.println("Thread finished.");
 	      	shutdown();
 		}
@@ -186,39 +197,39 @@ public class ProxyServer extends Thread
 
     public static void main(String[] args) throws IOException
     {
-	if(args.length < 2)
-	{
-	    System.err.println("Usage: java ProxyServer <configfile> <port>");
-	    return;
-	}
-	try 
-	{
-	    Integer.parseInt(args[1]);
-	}
-	catch (NumberFormatException e)
-	{
-	    System.err.println("<port> given is not a number.");
-	}
+		if(args.length < 2)
+		{
+		    System.err.println("Usage: java ProxyServer <configfile> <port>");
+		    return;
+		}
+		try 
+		{
+		    Integer.parseInt(args[1]);
+		}
+		catch (NumberFormatException e)
+		{
+		    System.err.println("<port> given is not a number.");
+		}
 
-	Validator validator = new Validator(args[0]);
-	System.out.println("Starting Proxy Server on Port: " + args[1]);
-	ServerSocket server = new ServerSocket(Integer.parseInt(args[1]));
-	
-	System.out.println("");
-	while(true)
-	{
-	    System.out.println("Waiting for client requests ...");
-	    Socket client = server.accept();
-	    
-	    System.out.println("====================================");
-	    System.out.println("Received Request from " + client.getInetAddress());
-	    System.out.println("====================================");
+		Validator validator = new Validator(args[0]);
+		System.out.println("Starting Proxy Server on Port: " + args[1]);
+		ServerSocket server = new ServerSocket(Integer.parseInt(args[1]));
+		
+		System.out.println("");
+		while(true)
+		{
+		    System.out.println("Waiting for client requests ...");
+		    Socket client = server.accept();
+		    
+		    System.out.println("====================================");
+		    System.out.println("Received Request from " + client.getInetAddress());
+		    System.out.println("====================================");
 
-	    //pass the same instance of validator to thread.
-	    ProxyServer proxyServer = new ProxyServer(client, validator);
-	    //start the thread.
-	    proxyServer.start();
-	}
+		    //pass the same instance of validator to thread.
+		    ProxyServer proxyServer = new ProxyServer(client, validator);
+		    //start the thread.
+		    proxyServer.start();
+		}
     }
 
 }
