@@ -2,20 +2,17 @@ import java.io.*;
 import java.net.*;
 
 import java.util.*;
+// above imports include the Logger. Note: All logging methods are thread safe.
+// ref: http://docs.oracle.com/javase/7/docs/api/java/util/logging/Logger.html
+
+
 /* Questions:
-	- do we forward other metadata such as mozilla/cookies (think so)
-	- do we need to post
-	- do we need to deal with http 1.0
-	- do we just respond with status code
-	- do we display ALL request headers
-	- do we always close the stream
-	- do we need a timeout
+	- DO WE HANDLE www.domain.com and domain.com? (regex if yes)
 	- microsoft.com has useragent string bot message
 	- theverge doesn't respond somehow
-   Note: Putting this as one file for ease of compilation during submission
 */
 
-/* Simple HTTP 1.1 proxy server that supports blacklist and GET, HEAD requests */
+/* Simple HTTP 1.1 proxy server that supports blacklist and GET, HEAD requests. No POST, per assignment. */
 public class ProxyServer extends Thread
 {
     Validator validator;
@@ -50,6 +47,7 @@ public class ProxyServer extends Thread
 
     /* 
        Returns a string that is read and also appends to the header string
+       Enforces we MUST have a line, if we have null throw the exception and force die.
     */
     protected String readline(BufferedReader rdr) throws IOException
     {
@@ -58,7 +56,7 @@ public class ProxyServer extends Thread
 		{
 		  throw new IOException("End of Buffer.");
 		}
-		return line;
+		return line;	
     }
 
     protected void addToHeader(String line)
@@ -91,8 +89,8 @@ public class ProxyServer extends Thread
       		
       		System.out.println("DEBUG: HOST " + host + " PORT: " + port);
 	    }
-	    else 
-	      	throw new RuntimeException("No valid HOST found in header");
+	    else if(host.length() == 0)
+	    		throw new RuntimeException("No valid HOST found in header or request URL");
 	}
 
 	protected void send(byte[] resp) throws IOException
@@ -116,6 +114,7 @@ public class ProxyServer extends Thread
     		String[] requestLine;
 	      	String line = new String("");
     		URL resourceURL;
+    		boolean isOnBlackList = false;
 
 	      	// Request type
 	      	line = readline(in_client);
@@ -129,24 +128,34 @@ public class ProxyServer extends Thread
 		   		port = resourceURL.getPort();
 		   		if (port == -1)
 		   			port = 80;
-		   		System.out.println("DEBUG: Request Method=" +requestLine[0] + " " + resourceURL.toString());
+		   		System.out.println("DEBUG: Request Method=" +requestLine[0] +" HOST " + host);
 		  	}
 		  	else
 		  	{
 	      		System.out.println("DEBUG: Unsupported Request Method " + requestLine[0]);
 		   		send(validator.resp_notAcceptable);
-		   		System.out.println("Killing.");
 		   		shutdown();
 		   		return;
 		   	}
 
 	      	//HOST Header
-	      	line = readline(in_client);
-	      	addToHeader(line);
-	      	getAndSetHost(line.split(":"));
+	      	if ( (line = in_client.readLine() ) != null)
+	      	{
+	      		addToHeader(line);
+		      	getAndSetHost(line.split(":"));
+	      	}
+
+	      	//Check Blacklist
+	      	if(validator.hostInBlackList(host))
+	      	{
+	      		//test for now, need to implement MIME type checks.
+	      		System.out.println("BLOCKED");
+	      		send(validator.resp_forbidden);
+	      		shutdown();
+	      		return;
+	      	}
 
 	      	server = connectToServer();
-
 
 	      	//read rest of the request
 			while((line = in_client.readLine()) != null && line.length() != 0)

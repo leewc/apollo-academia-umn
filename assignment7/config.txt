@@ -1,6 +1,6 @@
 # Filename: config.txt
 # Description: This is the config file for proxy server
-# Author: Wem Chuan Lee
+# Author: Wen Chuan Lee
 # Date: November 25, 2015
 # block complete access to the site
 www.badsite.com *
