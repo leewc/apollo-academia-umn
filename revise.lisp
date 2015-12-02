@@ -1,3 +1,11 @@
+;;;;;;;;;;;;;;
+;;; Names: 
+;;;	Wen Chuan Lee (leex7095)
+;;; Sihan Chen (chenx2436) 
+;;; Sean Lin (linx0486)
+;;;;;;;;;;;;;;
+
+
 ;; constraint consists of variable list and function defining the constraint 
 (defstruct constraint (vars NIL) (fn #'(lambda(x) x)))
 
@@ -5,7 +13,7 @@
 (defun revise( inCons htable )
   ;; get domain values from first variable, whose domain might change
   (let ((d1 (gethash (car (constraint-vars inCons)) htable )))
-    (print d1) ; useful for debugging
+    ;;(print d1) ; useful for debugging
     ;; test arity of constraint - so far just unary and binary
     (if (eq 1 (list-length (constraint-vars inCons)))
 	;; remove domain elements that do not meet unary constraint
@@ -26,7 +34,23 @@
 	   )
 	)
 
-    
+	(if (eq 3 (list-length (constraint-vars inCons)))
+    	(setf (gethash (car (constraint-vars inCons)) htable)
+    		(remove-if #'(lambda(x)
+    			(every #'null
+    				(mapcar #'(lambda(y)
+    					(mapcar #'(lambda(z)  (funcall (constraint-fn inCons) x y z))
+    						(gethash (cadr (cdr (constraint-vars inCons))) htable )
+    					))
+    				(gethash (cadr (constraint-vars inCons)) htable )
+    				)
+    			)
+
+    			) 
+    		  d1
+    		)
+    	)
+    )
     
    )
 )
@@ -120,11 +144,6 @@
 	     :vars (list 'davis) :fn #'notfruit)
 	    allconstraints ))
 
-;; Running PIE logic
-;;(AC3 allconstraints people)
-
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; ------------------  BELOW is specific to Robot LOGIC ------------------
@@ -140,8 +159,7 @@
  
 ; collect the constraints into a list
 (defparameter robotconstraints '())
- 
-;; make the "all different" binary constraints
+ ;; make the "all different" binary constraints
 (dolist (p *robots*)
   (dolist (q *robots*)
     (if ( not (eq p q))
@@ -155,21 +173,20 @@
  
 ;;; create the unary constraints ------
 ;; generic functions
-(defun odd (x) (equal 1 (mod x 2)))  
-(defun equalsfive (x) (equal x 5))
-(defun olderoneoldertwo (x y z) (and (equal (+ 1 y) (x))
-                                                                         (equal (+ 2 z) (x))))
+(defun odd (x) (eq 1 (mod x 2)))  
+(defun five (x) (eq x 5))
+(defun olderoneoldertwo (x y z) (and (eq (+ y 1) x ) (eq (+ z 2) x)))
  
 ;; Red's age is odd
-;(setf robotconstraints
- ;     (cons (make-constraint
-;            :vars (list 'red) :fn #'odd)
-;           robotconstraints ))
+(setf robotconstraints
+     (cons (make-constraint
+            :vars (list 'red) :fn #'odd)
+           robotconstraints ))
 ;; Green 5
-;(setf robotconstraints
- ;     (cons (make-constraint
-;            :vars (list 'green) :fn #'equalsfive)
-;           robotconstraints ))
+(setf robotconstraints
+     (cons (make-constraint
+            :vars (list 'green) :fn #'five)
+           robotconstraints ))
  
 ;; Blue is 1 yr older than green
 ;; Blue is 2 yrs older then yellow
@@ -178,4 +195,11 @@
                 :vars(list 'blue 'green 'yellow) :fn #'olderoneoldertwo)
                 robotconstraints))
 
-(AC3 robotconstraints robots)
+
+;;;;; Uncomment these to run the code.
+
+;; Running PIE logic
+(AC3 allconstraints people)
+
+;; Running Robot Logic
+;(AC3 robotconstraints robots)
