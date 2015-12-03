@@ -86,8 +86,6 @@ public class ProxyServer extends Thread
       		port = 80; 		//default to port 80 first
       		if(requestLine.length == 3)
       			port = Integer.parseInt(requestLine[2]);
-      		
-      		System.out.println("DEBUG: HOST " + host + " PORT: " + port);
 	    }
 	    else if(host.length() == 0)
 	    		throw new RuntimeException("No valid HOST found in header or request URL");
@@ -111,70 +109,11 @@ public class ProxyServer extends Thread
     {
     	try 
     	{
-    		String[] requestLine;
-	      	String line = new String("");
-    		URL resourceURL;
-    		boolean isOnBlackList = false;
-
-	      	// Request type
-	      	line = readline(in_client);
-	      	requestLine = line.split(" "); //split by spaces
-      	 	if (( validator.isGet(requestLine[0]) || validator.isHead(requestLine[0]) ) 
-	      			&& validator.isHTTP(requestLine[1]) )
-	      	{
-	      		addToHeader(line);
-		   		resourceURL = new URL(requestLine[1]);
-		   		host = resourceURL.getHost().trim(); //remove whitespace left by split
-		   		port = resourceURL.getPort();
-		   		if (port == -1)
-		   			port = 80;
-		   		System.out.println("DEBUG: Request Method=" +requestLine[0] +" HOST " + host);
-		  	}
-		  	else
-		  	{
-	      		System.out.println("DEBUG: Unsupported Request Method " + requestLine[0]);
-		   		send(validator.resp_notAcceptable);
-		   		shutdown();
-		   		return;
-		   	}
-
-	      	//HOST Header
-	      	if ( (line = in_client.readLine() ) != null)
-	      	{
-	      		addToHeader(line);
-		      	getAndSetHost(line.split(":"));
-	      	}
-
-	      	//Check Blacklist
-	      	if(validator.hostInBlackList(host))
-	      	{
-	      		//test for now, need to implement MIME type checks.
-	      		System.out.println("BLOCKED");
-	      		send(validator.resp_forbidden);
-	      		shutdown();
-	      		return;
-	      	}
-
-	      	server = connectToServer();
-
-	      	//read rest of the request
-			while((line = in_client.readLine()) != null && line.length() != 0)
-			{
-				addToHeader(line);
-				System.out.println(line);
-			}
-
-			if(header.toString().startsWith("GET"))
-			{
-				header.append("Connection: close\n\r\n");	
-			}
-			else
-				header.append("\r\n");
-			
-			System.out.println("REQUEST HEADER SIZE: " + header.toString().length());
-	      	System.out.println("Writing header to server.");
-
-			out_server.write(header.toString().getBytes());
+    		if(processAndSendRequest() == false)
+    		{
+    			shutdown();
+    			return;
+    		}
 
 			System.out.println("Receiving data and writing to client.");
 
@@ -201,6 +140,87 @@ public class ProxyServer extends Thread
 		{
 			e.printStackTrace();
 		}
+	}
+
+	protected boolean processAndSendRequest() throws IOException
+	{
+		String[] requestLine;
+	      	String line = new String("");
+    		URL resourceURL;
+    		boolean isOnBlackList = false;
+
+	      	// Request type
+	      	line = readline(in_client);
+	      	requestLine = line.split(" "); //split by spaces
+      	 	if (( validator.isGet(requestLine[0]) || validator.isHead(requestLine[0]) ) 
+	      			&& validator.isHTTP(requestLine[1]) )
+	      	{
+	      		addToHeader(line);
+		   		resourceURL = new URL(requestLine[1]);
+		   		host = resourceURL.getHost().trim(); //remove whitespace left by split
+		   		port = resourceURL.getPort();
+		   		if (port == -1)
+		   			port = 80;
+		   		System.out.println("DEBUG: Request Method=" +requestLine[0] +" HOST " + host);
+		  	}
+		  	else
+		  	{
+	      		System.out.println("DEBUG: Unsupported Request Method " + requestLine[0]);
+		   		send(validator.resp_notAcceptable);
+		   		return false;
+		   	}
+
+	      	//HOST Header
+	      	if ( (line = in_client.readLine() ) != null)
+	      	{
+	      		addToHeader(line);
+		      	getAndSetHost(line.split(":"));
+	      	}
+
+	      	//Check Blacklist
+	      	if(validator.hostInBlackList(host))
+	      	{
+	      		isOnBlackList = true;
+	      		if(validator.isCompletelyBlocked(host))
+	      		{
+	      			System.out.println("Site completely BLOCKED");
+	      			send(validator.resp_forbidden);
+	      			out_client.write("This website is blocked.".getBytes());
+	      			return false;
+	      		}
+	      	}
+
+	      	server = connectToServer();
+
+	      	//read rest of the request
+			while((line = in_client.readLine()) != null && line.length() != 0)
+			{
+				if (!(validator.isHopByHopHeader(line) ))
+				{
+					if(!(isOnBlackList && validator.isBlockedType(line, host)))
+						addToHeader(line);
+					else
+					{
+						System.out.println("RESOURCE BLOCKED" + line);
+		      			send(validator.resp_forbidden);
+		      			return false;
+					}
+				}
+			}
+
+			if(header.toString().startsWith("GET"))
+			{
+				header.append("Connection: close\n\r\n");	
+			}
+			else
+				header.append("\r\n");
+			
+			System.out.println("REQUEST HEADER SIZE: " + header.toString().length());
+			System.out.println(header.toString());	
+	      	System.out.println("Writing header to server.");
+
+			out_server.write(header.toString().getBytes());
+			return true;
 	}
 
 
@@ -234,7 +254,7 @@ public class ProxyServer extends Thread
 		    System.out.println("Received Request from " + client.getInetAddress());
 		    System.out.println("====================================");
 
-		    //pass the same instance of validator to thread.
+		    //pass the same instance of validator to each thread.
 		    ProxyServer proxyServer = new ProxyServer(client, validator);
 		    //start the thread.
 		    proxyServer.start();

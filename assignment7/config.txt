@@ -10,3 +10,7 @@ www.badsite.com
 www.microsoft.com image/gif
 # block all images i.e. gif, jpeg, png, etc.
 www.sco.com image/*
+
+www.w3.org image/*
+
+www.theverge.com
