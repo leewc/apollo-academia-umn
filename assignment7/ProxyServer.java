@@ -5,13 +5,6 @@ import java.util.*;
 // above imports include the Logger. Note: All logging methods are thread safe.
 // ref: http://docs.oracle.com/javase/7/docs/api/java/util/logging/Logger.html
 
-
-/* Questions:
-	- DO WE HANDLE www.domain.com and domain.com? (regex if yes)
-	- microsoft.com has useragent string bot message
-	- theverge doesn't respond somehow
-*/
-
 /* Simple HTTP 1.1 proxy server that supports blacklist and GET, HEAD requests. No POST, per assignment. */
 public class ProxyServer extends Thread
 {
@@ -19,7 +12,7 @@ public class ProxyServer extends Thread
     Socket client;
     Socket server; //server we are contacting as the proxy
 
-    BufferedReader in_client;
+    BufferedInputStream in_client;
     OutputStream out_client;
 
     BufferedInputStream in_server;
@@ -29,8 +22,9 @@ public class ProxyServer extends Thread
     String host;
     int port;
 
-    /* To hold header requests to be sent after validation */
-    StringBuilder header;
+    /* To hold header requests/responses to be sent after validation */
+    StringBuilder req_header;
+    StringBuilder resp_header;
 
     /* Constructor called when a client connection is made */
     public ProxyServer(Socket client, Validator validator) throws IOException
@@ -39,10 +33,11 @@ public class ProxyServer extends Thread
     	this.validator = validator;
 
     	/* Using default charset on system */
-    	in_client = new BufferedReader(new InputStreamReader(client.getInputStream()));
+    	in_client = new BufferedInputStream(client.getInputStream());
     	out_client = client.getOutputStream();
 
-   		header = new StringBuilder(4096);
+    	req_header = new StringBuilder(4096);
+    	resp_header = new StringBuilder(4096);
    	}
 
     /* 
@@ -59,7 +54,36 @@ public class ProxyServer extends Thread
 		return line;	
     }
 
-    protected void addToHeader(String line)
+    /* Reads the entire header fully first - then lets copies be made. */
+    protected BufferedReader readHeaders(InputStream in, ByteArrayOutputStream hdr) throws IOException
+    {
+    	byte[] buffer = new byte[1024];
+    	int len;
+    	while ((len = in.read(buffer)) > -1 )
+    	{
+    		boolean found_CLRF = false;
+    		hdr.write(buffer, 0, len);
+    		for(int i=0; i <= buffer.length -4 ; i ++)
+    		{
+    			//13 for CR, 10 for LF
+    			if(buffer[i] == (byte) 13 && buffer[i+1] == (byte) 10 
+    				&& buffer[i+2] == (byte) 13 && buffer[i+3] == (byte) 10)
+    				{
+    					found_CLRF = true;
+    					break; //stop for loop
+    				}
+    		}
+    		if(found_CLRF)
+    			break; //stop while loop
+    	}
+    	hdr.flush();
+
+    	//return a ready to use BufferedReader (of default charset)
+    	return new BufferedReader(new InputStreamReader(
+    								new ByteArrayInputStream(hdr.toByteArray())));
+    } 
+
+    protected void addToHeader(String line, StringBuilder header)
     {
     	header.append(line);
 		header.append("\n"); //readLine consumes newlines
@@ -67,9 +91,8 @@ public class ProxyServer extends Thread
 
 	protected Socket connectToServer() throws IOException
 	{
-		System.out.println("Connecting to " + host + " :" + port + " ...");
 		Socket socket = new Socket(host, port);
-		System.out.println("Connected.");
+		System.out.println("Connected to " + host + " :" + port + " ...");
 
 		socket.setSoTimeout(10000);
 		// default charset
@@ -109,7 +132,10 @@ public class ProxyServer extends Thread
     {
     	try 
     	{
-    		if(processAndSendRequest() == false)
+    		ByteArrayOutputStream requestHeader = new ByteArrayOutputStream(); //to make a copy of headers
+   		
+    		BufferedReader in_client_rdr = readHeaders(in_client, requestHeader); //to get original headers
+    		if(processAndSendRequest(in_client_rdr) == false)
     		{
     			shutdown();
     			return;
@@ -117,22 +143,19 @@ public class ProxyServer extends Thread
 
 			System.out.println("Receiving data and writing to client.");
 
-			byte response[] = new byte[8192];
-			int count;
+			
+			ByteArrayOutputStream responseHeader = new ByteArrayOutputStream(); //stores the response
 
-			try
+			BufferedReader in_server_rdr = readHeaders(in_server, responseHeader); //gets the original header
+			String TEST = new String(responseHeader.toByteArray());
+			System.out.println("UNTOUCHED |||||||||||||||||| \n\n" + TEST);
+			//out_client.write(responseHeader.toByteArray());
+			if(processAndReceive(in_server_rdr) == false)
 			{
-				while((count = in_server.read(response, 0, 8192)) > -1)
-				{
-					System.out.println(count);
-					out_client.write(response, 0, count);
-				}
+				shutdown();
+				return;
 			}
-			catch(SocketTimeoutException e)
-			{
-				System.out.println("Hmm. Timeout.");
-				send(validator.resp_timeout);
-			}
+
 			System.out.println("Thread finished.");
 	      	shutdown();
 		}
@@ -142,20 +165,20 @@ public class ProxyServer extends Thread
 		}
 	}
 
-	protected boolean processAndSendRequest() throws IOException
+	protected boolean processAndSendRequest(BufferedReader in_client_rdr) throws IOException
 	{
-		String[] requestLine;
+			String[] requestLine;
 	      	String line = new String("");
     		URL resourceURL;
     		boolean isOnBlackList = false;
 
 	      	// Request type
-	      	line = readline(in_client);
+	      	line = readline(in_client_rdr);
 	      	requestLine = line.split(" "); //split by spaces
       	 	if (( validator.isGet(requestLine[0]) || validator.isHead(requestLine[0]) ) 
 	      			&& validator.isHTTP(requestLine[1]) )
 	      	{
-	      		addToHeader(line);
+	      		addToHeader(line, req_header);
 		   		resourceURL = new URL(requestLine[1]);
 		   		host = resourceURL.getHost().trim(); //remove whitespace left by split
 		   		port = resourceURL.getPort();
@@ -171,9 +194,9 @@ public class ProxyServer extends Thread
 		   	}
 
 	      	//HOST Header
-	      	if ( (line = in_client.readLine() ) != null)
+	      	if ( (line = in_client_rdr.readLine() ) != null)
 	      	{
-	      		addToHeader(line);
+	      		addToHeader(line, req_header);
 		      	getAndSetHost(line.split(":"));
 	      	}
 
@@ -185,7 +208,7 @@ public class ProxyServer extends Thread
 	      		{
 	      			System.out.println("Site completely BLOCKED");
 	      			send(validator.resp_forbidden);
-	      			out_client.write("This website is blocked.".getBytes());
+	      			out_client.write("Sorry. This website is blocked.".getBytes());
 	      			return false;
 	      		}
 	      	}
@@ -193,36 +216,99 @@ public class ProxyServer extends Thread
 	      	server = connectToServer();
 
 	      	//read rest of the request
-			while((line = in_client.readLine()) != null && line.length() != 0)
+			while((line = in_client_rdr.readLine()) != null && line.length() != 0)
 			{
 				if (!(validator.isHopByHopHeader(line) ))
 				{
 					if(!(isOnBlackList && validator.isBlockedType(line, host)))
-						addToHeader(line);
+						addToHeader(line, req_header);
 					else
 					{
 						System.out.println("RESOURCE BLOCKED" + line);
 		      			send(validator.resp_forbidden);
+		      			out_client.write("Resource is blocked.".getBytes());
 		      			return false;
 					}
 				}
 			}
 
-			if(header.toString().startsWith("GET"))
+			if(req_header.toString().startsWith("GET"))
 			{
-				header.append("Connection: close\n\r\n");	
+				req_header.append("Connection: close\n\r\n");	
 			}
 			else
-				header.append("\r\n");
+				req_header.append("\r\n");
 			
-			System.out.println("REQUEST HEADER SIZE: " + header.toString().length());
-			System.out.println(header.toString());	
-	      	System.out.println("Writing header to server.");
+			System.out.println("Writing header to server.");
 
-			out_server.write(header.toString().getBytes());
+			out_server.write(req_header.toString().getBytes());
 			return true;
 	}
 
+	protected boolean processAndReceive(BufferedReader in_server_rdr) throws IOException
+	{
+		boolean isOnBlackList = false;
+		if(validator.hostInBlackList(host))
+		{
+      		isOnBlackList = true;
+      		if(validator.isCompletelyBlocked(host))
+      		{
+      			System.out.println("Site completely BLOCKED");
+      			send(validator.resp_forbidden);
+      			out_client.write("Sorry. This website is blocked.".getBytes());
+      			return false;
+      		}
+	    }
+
+	    //process the response header
+	    String line = new String("");
+		while((line = in_server_rdr.readLine()) != null && line.length() != 0)
+		{
+			// if (!(validator.isHopByHopHeader(line) ))
+			// {
+				if(!(isOnBlackList && validator.isBlockedType(line, host)))
+					addToHeader(line, resp_header);
+				else
+				{
+					System.out.println("RESOURCE BLOCKED" + line);
+	      			send(validator.resp_forbidden);
+	      			out_client.write("Resource is blocked.".getBytes());
+	      			return false;
+				}
+			// }
+			// else
+			// {
+			// 	System.out.println("HBH " + line);
+			// 	throw new RuntimeException();
+			// }
+		}
+		
+		//must send the response headers
+
+		System.out.println("RESP HEADER ||||||||||||||||||||||||||| \n\n " + resp_header.toString());
+
+		out_client.write(resp_header.toString().getBytes());
+		out_client.write(validator.CLRF);
+
+		byte response[] = new byte[8192];
+			int count;
+
+			try
+			{
+				while((count = in_server.read(response, 0, 8192)) > -1)
+				{
+					//System.out.println(count);
+					out_client.write(response, 0, count);
+				}
+			}
+			catch(SocketTimeoutException e)
+			{
+				System.out.println("Hmm. Timeout.");
+				send(validator.resp_timeout);
+			}
+			return true;
+
+	}
 
     public static void main(String[] args) throws IOException
     {
