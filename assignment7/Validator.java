@@ -24,9 +24,8 @@ class Validator
 
 	public Validator(String configFilename)
 	{
-		System.out.println("Loading config file : " + configFilename);
 		config = readConfigFile(configFilename);
-		System.out.println("Config file loaded.");
+		System.out.println("Loaded config file : " + configFilename);
 	}
 
 	public Properties readConfigFile(String filename)

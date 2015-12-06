@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.*;
 
 import java.util.*;
+import java.util.logging.*;
+
 // above imports include the Logger. Note: All logging methods are thread safe.
 // ref: http://docs.oracle.com/javase/7/docs/api/java/util/logging/Logger.html
 
@@ -25,6 +27,12 @@ public class ProxyServer extends Thread
     /* To hold header requests/responses to be sent after validation */
     StringBuilder req_header;
     StringBuilder resp_header;
+
+	ByteArrayOutputStream requestHeader = new ByteArrayOutputStream(); //to make a copy of headers
+	ByteArrayOutputStream responseHeader = new ByteArrayOutputStream(); //stores the original response
+
+
+    private static final Logger logger = Logger.getLogger("ProxyServer");
 
     /* Constructor called when a client connection is made */
     public ProxyServer(Socket client, Validator validator) throws IOException
@@ -71,20 +79,6 @@ public class ProxyServer extends Thread
 					}
 				}
 			}
-			// boolean flag = false;
-			// for (int i=0;i<4 ;i++ ) {
-			// 	int _byte = in.read();
-			// 	if(_byte != -1)
-			// 		break;
-			// 	if(flag)
-			// 		if(_byte != 10)
-			// 			break;
-			// 	else
-			// 		if(_byte != 13)
-			// 			break;
-			// 	flag = !flag;
-			// 	hdr.write((byte) _byte);
-			// }
     	}
     	hdr.flush();
 
@@ -116,7 +110,6 @@ public class ProxyServer extends Thread
 
     protected int hexByteArrayToInt(byte[] b) 
 	{
-		System.out.println(Integer.parseInt(javax.xml.bind.DatatypeConverter.printHexBinary(b),16));
 		return Integer.parseInt(javax.xml.bind.DatatypeConverter.printHexBinary(b),16);
 	}
 
@@ -129,8 +122,7 @@ public class ProxyServer extends Thread
 	protected Socket connectToServer() throws IOException
 	{
 		Socket socket = new Socket(host, port);
-		System.out.println("Connected to " + host + " :" + port + " ...");
-
+		
 		socket.setSoTimeout(10000);
 		// default charset
 		in_server = new BufferedInputStream(socket.getInputStream());
@@ -169,20 +161,14 @@ public class ProxyServer extends Thread
     {
     	try 
     	{
-    		ByteArrayOutputStream requestHeader = new ByteArrayOutputStream(); //to make a copy of headers
-   		
-    		BufferedReader in_client_headerRdr = readHeaders(in_client, requestHeader); //to get original headers
+    		BufferedReader in_client_headerRdr = readHeaders(in_client, requestHeader); //to hold original headers
     		if(processAndSendRequest(in_client_headerRdr) == false)
     		{
     			shutdown();
     			return;
     		}
-
-			System.out.println("Receiving data and writing to client.");
 			
-			ByteArrayOutputStream responseHeader = new ByteArrayOutputStream(); //stores the original response
-
-			BufferedReader in_server_headerRdr = readHeaders(in_server, responseHeader); //gets the original header
+			BufferedReader in_server_headerRdr = readHeaders(in_server, responseHeader); //holds the original header
 
 			//this be the original unmodified responseHeaders
 			//out_client.write(responseHeader.toByteArray());
@@ -193,12 +179,17 @@ public class ProxyServer extends Thread
 				return;
 			}
 
-			System.out.println("Thread finished.");
+			//Everything went well, we happy. Log. All at once so it makes sense, i.e: isn't garbled.
+			String info = java.text.MessageFormat.format("\n{0} :: ALLOWED\n\nREQUEST:\n{1}RESPONSE:\n{2}",
+											host, new String(requestHeader.toByteArray()),
+											new String(responseHeader.toByteArray()));
+			logger.log(Level.INFO, info);
+
 	      	shutdown();
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			// e.printStackTrace(); //sshh.
 		}
 	}
 
@@ -208,6 +199,8 @@ public class ProxyServer extends Thread
 	      	String line = new String("");
     		URL resourceURL;
     		boolean isOnBlackList = false;
+
+    		String resourceURI; //only used for logging.
 
 	      	// Request type
 	      	line = in_client_rdr.readLine();
@@ -221,12 +214,15 @@ public class ProxyServer extends Thread
 		   		port = resourceURL.getPort();
 		   		if (port == -1)
 		   			port = 80;
-		   		System.out.println("DEBUG: Request Method=" +requestLine[0] +" HOST " + host);
+		   		resourceURI = requestLine[1]; //so we don't have to fetch it again for logging.
 		  	}
 		  	else
 		  	{
-	      		System.out.println("DEBUG: Unsupported Request Method " + requestLine[0]);
-		   		send(validator.resp_notAcceptable);
+		  		String info = java.text.MessageFormat.format("\n{0} {1} :: UNSUPPORTED REQUEST\n\nREQUEST:\n{2}",
+											requestLine[0], requestLine[1],
+											new String(requestHeader.toByteArray()));
+				logger.log(Level.INFO, info);
+	      		send(validator.resp_notAcceptable);
 		   		return false;
 		   	}
 
@@ -245,6 +241,9 @@ public class ProxyServer extends Thread
 	      		{
 	      			send(validator.resp_forbidden);
 	      			out_client.write("Sorry. This website is blocked.".getBytes());
+	      			String info = java.text.MessageFormat.format("\n{0} :: BLOCKED\n\nREQUEST:\n{1}",
+											host, new String(requestHeader.toByteArray()));
+					logger.log(Level.INFO, info);
 	      			return false;
 	      		}
 	      	}
@@ -262,6 +261,9 @@ public class ProxyServer extends Thread
 					{
 						send(validator.resp_forbidden);
 		      			out_client.write("Resource is blocked.".getBytes());
+		      			String info = java.text.MessageFormat.format("\n{0} :: BLOCKED\nREQUEST:\n{1}\n",
+		      				resourceURI, new String(requestHeader.toByteArray()));
+		      			logger.log(Level.INFO, info);
 		      			return false;
 					}
 				}
@@ -290,6 +292,10 @@ public class ProxyServer extends Thread
       		{
       			send(validator.resp_forbidden);
       			out_client.write("Sorry. This website is blocked.".getBytes());
+      			String info = java.text.MessageFormat.format("\n{0} :: BLOCKED\nREQUEST:\n{1}\nRESPONSE:\n{2}\n",
+											host, new String(requestHeader.toByteArray()),
+											new String(responseHeader.toByteArray()));
+				logger.log(Level.INFO, info);
       			return false;
       		}
 	    }
@@ -298,23 +304,22 @@ public class ProxyServer extends Thread
 	    String line = new String("");
 		while((line = in_server_rdr.readLine()) != null && line.length() != 0)
 		{
-			// if (!(validator.isHopByHopHeader(line) ))
-			// {
-				if(!(isOnBlackList && validator.isBlockedType(line, host)))
-					addToHeader(line, resp_header);
-				else
-				{
-					System.out.println("RESOURCE BLOCKED" + line);
-	      			send(validator.resp_forbidden);
-	      			out_client.write("Resource is blocked.".getBytes());
-	      			return false;
-				}
-			// }
+			if(!(isOnBlackList && validator.isBlockedType(line, host)))
+				addToHeader(line, resp_header);
+			else
+			{
+				send(validator.resp_forbidden);
+      			out_client.write("Resource is blocked.".getBytes());
+      			String info = java.text.MessageFormat.format("\nResource {0} :: BLOCKED\n\nREQUEST:\n{1}RESPONSE:\n{2}",
+			      				host, new String(requestHeader.toByteArray()),
+			      				new String(responseHeader.toByteArray()));
+      			logger.log(Level.INFO, info);
+      			return false;
+			}
 		}
 		resp_header.append("\n"); //havent close connections.
 		
 		//send the MODIFIED response headers
-		System.out.println(resp_header.toString());
 		out_client.write(resp_header.toString().getBytes());
 
 		byte response[] = new byte[8192];
@@ -324,13 +329,11 @@ public class ProxyServer extends Thread
 		{
 			while((count = in_server.read(response, 0, 8192)) > -1)
 			{
-				//System.out.println(count);
 				out_client.write(response, 0, count);
 			}
 		}
 		catch(SocketTimeoutException e)
 		{
-			System.out.println("Hmm. Timeout &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&.");
 			send(validator.resp_timeout);
 		}
 		return true;
@@ -351,11 +354,16 @@ public class ProxyServer extends Thread
 		catch (NumberFormatException e)
 		{
 		    System.err.println("<port> given is not a number.");
+		    return;
 		}
 
 		Validator validator = new Validator(args[0]);
 		System.out.println("Starting Proxy Server on Port: " + args[1]);
 		ServerSocket server = new ServerSocket(Integer.parseInt(args[1]));
+
+		String logFile = "ProxyServer."+ new java.text.SimpleDateFormat("yyyy-MM-dd-hh-mm-ss").format(new Date())+".log";
+		logger.addHandler(new FileHandler(logFile));
+		System.out.println("Logfile: " + logFile);
 		
 		System.out.println("");
 		while(true)
@@ -363,9 +371,7 @@ public class ProxyServer extends Thread
 		    System.out.println("Waiting for client requests ...");
 		    Socket client = server.accept();
 		    
-		    System.out.println("====================================");
-		    System.out.println("Received Request from " + client.getInetAddress());
-		    System.out.println("====================================");
+		    System.out.println("Note: Received Request from " + client.getInetAddress());
 
 		    //pass the same instance of validator to each thread.
 		    ProxyServer proxyServer = new ProxyServer(client, validator);
