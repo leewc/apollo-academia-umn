@@ -69,7 +69,6 @@ class Validator
 
     public Boolean hostInBlackList(String host)
     {
-    	System.out.println(host);
     	//sometimes the host does not have www
     	return (config.containsKey(host.toLowerCase()) || config.containsKey("www." + host.toLowerCase()));
     }
@@ -117,5 +116,24 @@ class Validator
     		//}
     	}
     	return false; //not a blocked type
+    }
+
+    // Function not used as we can check for presence of content-length
+    public Boolean isChunked(String line) 
+    {
+    	if(line.toLowerCase().contains("chunked"))
+    		return true;
+    	return false;
+    }
+
+    public Integer tryGetContentLength(String line)
+    {
+    	String[] field_value = line.split(":");
+    	if (field_value[0].trim().toLowerCase().equals("content-length"))
+    	{
+    		return Integer.parseInt(field_value[1].trim());
+    	}
+
+    	return null; //not the field we want
     }
 }

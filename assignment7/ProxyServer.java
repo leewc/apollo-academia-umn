@@ -47,40 +47,78 @@ public class ProxyServer extends Thread
     	boolean found_CLRF = false;
     	while (true)
     	{
-			//13 for CR, 10 for LF -- we must check one by one since we don't know total size.
+			// 13 for CR, 10 for LF -- we must check one by one since we don't know total size.
 			// Reading into an array might make us miss the CLRF
 			//  (eg data off length, did not catch CLRF in one buffer, or overread)
     		int byte_1 = in.read();
     		assert byte_1 != -1; //might be end of stream
     		hdr.write((byte) byte_1);
-			if(byte_1 == 13)
+			if(byte_1 == 13 && byte_1 != -1)
 			{
 				int byte_2 = in.read();
-				assert byte_2 != -1;
 				hdr.write((byte) byte_2);
-				if(byte_2 == 10)
+				if(byte_2 == 10 && byte_2 != -1)
 				{
 					int byte_3 = in.read();
-					assert byte_3 != -1;
 					hdr.write((byte) byte_3);
-					if(byte_3 == 13)
+					if(byte_3 == 13 && byte_3 != -1)
 					{
 						int byte_4 = in.read();
-						assert byte_4 != -1;
 						hdr.write((byte) byte_4);
-						if(byte_4 == 10)
+						if(byte_4 == 10 && byte_4 != -1)
 							//found terminator !
 							break;
 					}
 				}
-			} 
+			}
+			// boolean flag = false;
+			// for (int i=0;i<4 ;i++ ) {
+			// 	int _byte = in.read();
+			// 	if(_byte != -1)
+			// 		break;
+			// 	if(flag)
+			// 		if(_byte != 10)
+			// 			break;
+			// 	else
+			// 		if(_byte != 13)
+			// 			break;
+			// 	flag = !flag;
+			// 	hdr.write((byte) _byte);
+			// }
     	}
     	hdr.flush();
 
     	//return a ready to use BufferedReader (of default charset)
     	return new BufferedReader(new InputStreamReader(
     								new ByteArrayInputStream(hdr.toByteArray())));
-    } 
+    }
+
+    protected ByteArrayOutputStream readTillCLRF(InputStream in) throws IOException
+    {
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	//readHeaders actually reads till CLRF and returns BufferRead return that we don't need
+    	int _byte;
+    	while(true)
+    	{
+    		_byte = in.read();
+    		if(_byte == 13)
+    		{
+    			baos.write((byte) _byte);
+    			_byte = in.read();
+    			if(_byte == 10)
+    				break;
+    			else 
+    				baos.write((byte) _byte);
+    		}
+    	}
+    	return baos;
+    }
+
+    protected int hexByteArrayToInt(byte[] b) 
+	{
+		System.out.println(Integer.parseInt(javax.xml.bind.DatatypeConverter.printHexBinary(b),16));
+		return Integer.parseInt(javax.xml.bind.DatatypeConverter.printHexBinary(b),16);
+	}
 
     protected void addToHeader(String line, StringBuilder header)
     {
@@ -141,7 +179,6 @@ public class ProxyServer extends Thread
     		}
 
 			System.out.println("Receiving data and writing to client.");
-
 			
 			ByteArrayOutputStream responseHeader = new ByteArrayOutputStream(); //stores the original response
 
@@ -230,7 +267,7 @@ public class ProxyServer extends Thread
 				}
 			}
 
-			if(req_header.toString().startsWith("GET"))
+			if(req_header.toString().startsWith("GET") || req_header.toString().startsWith("HEAD"))
 			{
 				addToHeader("Connection: close\n",req_header);
 				req_header.append(validator.CLRF);	
@@ -261,8 +298,8 @@ public class ProxyServer extends Thread
 	    String line = new String("");
 		while((line = in_server_rdr.readLine()) != null && line.length() != 0)
 		{
-			if (!(validator.isHopByHopHeader(line) ))
-			{
+			// if (!(validator.isHopByHopHeader(line) ))
+			// {
 				if(!(isOnBlackList && validator.isBlockedType(line, host)))
 					addToHeader(line, resp_header);
 				else
@@ -272,12 +309,12 @@ public class ProxyServer extends Thread
 	      			out_client.write("Resource is blocked.".getBytes());
 	      			return false;
 				}
-			}
+			// }
 		}
-		addToHeader("Connection: close\n",resp_header);
-		req_header.append(validator.CLRF);	//must have this since readline consumes newlines
+		resp_header.append("\n"); //havent close connections.
 		
 		//send the MODIFIED response headers
+		System.out.println(resp_header.toString());
 		out_client.write(resp_header.toString().getBytes());
 
 		byte response[] = new byte[8192];
