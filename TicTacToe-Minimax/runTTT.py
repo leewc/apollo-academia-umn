@@ -1,11 +1,11 @@
-from TTT import TicTacToe, Alpha_Beta_Search
+from TTT import TicTacToe, Alpha_Beta_Search, checkend
 from TTTGui import TTTGui
 
 class Controller:
     def __init__(self): # need to have self else you're not instantiating the object.
-        self.game = TicTacToe(3, 'X', 3)
+        self.game = TicTacToe(3, 'X', 6)
         self.game.state = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        self.player = 'X'
+        self.player = 'O'
 
         self.GUI = TTTGui(self, 3)  # 3 by 3
 
@@ -14,10 +14,17 @@ class Controller:
         Alpha_Beta_Search(self.game)
         print("New state: ", self.game.state)
 
-    def updateModel(self, x, y):
-        print("Model update fired.  ",x, y)
+    def updateModel(self, x, y, callback):
         self.game.state[x][y] = 'x' if self.player == 'X' else 'o'
         self.aiTurn()
+
+        # Optional boolean causes checkend to return winning coordinates (in a tuple)
+        status = checkend(self.game.state, True)
+        print("Current winning situation : ", status)
+        if status[0]: #
+            callback(self.game.state, status[1])
+        else:
+            callback(self.game.state)
 
 
 if __name__ == '__main__':
