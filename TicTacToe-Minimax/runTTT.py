@@ -1,11 +1,13 @@
+import time
+
 from TTT import TicTacToe, Alpha_Beta_Search, Random_Pick, checkend
 from TTTGui import TTTGui
 
 class Controller:
     def __init__(self): # need to have self else you're not instantiating the object.
-        self.cut_off_limit = 3
+        self.cut_off_limit = 9
         self.aiStartFirst = True
-        self.use_alphaBetaPruning = False
+        self.use_alphaBetaPruning = True
 
         self.game = TicTacToe(3, 'X', self.cut_off_limit)  # Third param is cut off limit
         self.player = 'O'
@@ -15,7 +17,9 @@ class Controller:
     def aiTurn(self):
         print("Old state: ", self.game.state)
         if self.use_alphaBetaPruning:
+            t = time.process_time()
             Alpha_Beta_Search(self.game)
+            print("Elapsed time for AlphaBetaSearch: ", t - time.process_time())
         else:
             Random_Pick(self.game)
         print("New state: ", self.game.state)
