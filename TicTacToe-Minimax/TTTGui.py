@@ -23,12 +23,11 @@ class TTTGui:
             for y in range(0, self.dimension):
                 handler = lambda x=x,y=y: self.playerMoved(x, y)
                 button = Button(self.root, command=handler, font=self.font, width=2, height=1)
-                button.grid(row=y, column=x)
+                button.grid(row=x, column=y)
                 self.buttons[x,y] = button
 
     def load_restart_button(self):
-        handler = lambda: self.restart()
-        button = Button(self.root, text='Restart',font=Font(family="Helvetica", size=32), command=handler)
+        button = Button(self.root, text='Restart',font=Font(family="Helvetica", size=32), command=lambda: self.controller.restart(self.reloadUI))
         button.grid(row=self.dimension + 1, column=0, columnspan=self.dimension, sticky="WE")
         self.root.update()
 
@@ -39,6 +38,7 @@ class TTTGui:
                 if board_state[x][y] != 0:
                     self.buttons[x, y]['disabledforeground'] = 'black'
                     self.buttons[x, y]['state'] = 'disabled'
+                    self.buttons[x, y]['relief'] = 'sunken'
 
                 if board_state[x][y] == 'x':
                     self.buttons[x, y]['text'] = 'x'
@@ -46,12 +46,21 @@ class TTTGui:
                 if board_state[x][y] == 'o':
                     self.buttons[x, y]['text'] = 'o'
 
-                if board_state[x][y] == 'win':
-                    self.buttons[x, y]['disabledforeground'] = 'red'
-
-                if winCoordinates is not None:
+        if winCoordinates is not None:
+            for x, y in winCoordinates:
+                self.buttons[x, y]['disabledforeground'] = 'red'
+            for x in range(len(board_state)):
+                for y in range(len(board_state[0])):
                     self.buttons[x, y]['relief'] = 'sunken'
                     self.buttons[x, y]['state'] = 'disabled'
+
+    def reloadUI(self, board_state):
+        print("Restarting Game.")
+        for x in range(len(board_state)):
+            for y in range(len(board_state[0])):
+                self.buttons[x, y]['relief'] = 'raised'
+                self.buttons[x, y]['state'] = 'normal'
+                self.buttons[x, y]['text'] = ""
 
     def playerMoved(self, x, y):
         print('Played Moved: ', x,y)

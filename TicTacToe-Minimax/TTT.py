@@ -222,15 +222,15 @@ class TicTacToe:
 def checkend( state , returnCoordinates=False ):
 	# Optional param returns a list of coordinates if true.
 	# Check row
-	for i in state:
-		if not ( 0 in i or 'o' in i ):
+	for i in range( 3 ):
+		if not ( 0 in state[i] or 'o' in state[i] ):
 			if returnCoordinates:
-				return (True, [(j, i) for j in range(3)])
+				return (True, [(i, j) for j in range(3)])
 			return True
 
-		elif not ( 0 in i or 'x'in i ):
+		elif not ( 0 in state[i] or 'x'in state[i] ):
 			if returnCoordinates:
-				return (True, [(j, i) for j in range(3)])
+				return (True, [(i, j) for j in range(3)])
 			return True
 
 	# Check column
@@ -250,7 +250,7 @@ def checkend( state , returnCoordinates=False ):
 
 		if x_count == 3 or o_count == 3:
 			if returnCoordinates:
-				return (True, x_win if len(x_win) is 3 else y_win)
+				return (True, x_win if len(x_win) is 3 else o_win)
 			return True
 		x_count = 0
 		o_count = 0
@@ -269,7 +269,7 @@ def checkend( state , returnCoordinates=False ):
 			o_win.append( (i, i) )
 	if x_count == 3 or o_count == 3:
 		if returnCoordinates:
-			return (True, x_win if len(x_win) is 3 else y_win)
+			return (True, x_win if len(x_win) is 3 else o_win)
 		return True
 
 	# Check negative diagonal
@@ -290,7 +290,7 @@ def checkend( state , returnCoordinates=False ):
 		j -= 1
 	if x_count == 3 or o_count == 3:
 		if returnCoordinates:
-			return (True, x_win if len(x_win) is 3 else y_win)
+			return (True, x_win if len(x_win) is 3 else o_win)
 
 	# no one won yet
 	if returnCoordinates:
