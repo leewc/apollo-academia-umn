@@ -61,10 +61,12 @@ class TTTGui:
                 self.buttons[x, y]['relief'] = 'raised'
                 self.buttons[x, y]['state'] = 'normal'
                 self.buttons[x, y]['text'] = ""
+        self.updateUI(board_state)
 
     def playerMoved(self, x, y):
         print('Played Moved: ', x,y)
         self.controller.updateModel(x, y, self.updateUI)
 
-    def start(self):
+    def start(self, state):
+        self.updateUI(state)
         self.root.mainloop()

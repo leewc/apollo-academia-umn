@@ -1,4 +1,5 @@
 import copy
+import random
 
 DEBUG = False
 
@@ -164,6 +165,7 @@ class TicTacToe:
 				elif o_count == 0:
 					cost += -1
 				o_count = 0
+			tf = False
 		if DEBUG: print(cost)
 
 		# Check for positive diagonal
@@ -312,6 +314,22 @@ def Alpha_Beta_Search( game ):
 		game.results( game.state, result[ 1 ] )
 		if DEBUG: print(game.state)
 		return game
+
+def Random_Pick ( game ):
+	empty_boxes = list()
+	for i in range(len(game.state)):
+		for j in range(len(game.state)):
+			if game.state[i][j] == 0:
+				empty_boxes.append( (i, j) )
+
+	if len(empty_boxes) == 0:
+		print("AI cannot make anymore possible moves.")
+		return game
+
+	choice = random.choice(empty_boxes)
+	game.state[ choice[0] ][ choice[1] ] = 'x'
+	return game
+
 
 
 def Max_value( state, alpha, beta, game, depth ):
