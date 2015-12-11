@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<courseCatalog xmlns="http://www.cs.umn.edu/4131/ns/catalog"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.cs.umn.edu/4131/ns/catalog Catalog.xsd" >
+<course>
+ <title> Internet Programming </title>
+ <instructor title="Prof">
+ <firstname> Sang </firstname>
+ <lastname> Song </lastname>
+ </instructor>
+<instructor>
+ <firstname> Ping </firstname>
+ <lastname> Pong </lastname>
+ </instructor>
+<instructor>
+ <firstname> Zhing </firstname>
+ <lastname> Zhong </lastname>
+ </instructor>
+<number>CS4131</number>
+ <schedule>
+ <lecture day="Tue">10:30-11:30</lecture>
+ <lecture day="Th">10:30-11:30</lecture>
+ </schedule>
+ <semester>Fall</semester>
+ <enrollment>50</enrollment>
+</course>
+</courseCatalog>
