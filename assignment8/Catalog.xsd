@@ -11,9 +11,9 @@
 
     <!-- DEFINITION of CourseListType -->
     <xsd:complexType name="CourseListType">
-      <xsd:all>
-        <xsd:element name="course" type="CourseType" minOccurs="0"/>
-      </xsd:all>
+      <xsd:sequence>
+        <xsd:element name="course" type="CourseType" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
     </xsd:complexType>
 
     <!-- DEFINITION of CourseType -->
