@@ -1,0 +1,201 @@
+Script started on Wed Dec  9 22:36:15 2015
+]0;(theia)wclee@localhost: ~/Development/repo-leex7095/TicTacToe-Minimax(theia)wclee@localhost:~/Development/repo-leex7095/TicTacToe-Minimax$ python3 ru nTTT.py
+AI will use Alpha Beta Pruning.
+AI will start first.
+Old state:  [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0007694879999999987
+New state:  [[0, 0, 0], [0, 'x', 0], [0, 0, 0]]
+Played Moved:  0 0
+Old state:  [['o', 0, 0], [0, 'x', 0], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0014783550000000006
+New state:  [['o', 0, 'x'], [0, 'x', 0], [0, 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  2 0
+Old state:  [['o', 0, 'x'], [0, 'x', 0], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.000811181000000008
+New state:  [['o', 0, 'x'], ['x', 'x', 0], ['o', 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  1 2
+Old state:  [['o', 0, 'x'], ['x', 'x', 'o'], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.00043599100000001056
+New state:  [['o', 0, 'x'], ['x', 'x', 'o'], ['o', 'x', 0]]
+Current winning situation :  (False, None)
+Played Moved:  0 1
+Old state:  [['o', 'o', 'x'], ['x', 'x', 'o'], ['o', 'x', 0]]
+Elapsed time for AlphaBetaSearch:  -0.00029860299999998063
+New state:  [['o', 'o', 'x'], ['x', 'x', 'o'], ['o', 'x', 'x']]
+Current winning situation :  (False, None)
+You go first.
+Restarting Game.
+Played Moved:  2 0
+Old state:  [[0, 0, 0], [0, 0, 0], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0014841559999999865
+New state:  [[0, 0, 0], [0, 'x', 0], ['o', 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  2 2
+Old state:  [[0, 0, 0], [0, 'x', 0], ['o', 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.0009232219999999736
+New state:  [[0, 0, 0], [0, 'x', 0], ['o', 'x', 'o']]
+Current winning situation :  (False, None)
+Played Moved:  1 2
+Old state:  [[0, 0, 0], [0, 'x', 'o'], ['o', 'x', 'o']]
+Elapsed time for AlphaBetaSearch:  -0.0007451899999999789
+New state:  [[0, 'x', 0], [0, 'x', 'o'], ['o', 'x', 'o']]
+Current winning situation :  (True, [(0, 1), (1, 1), (2, 1)])
+AI will start first.
+Old state:  [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.352497118
+New state:  [[0, 0, 0], ['x', 0, 0], [0, 0, 0]]
+Restarting Game.
+Played Moved:  0 0
+Old state:  [['o', 0, 0], ['x', 0, 0], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0009139910000000029
+New state:  [['o', 0, 0], ['x', 'x', 0], [0, 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  1 2
+Old state:  [['o', 0, 0], ['x', 'x', 'o'], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0005964039999999393
+New state:  [['o', 0, 'x'], ['x', 'x', 'o'], [0, 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  2 0
+Old state:  [['o', 0, 'x'], ['x', 'x', 'o'], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0004112729999999898
+New state:  [['o', 0, 'x'], ['x', 'x', 'o'], ['o', 'x', 0]]
+Current winning situation :  (False, None)
+Played Moved:  0 1
+Old state:  [['o', 'o', 'x'], ['x', 'x', 'o'], ['o', 'x', 0]]
+Elapsed time for AlphaBetaSearch:  -0.0003502290000000352
+New state:  [['o', 'o', 'x'], ['x', 'x', 'o'], ['o', 'x', 'x']]
+Current winning situation :  (False, None)
+You go first.
+Restarting Game.
+Played Moved:  1 1
+Old state:  [[0, 0, 0], [0, 'o', 0], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0015808750000000371
+New state:  [['x', 0, 0], [0, 'o', 0], [0, 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  1 2
+Old state:  [['x', 0, 0], [0, 'o', 'o'], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.000796760000000063
+New state:  [['x', 0, 0], ['x', 'o', 'o'], [0, 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  2 1
+Old state:  [['x', 0, 0], ['x', 'o', 'o'], [0, 'o', 0]]
+Elapsed time for AlphaBetaSearch:  -0.0005478119999999809
+New state:  [['x', 0, 0], ['x', 'o', 'o'], ['x', 'o', 0]]
+Current winning situation :  (True, [(0, 0), (1, 0), (2, 0)])
+AI will start first.
+Old state:  [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.342138005
+New state:  [[0, 0, 0], ['x', 0, 0], [0, 0, 0]]
+Restarting Game.
+Played Moved:  2 2
+Old state:  [[0, 0, 0], ['x', 0, 0], [0, 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.000980941000000013
+New state:  [[0, 0, 0], ['x', 'x', 0], [0, 0, 'o']]
+Current winning situation :  (False, None)
+Played Moved:  1 2
+Old state:  [[0, 0, 0], ['x', 'x', 'o'], [0, 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.00029675299999998295
+New state:  [[0, 0, 'x'], ['x', 'x', 'o'], [0, 0, 'o']]
+Current winning situation :  (False, None)
+Played Moved:  0 0
+Old state:  [['o', 0, 'x'], ['x', 'x', 'o'], [0, 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.0005806750000000305
+New state:  [['o', 0, 'x'], ['x', 'x', 'o'], ['x', 0, 'o']]
+Current winning situation :  (True, [(0, 2), (1, 1), (2, 0)])
+You go first.
+Restarting Game.
+Played Moved:  2 0
+Old state:  [[0, 0, 0], [0, 0, 0], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0019253369999999714
+New state:  [[0, 0, 0], [0, 'x', 0], ['o', 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  1 0
+Old state:  [[0, 0, 0], ['o', 'x', 0], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0008018199999999531
+New state:  [['x', 0, 0], ['o', 'x', 0], ['o', 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  0 1
+Old state:  [['x', 'o', 0], ['o', 'x', 0], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.000734558999999968
+New state:  [['x', 'o', 0], ['o', 'x', 0], ['o', 0, 'x']]
+Current winning situation :  (True, [(0, 0), (1, 1), (2, 2)])
+AI will start first.
+Old state:  [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.34711030200000004
+New state:  [[0, 0, 0], ['x', 0, 0], [0, 0, 0]]
+Restarting Game.
+Played Moved:  2 2
+Old state:  [[0, 0, 0], ['x', 0, 0], [0, 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.0013994269999999531
+New state:  [[0, 0, 0], ['x', 'x', 0], [0, 0, 'o']]
+Current winning situation :  (False, None)
+Played Moved:  1 2
+Old state:  [[0, 0, 0], ['x', 'x', 'o'], [0, 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.0006601849999998688
+New state:  [[0, 0, 'x'], ['x', 'x', 'o'], [0, 0, 'o']]
+Current winning situation :  (False, None)
+Played Moved:  0 0
+Old state:  [['o', 0, 'x'], ['x', 'x', 'o'], [0, 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.0004631880000001143
+New state:  [['o', 0, 'x'], ['x', 'x', 'o'], ['x', 0, 'o']]
+Current winning situation :  (True, [(0, 2), (1, 1), (2, 0)])
+You go first.
+Restarting Game.
+Played Moved:  2 1
+Old state:  [[0, 0, 0], [0, 0, 0], [0, 'o', 0]]
+Elapsed time for AlphaBetaSearch:  -0.0009644230000001031
+New state:  [[0, 0, 0], [0, 'x', 0], [0, 'o', 0]]
+Current winning situation :  (False, None)
+Played Moved:  1 0
+Old state:  [[0, 0, 0], ['o', 'x', 0], [0, 'o', 0]]
+Elapsed time for AlphaBetaSearch:  -0.001243716999999922
+New state:  [['x', 0, 0], ['o', 'x', 0], [0, 'o', 0]]
+Current winning situation :  (False, None)
+Played Moved:  0 1
+Old state:  [['x', 'o', 0], ['o', 'x', 0], [0, 'o', 0]]
+Elapsed time for AlphaBetaSearch:  -0.0006031040000000765
+New state:  [['x', 'o', 0], ['o', 'x', 0], [0, 'o', 'x']]
+Current winning situation :  (True, [(0, 0), (1, 1), (2, 2)])
+AI will start first.
+Old state:  [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.3515014780000001
+New state:  [[0, 0, 0], ['x', 0, 0], [0, 0, 0]]
+Restarting Game.
+Played Moved:  2 0
+Old state:  [[0, 0, 0], ['x', 0, 0], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0012819500000000872
+New state:  [[0, 0, 0], ['x', 'x', 0], ['o', 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  0 2
+Old state:  [[0, 0, 'o'], ['x', 'x', 0], ['o', 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0008654740000000327
+New state:  [[0, 0, 'o'], ['x', 'x', 'x'], ['o', 0, 0]]
+Current winning situation :  (True, [(1, 0), (1, 1), (1, 2)])
+You go first.
+Restarting Game.
+Played Moved:  1 2
+Old state:  [[0, 0, 0], [0, 0, 'o'], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0009423909999999314
+New state:  [[0, 0, 0], [0, 'x', 'o'], [0, 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  1 0
+Old state:  [[0, 0, 0], ['o', 'x', 'o'], [0, 0, 0]]
+Elapsed time for AlphaBetaSearch:  -0.0007357930000000401
+New state:  [['x', 0, 0], ['o', 'x', 'o'], [0, 0, 0]]
+Current winning situation :  (False, None)
+Played Moved:  2 2
+Old state:  [['x', 0, 0], ['o', 'x', 'o'], [0, 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.0007658680000000029
+New state:  [['x', 0, 'x'], ['o', 'x', 'o'], [0, 0, 'o']]
+Current winning situation :  (False, None)
+Played Moved:  2 0
+Old state:  [['x', 0, 'x'], ['o', 'x', 'o'], ['o', 0, 'o']]
+Elapsed time for AlphaBetaSearch:  -0.0005480880000001687
+New state:  [['x', 'x', 'x'], ['o', 'x', 'o'], ['o', 0, 'o']]
+Current winning situation :  (True, [(0, 0), (0, 1), (0, 2)])
+]0;(theia)wclee@localhost: ~/Development/repo-leex7095/TicTacToe-Minimax(theia)wclee@localhost:~/Development/repo-leex7095/TicTacToe-Minimax$ [Kexit
+exit
+
+Script done on Wed Dec  9 22:38:06 2015
