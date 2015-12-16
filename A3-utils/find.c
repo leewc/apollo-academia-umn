@@ -21,16 +21,18 @@ int main(int argc, char** argv)
     return 0;
 }
 
+//adapted from how walk a folder recursively: http://rosettacode.org/wiki/Walk_a_directory/Recursively#C
 void find(char* dirName, char* filename)
 {
     DIR *dir; //starting directory
     
-    char fname[256]; //holds the filename
+    char fname[255]; //holds the filename
     int fname_len = strlen(dirName);
     strcpy(fname, dirName); //copy the directory name for modification
+    
     fname[fname_len++] = '/';
     
-    if(fname_len > 256)
+    if(fname_len > 255)
     {
         printf("Name too long \n.");
         return;
@@ -38,7 +40,7 @@ void find(char* dirName, char* filename)
     
     if(!( dir = opendir(dirName)))
     {
-        fprintf(stderr, "Can't open dir %s or not found\n.", dirName);
+        fprintf(stderr, "Can't open dir %s or not found. Is it a directory?\n.", dirName);
         return;
     }
     
@@ -55,11 +57,13 @@ void find(char* dirName, char* filename)
         
         // printf("Current item : %s\n", current->d_name);
     
-        strncpy(fname + fname_len, current->d_name, 256 - fname_len);
+        strncpy(fname + fname_len, current->d_name, 255 - fname_len);
         //using d_type and macros work on Linux and BSD systems, avoids need to use lstat
         
-        if(stat(fname, &s) == -1 )
+        if(stat(fname, &s) == -1 ){
             fprintf(stderr, "Cannot stat %s\n.", fname);
+            return;
+        }
         
         if(S_ISDIR(s.st_mode))
         {
@@ -68,7 +72,7 @@ void find(char* dirName, char* filename)
         }
         else if(strcmp(current->d_name,filename) == 0)
         {
-            printf("Found file match %s.\nLocation: %s\n", filename, fname);
+            printf("Found file %s.\nLocation: %s\n", filename, fname);
         }
     }
     if(dir)
