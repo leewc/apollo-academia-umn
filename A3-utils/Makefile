@@ -21,4 +21,7 @@ grep: grep.o
 	gcc $(FLAGS) grep.o -o grep
 
 clean:
+	rm ls
+	rm find
+	rm grep
 	rm *.o

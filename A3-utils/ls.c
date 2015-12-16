@@ -10,12 +10,6 @@
 #include <dirent.h>
 #include <unistd.h>
 
-
-// do we need coloring
-// do we need total blocks
-// manage to display group names. 
-// do we need to print symbolic links
-
 /* This is a (very) simple implementatiom of ls -l in C.
     Adapted and improved from Aditya Sarawgi's older, OSX only implementation: 
         https://github.com/truncs/ls-implementation/blob/master/ls.c
