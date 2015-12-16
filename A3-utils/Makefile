@@ -1,6 +1,6 @@
 FLAGS = -Wall -g
 
-all: ls find
+all: ls find grep
 
 ls.o: ls.c
 	gcc $(FLAGS) ls.c -c
@@ -13,6 +13,12 @@ find.o: find.c
 
 find: find.o
 	gcc $(FLAGS) find.o -o find
+
+grep.o: grep.c
+	gcc $(FLAGS) grep.c -c 
+
+grep: grep.o
+	gcc $(FLAGS) grep.o -o grep
 
 clean:
 	rm *.o

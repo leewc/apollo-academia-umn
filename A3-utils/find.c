@@ -70,7 +70,7 @@ void find(char* dirName, char* filename)
         }
         else if(strcmp(current->d_name,filename) == 0)
         {
-            printf("Found file %s.\nLocation: %s\n", filename, dirName);
+            printf("Found file %s.\nLocation: %s\n", filename, fname);
         }
     }
     if(dir)
