@@ -1,5 +1,3 @@
-#define _GNU_SOURCE
-
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
@@ -127,11 +125,11 @@ void displayInfo(char *name)
 
     //print name of uid    
     struct passwd *pwd = getpwuid(s.st_uid);
-    printf("%10s ", pwd->pw_name);
+    printf("%8s ", pwd->pw_name);
     
     //print name of grid
     struct group *grid = getgrgid(s.st_gid);
-	printf("%10s ", grid->gr_name);
+	printf("%8s ", grid->gr_name);
 
     //print size, 5.0 aligns right by 5 chars    
 	printf("%5.0lu ", s.st_size);
