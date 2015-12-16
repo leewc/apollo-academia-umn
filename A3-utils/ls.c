@@ -63,7 +63,8 @@ int main(int argc, char** argv)
         
         argc--;
     }
-    closedir(directory);
+    if(S_ISDIR(current.st_mode))
+        closedir(directory);
     return 0;
 }
 
