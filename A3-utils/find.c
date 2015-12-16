@@ -28,7 +28,14 @@ void find(char* dirName, char* filename)
     int fname_len = strlen(dirName);
     strcpy(fname, dirName); //copy the directory name for modification
     
-    fname[fname_len++] = '/';
+    if(fname[fname_len-1] != '/')
+        fname[fname_len++] = '/';
+    
+    if(fname_len > FILENAME_MAX)
+    {
+        printf("Name too long \n.");
+        return;
+    }
     
     if(fname_len > FILENAME_MAX)
     {
@@ -38,7 +45,7 @@ void find(char* dirName, char* filename)
     
     if(!( dir = opendir(dirName)))
     {
-        fprintf(stderr, "Can't open dir %s or not found. Is it a directory?\n.", dirName);
+        fprintf(stderr, "Can't open dir %s or not found. Do you have sufficient permissions? Is it a directory?\n.", dirName);
         return;
     }
     
