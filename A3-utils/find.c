@@ -4,8 +4,6 @@
 #include <sys/stat.h>
 
 
-//do we have to deal with symbolic links
-
 void find(char* startingDir, char* filename);
 
 int main(int argc, char** argv)
@@ -26,13 +24,13 @@ void find(char* dirName, char* filename)
 {
     DIR *dir; //starting directory
     
-    char fname[255]; //holds the filename
+    char fname[FILENAME_MAX]; //holds the filename, use FILENAME_MAX instead of 255 since pathnames get long.
     int fname_len = strlen(dirName);
     strcpy(fname, dirName); //copy the directory name for modification
     
     fname[fname_len++] = '/';
     
-    if(fname_len > 255)
+    if(fname_len > FILENAME_MAX)
     {
         printf("Name too long \n.");
         return;
@@ -57,11 +55,11 @@ void find(char* dirName, char* filename)
         
         // printf("Current item : %s\n", current->d_name);
     
-        strncpy(fname + fname_len, current->d_name, 255 - fname_len);
+        strncpy(fname + fname_len, current->d_name, FILENAME_MAX - fname_len);
         //using d_type and macros work on Linux and BSD systems, avoids need to use lstat
         
         if(stat(fname, &s) == -1 ){
-            fprintf(stderr, "Cannot stat %s\n.", fname);
+            fprintf(stderr, "Cannot stat %s.\n", fname);
             return;
         }
         
@@ -72,7 +70,7 @@ void find(char* dirName, char* filename)
         }
         else if(strcmp(current->d_name,filename) == 0)
         {
-            printf("Found file %s.\nLocation: %s\n", filename, fname);
+            printf("Found file %s.\nLocation: %s\n", filename, dirName);
         }
     }
     if(dir)
