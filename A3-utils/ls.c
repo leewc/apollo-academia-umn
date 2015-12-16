@@ -41,8 +41,10 @@ int main(int argc, char** argv)
     while(argc > 1)
     {
         if((stat(argv[i], &current) != 0 ))
+        {
             perror("Error could not stat file/folder.");
-        
+            return 1;
+        }
         if(S_ISDIR(current.st_mode)) //check file st_mode
         {
             /*current item is a directory. chdir into it and displayFiles then return */
@@ -87,8 +89,10 @@ void displayInfo(char *name)
     struct stat s;
     
     if(stat(name, &s) != 0)
+    {
         perror("Error could not stat file.");
-    
+        return;
+    }
     //Find if we are fifo, link, dir
     if(S_ISDIR(s.st_mode))
         printf("d");
