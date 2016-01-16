@@ -8,7 +8,7 @@ Each folder was previously an individual repository, but I have decided to combi
 
 *Most* of the code is in functional state. (I usually indicate what doesn't work) Also note that I have decided to maintain the master branch with squashed merges instead of a full merge to keep history between branches separate (as each branch is unrelated, and combining all the commits made no sense). 
 
-An index of branches (that used to be repositories) can be found below, along with links to my other standalone repositories that may contain even more code.
+An index of branches (that used to be repositories) can be found below, along with links to my other standalone repositories that may contain even more code. Alternatively click on the [branches](https://github.com/leewc/apollo-academia-umn/branches) link on GitHub to view all branches, which were individual repos before they were squashed.
 
 ## List of Courses And Projects
 
@@ -23,6 +23,10 @@ An index of branches (that used to be repositories) can be found below, along wi
 ### Spring 2014
 
 - [3081 Program Design and Development, FCAL-CPP Translator, separate repo](https://github.com/leewc/fcal-cpp-translator)
+
+### Fall 2014
+
+- [2041 Advanced Programming Principles (Functional Programming in OCaml)](https://github.com/leewc/apollo-academia-umn/tree/Functional_Programming_Ocaml)
 
 ## Notes
 
