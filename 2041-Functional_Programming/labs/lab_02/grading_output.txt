@@ -1,0 +1,11 @@
+BEGIN OUTPUT MESSAGE
+5/5 - Successfully committed the file ``lab_02/lab_02.ml`` to ``labs`' directory.
+5/5 - ``circle_area_v1 4.5`` evaluates to approximately ``15.9038``
+5/5 - ``circle_area_v2 4.5`` evaluates to approximately ``15.9038``
+10/10 - ``product [2; 3; 4]`` evaluates to ``24``
+15/15 - ``sum_diffs [4; 5; 2]`` evaluates to ``2``
+5/5 - ``distance (1.0, 1.0) (2.0, 1.0)`` evaluates to approximately ``1.``
+5/5 - ``triangle_perimeter (1.0, 1.0) (2.0, 1.0) (2.0, 2.0)`` evaluates to approximately ``3.4142135623``
+15/15 - ``perimeter [ (1.0, 1.0); (1.0, 3.0); (4.0, 4.0); (7.0, 3.0); (7.0, 1.0) ]`` evaluates to approximately ``16.3245553203``
+
+END OUTPUT MESSAGE

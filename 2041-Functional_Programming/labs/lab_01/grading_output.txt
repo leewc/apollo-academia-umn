@@ -1,0 +1,5 @@
+BEGIN OUTPUT MESSAGE
+5/5 - Successfully added name to the sample OCaml file.
+5/5 - Fixed the bug so that the fib function works correctly.
+
+END OUTPUT MESSAGE
