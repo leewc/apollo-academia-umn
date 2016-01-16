@@ -1,0 +1,43 @@
+Script started on Wed 11 Nov 2015 04:59:04 PM CST
+
+wclee@athena-tux:~/Development/4061-Private-Assignments/A2-IPC-Semaphore$ ./client 9876
+Client: PID: 31333 
+Client: Connected to Server Queue ID: 229379 ...
+Sending Initial Message to server... 
+Client: Waiting for server response. 
+Client: Received Message from Server:
+	Welcome client!
+Client: Sending Reply.. 
+Client: Received Message from Server:
+	OK that's enough. Please shut down. Goodbye.
+Client: Shutting down client.
+
+wclee@athena-tux:~/Development/4061-Private-Assignments/A2-IPC-Semaphore$ ./client 9876
+Client: PID: 31336 
+Client: Connected to Server Queue ID: 229379 ...
+Sending Initial Message to server... 
+Client: Waiting for server response. 
+Client: Received Message from Server:
+	Welcome client!
+Client: Sending Reply.. 
+Client: Received Message from Server:
+	OK that's enough. Please shut down. Goodbye.
+Client: Shutting down client.
+
+wclee@athena-tux:~/Development/4061-Private-Assignments/A2-IPC-Semaphore$ ./client 9876
+Client: PID: 31337 
+Client: Connected to Server Queue ID: 229379 ...
+Sending Initial Message to server... 
+Client: Waiting for server response. 
+Client: Received Message from Server:
+	Welcome client!
+Client: Sending Reply.. 
+Client: Received Message from Server:
+	OK that's enough. Please shut down. Goodbye.
+Client: Shutting down client.
+
+wclee@athena-tux:~/Development/4061-Private-Assignments/A2-IPC-Semaphore$ 
+wclee@athena-tux:~/Development/4061-Private-Assignments/A2-IPC-Semaphore$ exit
+exit
+
+Script done on Wed 11 Nov 2015 04:59:32 PM CST
