@@ -1,0 +1,22 @@
+FILES FOUND ON: MOODLE
+
+State of Code
+Everything works, other than Forward Checking for Cryptarithmetic which I have spent most of the time trying to implement it based on the work of my team mates, it runs out of recursion depth as the domains are not properly pruned. 
+
+I have implemented the following algorithms:
+
+1. AC3 for Futoshiki
+2. MAC for Futoshiki 
+3. MRV for Cryptarithmetic
+4. Forward Checking for Cryptarithmetic 
+
+My additional work will be the forward checking.
+
+
+People I have collaborated with:
+
+Sihan Chen for Futoshiki, I have helped debug and fix the code for KenKen as well, as they are related.
+
+Sean Lin for his Cryptarithmetic work. 
+
+Please note although this is a group project we have submitted our works individually to show which part was made by ourselves (and which part we are responsible for).

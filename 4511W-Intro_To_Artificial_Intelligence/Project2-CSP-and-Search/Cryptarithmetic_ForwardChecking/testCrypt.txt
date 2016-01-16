@@ -1,0 +1,7 @@
++,send+more=money
++,crash+hacker=reboot
++,basic+logic=pascal
++,NETWORK+WINDOWS+WS= DISKETTE
++,CHARON+COMET+EARTH= TRITON
++,TOO+TOO+TOO+TOO=GOOD
++,AT+EAST+WEST=SOUTH
