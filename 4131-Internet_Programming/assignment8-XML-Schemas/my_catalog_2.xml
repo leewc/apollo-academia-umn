@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+ <courseCatalog xmlns="http://www.cs.umn.edu/4131/ns/catalog"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.cs.umn.edu/4131/ns/catalog Catalog.xsd" >
+
+
+<course>
+   <title> Artificial Intelligence </title> 
+  <instructor  title="Prof">  
+       <firstname> Amy </firstname> 
+       <lastname> Larson </lastname> 
+  </instructor>
+  <number>CS4511</number>
+  <schedule>  
+            <lecture day="Wed">10:30-11:30</lecture>
+            <lecture day="Mon">10:30-11:30</lecture>
+  </schedule>  
+   <semester>Fall</semester>
+   <enrollment>11</enrollment>
+</course>
+
+
+<course>
+  <title> Program Design and Development </title> 
+  <instructor >  
+       <firstname> Dan </firstname> 
+       <lastname> Challou </lastname> 
+  </instructor>
+  <number>CS3081</number>
+  <schedule>  
+            <lecture day="Tue">17:30-19:30</lecture>
+            <lecture day="Fri">07:30-09:30</lecture>
+  </schedule>  
+   <semester>Summer</semester>
+   <enrollment>99</enrollment>
+</course>
+
+
+</courseCatalog>

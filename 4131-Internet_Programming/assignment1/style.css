@@ -1,0 +1,80 @@
+nav {
+	text-align: center;
+	padding: 2em;
+	border-top: 2px solid gray;
+	border-bottom: 2px solid gray;
+	border-spacing: 0.5em;
+	margin-bottom: 2em;
+}
+
+h1 {
+	color: blue;
+	font-weight: bold;
+	text-align: center;
+}
+
+table {
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #00AAFF;
+	border: 5px solid black;
+	text-align: center;
+	empty-cells: show;
+}
+
+thead {
+	font-weight: bold;
+	font-size: 1.2em;
+	background-color: white;
+	padding-left: 7px;
+	padding-right: 7px;
+	
+}
+
+table tr td {
+	background-color: lightblue;
+	border: 1px solid black;
+}
+
+td:first-child {
+	font-style: italic;
+	color: white;
+	background-color: inherit;
+	border: none;
+	padding: 3px; 
+}
+
+td {
+
+	color: #585858;
+}
+
+/*Centering images: http://www.w3.org/Style/Examples/007/center.en.html*/
+img {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+
+}
+
+.formContainer {
+	display: block;
+	text-align: center;
+	margin: 0 auto;
+	
+}
+
+form {
+	text-align: left; /*align left but form is centered thanks to centering container*/
+	display: inline-block;
+	/*margin-left: auto; */ /*not needed using div*/
+	/*margin-right: auto;*/
+	/*width: 100px;*/
+	/*text-align: center*/ /*this centers everything*/
+	margin-top: 20px;
+	padding: 10px 0px 0px 0px;
+}
+
+input {
+	margin: 5px 0px 5px 0px;
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Map of UMN Halls</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+      #content {
+      	text-align: center;
+      }
+
+      #bodyContent img {
+      	text-align: center;
+      }
+
+      #bodyContent p {
+      	text-align: left;
+      }
+
+      #floating-panel-left {
+	  	position: absolute;
+	  	top: 10px;
+	  	left: 25%;
+	  	z-index: 5;
+	  	background-color: #fff;
+	  	padding: 5px;
+	  	border: 1px solid #999;
+	  	text-align: center;
+	  	font-family: 'Roboto','sans-serif';
+	  	line-height: 30px;
+	  	padding-left: 10px;
+	  }
+
+	  #floating-panel-right {
+	  	position: absolute;
+	  	top: 10px;
+	  	right: 25%;
+	  	z-index: 5;
+	  	background-color: #fff;
+	  	padding: 5px;
+	  	border: 1px solid #999;
+	  	text-align: center;
+	  	font-family: 'Roboto','sans-serif';
+	  	line-height: 30px;
+	  	padding-right: 10px;
+	  }
+
+    </style>
+  </head>
+
+  <body>
+  	<div id ="floating-panel-left">
+  		<b>Building: </b>
+		<select id="buildingSelector">
+			<!-- Further populated by JS -->
+			<option value="-1"> None </option>
+		</select>
+  	</div>
+  	<div id ="floating-panel-right">
+  		<b>Mode of Travel: </b>
+  		<select id="travelSelector">
+  			<option value="DRIVING"> Driving </option>
+  			<option value="WALKING"> Walking </option>
+  			<option value="BICYCLING"> Bicycling </option>
+  			<option value="TRANSIT"> Transit </option>
+  		</select>
+  	</div>
+    <div id="map"></div>
+   <!--  
+   <script>
+ 	</script>
+	-->
+	<script type="text/javascript" src="maps_custom.js"></script>
+	<!-- NOTE TO SELF: REVOKE API KEY AFTER ASSIGNMENT -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJ7qcWfRp3G1TnhP9PgXXBF4FCkr3TRGw&callback=initMap"
+        async defer></script>
+  </body>
+</html>

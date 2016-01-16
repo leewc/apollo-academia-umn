@@ -1,0 +1,18 @@
+# Filename: config.txt
+# Description: This is the config file for proxy server
+# Author: Wen Chuan Lee
+# Date: November 25, 2015
+# block complete access to the site
+www.badsite.com *
+# block complete access to the site (missing * defaults to ‘block complete access’ as above)
+www.badsite.com
+# block all gif files from www.microsoft.com
+www.microsoft.com image/gif
+# block all images i.e. gif, jpeg, png, etc.
+www.sco.com image/*
+
+www.w3.org image/*
+
+www.theverge.com
+
+www-users.cselabs.umn.edu application/pdf

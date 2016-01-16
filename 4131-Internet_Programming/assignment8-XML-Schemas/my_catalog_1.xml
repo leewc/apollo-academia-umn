@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+ <courseCatalog xmlns="http://www.cs.umn.edu/4131/ns/catalog"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.cs.umn.edu/4131/ns/catalog Catalog.xsd" >
+
+
+<course>
+   <title> Intro to Computer Networks </title> 
+  <instructor  title="Dr">  
+       <firstname> Tian </firstname> 
+       <lastname> He </lastname> 
+  </instructor>
+  <number>CS4211</number>
+  <schedule>  
+            <lecture day="Wed">10:30-11:30</lecture>
+            <lecture day="Mon">10:30-11:30</lecture>
+  </schedule>  
+   <semester>Fall</semester>
+   <enrollment>100</enrollment>
+</course>
+
+
+<course>
+  <title> Intro to Operating Systems </title> 
+  <instructor  title="Prof">  
+       <firstname> John </firstname> 
+       <lastname> Weisman </lastname> 
+  </instructor>
+  <number>CS4061</number>
+  <schedule>  
+            <lecture day="Tue">09:30-10:30</lecture>
+            <lecture day="Fri">12:30-13:30</lecture>
+  </schedule>  
+   <semester>Spring</semester>
+   <enrollment>10</enrollment>
+</course>
+
+
+</courseCatalog>

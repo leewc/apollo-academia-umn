@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<courseCatalog xmlns = "http://www.cs.umn.edu/4131/ns/catalog"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.cs.umn.edu/4131/ns/catalog  Catalog.xsd" >
+
+<course>
+  <title> Distributed Systems </title> 
+  <instructor  title="Prof">  
+       <firstname> Jack </firstname> 
+       <lastname> Jump </lastname> 
+  </instructor>
+  <instructor>  
+       <firstname>  Rob </firstname> 
+       <lastname>  Bank </lastname> 
+  </instructor>
+  <instructor>  
+       <firstname>  Sandy </firstname> 
+       <lastname>  Beach </lastname> 
+  </instructor>
+  <number>CS5105</number>
+  <schedule>  
+            <lecture day="Mon">14:30-16:00</lecture>
+            <lecture day="Fri">14:30-16:00</lecture>
+  </schedule>  
+   <semester>Spring</semester>
+   <enrollment>50</enrollment>
+</course>
+
+
+</courseCatalog>

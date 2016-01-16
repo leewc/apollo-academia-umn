@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xsd:schema
+  xmlns="http://www.cs.umn.edu/4131/ns/catalog"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  targetNamespace="http://www.cs.umn.edu/4131/ns/catalog"
+  elementFormDefault="qualified"
+  >
+    <!-- ROOT Element -->
+    <xsd:element name="courseCatalog" type="CourseListType"/>
+
+    <!-- DEFINITION of CourseListType -->
+    <xsd:complexType name="CourseListType">
+      <xsd:sequence>
+        <xsd:element name="course" type="CourseType" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- DEFINITION of CourseType -->
+    <xsd:complexType name="CourseType">
+      <xsd:sequence>
+          <xsd:element name="title" maxOccurs="1">
+            <xsd:simpleType>
+              <xsd:restriction base="xsd:string"> 
+                <xsd:maxLength value="50" />
+              </xsd:restriction>
+            </xsd:simpleType>
+          </xsd:element>
+
+          <xsd:element name="instructor" type="instructorType" maxOccurs="3" />
+          <xsd:element name="number" type="courseNumberType" maxOccurs="1" />
+          <xsd:element name="schedule" type="scheduleType" maxOccurs="1"/>
+          <xsd:element name="semester" type="semesterType" maxOccurs="1"/>
+          <xsd:element name="enrollment" type="enrollmentType" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- DEFINITION of courseNumberType -->
+    <xsd:simpleType name="courseNumberType" >
+      <xsd:restriction base="xsd:string">
+        <xsd:pattern value="[a-zA-z]{2}\d{4}" />
+      </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- DEFINITION of lectureHourType -->
+    <xsd:simpleType name="lectureHourType">
+      <xsd:restriction base="xsd:string">
+        <xsd:pattern value="\d{2}:\d{2}-\d{2}:\d{2}" />
+      </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- DEFINITION of scheduleType: 1-3 "lecture" of type DayTimeType -->
+    <xsd:complexType name="scheduleType">
+      <xsd:sequence>
+        <xsd:element name="lecture" type="DayTimeType" maxOccurs="3" />
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- DEFINTION of personTitleType -->
+    <xsd:simpleType name="personTitleType">
+        <xsd:restriction base="xsd:string">
+          <xsd:enumeration value="Dr"/>
+          <xsd:enumeration value="Prof"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+                  
+    <!-- DEFINITION of instructorType -->
+    <xsd:complexType name="instructorType">
+      <xsd:all>
+        <xsd:element name="firstname" type="xsd:string" maxOccurs="1" />
+        <xsd:element name="lastname" type="xsd:string" maxOccurs="1" />
+      </xsd:all>
+      <!-- Attributes are optional by default -->
+      <xsd:attribute name="title" type="personTitleType"/>       
+    </xsd:complexType>
+
+    <!-- DEFINITION of semesterType -->
+    <xsd:simpleType name="semesterType">
+      <xsd:restriction base="xsd:string">
+        <xsd:enumeration value="Fall" />
+        <xsd:enumeration value="Spring" />
+        <xsd:enumeration value="Summer" />
+      </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--DEFINITION of enrollmentType -->
+    <xsd:simpleType name="enrollmentType">
+      <xsd:restriction  base="xsd:integer">
+        <xsd:minInclusive value="10" />
+        <xsd:maxInclusive value="100" />
+      </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- DEFINITION of WeekdayType -->
+    <xsd:simpleType name="WeekdayType">
+      <xsd:restriction base="xsd:string">
+        <xsd:enumeration value="Mon" />
+        <xsd:enumeration value="Tue" />
+        <xsd:enumeration value="Wed" />
+        <xsd:enumeration value="Th" />
+        <xsd:enumeration value="Fri" />
+      </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- DEFINITION DayTimeType: ext of lectureHourType -->
+    <xsd:complexType name="DayTimeType">
+      <xsd:simpleContent>
+      <xsd:extension base="lectureHourType">
+            <xsd:attribute name="day" type="WeekdayType" />
+      </xsd:extension>
+    </xsd:simpleContent>
+    </xsd:complexType>
+
+</xsd:schema>

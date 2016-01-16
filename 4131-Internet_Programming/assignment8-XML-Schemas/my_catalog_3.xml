@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+ <courseCatalog xmlns="http://www.cs.umn.edu/4131/ns/catalog"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.cs.umn.edu/4131/ns/catalog Catalog.xsd" >
+
+<course>
+  <title> Intro to Computer Science with Python </title> 
+  <instructor title="Prof">  
+       <firstname> Steve </firstname> 
+       <lastname> Jensen </lastname>
+  </instructor>
+  <instructor>
+        <firstname> Kate </firstname>
+        <lastname> Jensen </lastname> 
+  </instructor>
+  <number>CS1133</number>
+  <schedule>  
+            <lecture day="Mon">10:30-12:30</lecture>
+  </schedule>  
+   <semester>Spring</semester>
+   <enrollment>42</enrollment>
+</course>
+
+<course>
+  <title> Machine Architecture and C Programming </title> 
+  <instructor title="Dr">  
+       <firstname> Chung-Yew </firstname> 
+       <lastname> Pen </lastname> 
+  </instructor>
+
+  <instructor>
+        <firstname> Chris </firstname>
+        <lastname> Dovolis </lastname>
+  </instructor>
+
+  <number>CS2021</number>
+  <schedule>  
+            <lecture day="Tue">17:30-19:30</lecture>
+            <lecture day="Fri">07:30-09:30</lecture>
+  </schedule>  
+   <semester>Summer</semester>
+   <enrollment>30</enrollment>
+</course>
+
+<course>
+  <title> Advanced Programming Principles </title> 
+  <instructor title="Prof">  
+       <firstname> Erik </firstname> 
+       <lastname> Van-Wyk </lastname> 
+  </instructor>
+
+  <instructor title="Dr">
+        <firstname> Nick </firstname>
+        <lastname> Hopper </lastname>
+  </instructor>
+
+  <number>CS2041</number>
+  <schedule>
+            <lecture day="Tue">09:45-11:00</lecture>  
+            <lecture day="Wed">13:30-15:30</lecture>
+            <lecture day="Th">09:45-11:00</lecture>
+  </schedule>  
+   <semester>Summer</semester>
+   <enrollment>30</enrollment>
+</course>
+
+</courseCatalog>
