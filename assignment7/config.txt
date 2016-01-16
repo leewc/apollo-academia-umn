@@ -14,3 +14,5 @@ www.sco.com image/*
 www.w3.org image/*
 
 www.theverge.com
+
+www-users.cselabs.umn.edu application/pdf
