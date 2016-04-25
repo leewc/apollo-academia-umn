@@ -1,0 +1,8 @@
+#!/bin/bash
+
+g++ -c readInput.cpp
+g++ -c regex.cpp
+g++ -c WordCount.cpp
+g++ -c main.cpp
+
+g++ -o WordCount readInput.o regex.o WordCount.o main.o

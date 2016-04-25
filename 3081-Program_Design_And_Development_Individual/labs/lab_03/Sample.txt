@@ -1,0 +1,10 @@
+some words 1
+more words 2 3
+/* some words and numbers in a comment that are not counted.
+   4 
+*/  
+gotta love counting these 9 words
+
+
+
+

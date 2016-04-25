@@ -1,0 +1,246 @@
+
+<h2>Lab 02 - Regular Expressions in C</h2>
+
+<p>In lecture on Thursday we discussed regular expressions and how
+  they can be used to specify the lexical syntax of a language.  That
+  is, they define what constitutes a variable name, an integer
+  literal, a floating point literal, a comment, etc. </p>
+
+<p>In this lab you will have an opportunity to experiment with a C
+  library for using regular expressions to match for patterns in
+  strings.
+</p>
+
+<p>Although you will likely be working in pairs in the lab, you will
+  need to turn this work in using your individual repositories.  But
+  it is fine of you and your partner for today's lab turn in the same
+  joint work - please make sure that both of your names appear in a
+  comment at the beginning of the code and that the code is turned
+  into <b>both</b> of your individual repositories as specified
+  below.</p>
+
+<p>The web has many resources for learning about regular expressions.
+  One reasonable description can be found 
+  <a href="http://www.proftpd.org/docs/howto/Regex.html">here</a>.</p>
+
+<h3>Get the sample code</h3>
+<p>For this lab you will need the following 5 files:
+<ul>
+<li> <code>RegexTest.cpp</code> - this program lets you
+  experiment with the regular expression library by writing regular
+  expression strings and checking if the match against a text
+  sample.</li>
+
+<li><code>WordCount.cpp</code> - this program counts
+  the number of words and integer constants in a text file, avoid
+  those inside of C-style block comments.</li>
+
+<li><code>Sample.txt</code> - a sample input file
+  containing some words, numbers and comments.</li>
+
+<li><code>Assessment.txt</code> - the input file
+  that we will use to assess your extended <code>WordCount.cpp</code>
+  program.</li> 
+
+<li><code>Solution.txt</code> - the output of your program should
+  exactly match this file.
+</ul>
+
+<p>Retrieve the sample programs and associated files listed above.  These files are located in the
+public class repository.  Lab 01 showed you how to check out the contents
+of that repository.  Now go back to your
+class repository directory and use Git to bring those
+files into your workspace.  Review with your partner or the lab 1
+instructions to figure out what this command is.</p>
+
+<p>Put these five files in a directory called "lab_02" in the "labs"
+directory in your <b>individual repository</b> work space.</p>
+
+<p>You will want all of these files to be in your repository
+  (and not just existing in your workspace directory as they are
+  now). Thus it is always a good idea to <code>add</code> as soon as
+  it is created.</p>
+
+<p>What is the Git command for adding new files so that
+  Git will track those files?  Figure this out and enter the
+  appropriate command for doing this.</p>
+
+<p> You can commit it later, but by doing the add now, Git knows
+  that you want it in your repository.  This way you won't forget to
+  add it later when you do a commit.</p>
+
+<p>The assignment for this lab is to extend WordCount.cpp and to be
+  sure to add your version of this file to the "labs/lab_02" directory
+  in your individual Git repository.</p>
+
+<h3>Experiment with RegexTest.cpp</h3>
+<p>Compile this program but try writing a few interesting regular
+expressions to try to match them against the text.  Remember that we
+want the regular expression to match only at the beginning of the
+text, so that "^" character is required.</p>
+
+
+Here are some suggestions:
+<ul>
+<li><p>First compile and run the program as it is now.  Is the output
+    what you expect?  Add a few spaces to the first string argument
+    of <code>match</code> and see how it changes the
+    behavior.</p></li>
+
+<li><p>Change the first argument to "1234 567" and write a regular
+  expression to match integer constants in the second argument.</p>
+
+  <p>You can find just such a regular expression string in the
+  WordCount.cpp program.</p>
+
+  <p>When you run the program, does it match correctly?</p>
+</li>
+
+<li><p>Can you write a regular expression for matching floating point
+    constants?</p> 
+
+    <p>Keep it simple and just try to match a sequence of digits
+    followed by a period followed by a sequence of digits.</p>
+
+    <p>Note that the period is a special operator (which we don't need
+    to use here).  But you will need to "escape it" by making sure
+    that in the string passed to the function there is a backslash
+    before the period.   But be careful!  We want that backslash in
+    the string - and a backslash is also an escape character in C
+    strings.  Thus you may need 2 backslashes in the literal string
+    representation in the program.   Make sure you understand why this
+    is. </p>
+</li>
+
+<li>Write a regular expression that matches a left parenthesis. </li>
+</ul>
+
+<h3>Counting floating point number constants</h3>
+<p>The first modification to make the WordCount.cpp program is to make it
+include floating point numbers in the count of integers.   So, if we
+add "1.23" somewhere in the Sample.txt file, it will report 1 more
+number.  Originally there were 4 numbers, now it will return 5.</p>
+
+<p>If you compile and run WordCount on the Assessment.txt file now it
+  shows that is found 105 words and 16 numbers.  In your final version,
+  it should show 12 numbers.  Right now the string "3.1415" is being
+  counted as two integers (the same holds for the string "2.71828" and 
+  the string "0.57722").
+  When these are properly counted as 1 number, your solution will
+  report 12 numbers being found.</p>
+
+<p>The point here is that when a floating point constant is found, the
+  value in "numNumericConsts" is increased by one.  We are NOT creating
+  another counter just for floating point numbers - we are re-using the 
+  same counter as we use to count integer numbers.</p>
+
+<p>A key thing to consider here is that when a floating point constant
+  is seen in the text, both the floating point regular expression and
+  the integer regular expression will both match.  We want to only
+  take the longest match.   That is why we keep track of the length of
+  the longest match in "maxNumMatchedChars".</p>
+
+<h3>Counting keywords</h3>
+
+<p>In building a scanner for our functional programming language, we will
+  have some reserved keywords.  We would like to investigate how we
+  might do that.  Here, we will count the number of times that the
+  word "Boot" appears in the input text.</p>
+
+<p>To do this, we will create a regular expression that matches only
+  "Boot" at the beginning of the text.  We need a new value in the
+  enumerated type "matchType", perhaps "BootMatch".  We also need a new
+  counter, perhaps "numBoots".</p>
+
+<p>We also need another bit of code the call "matchRegex" and possibly
+  update the Boot counter and set matchType appropriately.  This code
+  will be much like what is already there.</p>
+
+<p>However, you should think carefully about where to put this new
+  code snippet.  Notice that the regular expression for a word will
+  also match the letters "Boot".  We don't want to have to write a
+  regular expression for words that somehow takes all words except
+  "Boot".  Instead we want to write our code so that the Boot regular
+  expression <b>takes precedence</b> over the word regular
+  expression.  That is, when the text is "Boot123", we want to match
+  the first three letters as a Boot, not as a word.  But if the text is
+  "BootBit123" then we want to match the first 7 letters as a word.</p>
+
+<p>This is what happens in many programming languages.  The string
+  "while" might be a keyword in the language, but the string
+  "whileLoopCounter" might be a variable name.</p>
+
+<p>So, we want to take the longest match possible.  But if two regular
+  expressions match and match the same number of characters, then we
+  want to take the one with the higher precedence.  Here, the Boot
+  regular expression is said to have higher precedence than the word
+  regular expression.</p>
+
+<p>Don't forget to print out the number of "Boot"s that your program
+  finds - just add another print statement after the existing two print statements.</p>
+
+<p>Test out your code by adding "Boot123" and "BootyBooty123" to the sample
+  input file (Sample.txt).  You should get 1 Boot and one more word than you
+  calculated before.  (You'll also get 2 additional numbers.)</p>
+
+<p>Note that case matters.  "Boot" is a Boot keyword but "boot" is just a
+  word.  We only count "Boot"s that begin with a capital "B".</p>
+
+<h3>Validating your outcome</h3>
+<p>Run your final program against the <code>Assessment.txt</code> files,
+redirecting the output to <code>MyOutput.txt</code>.</p>
+
+<pre>
+   ./a.out Assessment.txt > MyOutput.txt
+   diff MyOutput.txt Solution.txt 
+</pre>
+
+<p>If <code>diff</code> shows no differences between the files then
+you've successfully completed the programming.</p>
+
+<p>Now be sure to commit your solution to your individual repository.</p>
+
+<h3>Due Date</h3>
+<p>
+This work is due on Thursday, Sept 18th at 11:59pm.
+</p>
+
+<h3>Turning in your work</h3>
+
+<p>Make sure that your name, and the name of your (temporary) lab
+  partner if you worked together, is added to the top of the file.
+  You work will be graded separately however, so both of you need to
+  get the appropriate files into <b>both</b> of your individual
+  repositories.</p> 
+
+<p>Critically, the file should be named <code>WordCount.cpp</code> and
+  stored in the directory <code>labs/lab_02</code> of your individual
+  Git repository.</p> 
+
+<h3>Assessment</h3>
+
+<p>The following rubric will be used to compute your score for Lab 2.
+
+<pre>
+Possible points: 32.
+
+Correct use of Git (7 points).  Are each of the following
+files or directories is in the correct place in your repository?
+
+___ / 2:  labs/lab_02
+___ / 2:  labs/lab_02/WordCount.cpp
+___ / 3:  No generated or editor backup files committed.
+          (-1 for each such file, up to -3 points)
+
+Correct execution of the WordCount.cpp program. (60 points)
+___ / 5:  WordCount.cpp compiles with no errors.
+___ / 5:  101 words found.
+___ / 5:  12 numbers found, integers and floating point combined.
+___ / 5:  4 Boot keywords found.
+___ / 5:  Correct output format.  The output of the program exactly
+           matches the file Solution.txt
+</pre>
+
+
+
+
